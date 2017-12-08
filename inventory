@@ -1,0 +1,4 @@
+[openstack-server]
+# The server that contains the OpenStack rc file.
+[image-server]
+# The server that contains the OpenStack compatible VM images.

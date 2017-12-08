@@ -1,0 +1,162 @@
+---
+- name: Steps to clean up the OpenStack environment
+  hosts: openstack-server
+  vars_files:
+    - vars/openstack.yml
+  vars:
+    openstack_rc: "{{ lookup('env', 'openstack_rc_path') | default(ansible_user_dir ~ '/overcloudrc', true) }}"
+  vars_prompt:
+    - name: "delete_flavors"
+      prompt: "Delete the flavors? "
+      default: no
+      private: no
+    - name: "delete_images"
+      prompt: "Delete the images? "
+      default: no
+      private: no
+  tasks:
+    # Check for the existence of the OpenStack client.
+    - name: Checking for the OpenStack client
+      stat:
+        path: "{{ openstack_location }}"
+      register: openstack_path
+
+    # When the specific path does not exist try openstack client from PATH.
+    - name: Reverting to the OpenStack client from PATH when the path does not exist
+      set_fact:
+        openstack_location: openstack
+      when: openstack_path.stat.exists == false
+
+    # This variable includes rc file and the path to the OpenStack client.
+    - name: Setting a variable to source the rc file and contain path to the OpenStack client
+      set_fact:
+        openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
+
+    # Get the images.
+    - name: Getting all the heat stacks
+      shell: "{{ openstack }} stack list --format value -c ID"
+      register: stacks
+      changed_when: false
+
+    # The OpenShift installer uses a stack, try deleting that first.
+    - name: Deleting all the heat stacks
+      shell: "{{ openstack }} stack delete --yes --wait {{ item }}"
+      with_items: "{{ stacks.stdout_lines }}"
+      ignore_errors: true
+
+    # Get the server ids that match the name.
+    - name: Getting the server IDs that match {{ openstack_server_name }}
+      shell: "{{ openstack }} server list --name {{ openstack_server_name }} --format value -c ID"
+      register: servers
+      changed_when: false
+
+    # Get the server addresses to remove the floating ip.
+    - name: Getting the floating ip address for {{ openstack_server_name }}
+      shell: "{{ openstack }} server show {{ servers.stdout }} --format value -c addresses"
+      register: server_addresses
+      changed_when: false
+
+    # Delete the servers.
+    - name: Deleting the matching servers
+      shell: "{{ openstack }} server delete {{ item }}"
+      with_items: "{{ servers.stdout_lines }}"
+      ignore_errors: true
+
+    # Delete the keypair.
+    - name: Deleting the {{ openstack_keypair_name }} keypair
+      shell: "{{ openstack }} keypair delete {{ openstack_keypair_name }}"
+      ignore_errors: true
+
+    # Get the flavor ids.
+    - name: Getting all the flavor ids
+      shell: "{{ openstack }} flavor list --format value -c ID"
+      register: flavors
+      when: delete_flavors | bool == true
+      changed_when: false
+
+    # Delete the flavors.
+    - name: Deleting all the flavors
+      shell: "{{ openstack }} flavor delete {{ item }}"
+      with_items: "{{ flavors.stdout_lines }}"
+      # Some OpenStack environments do not let anyone delete flavors.
+      ignore_errors: true
+      when: delete_flavors | bool == true
+
+    # Get all the floating ips.
+    - name: Getting all the floating ip addresses
+      shell: "{{ openstack }} floating ip list --format value -c 'Floating IP Address'"
+      register: floating_ips
+      changed_when: false
+
+    # Delete the floating ips.
+    - name: Deleting the {{ openstack_server_name }} floating ip address
+      shell: "{{ openstack }} floating ip delete {{ item }}"
+      when: item in server_addresses.stdout
+      with_items: "{{ floating_ips.stdout_lines }}"
+
+    # Delete the security group.
+    - name: Deleting the security group {{ openstack_security_group_name }}
+      shell: "{{ openstack }} security group delete {{ openstack_security_group_name }}"
+      ignore_errors: true
+
+    # Get the router ids.
+    - name: Getting the routers named {{ openstack_router_name }}
+      shell: "{{ openstack }} router list --name {{ openstack_router_name }} --format value -c ID"
+      register: routers
+      changed_when: false
+
+    # Get the subnet ids.
+    - name: Getting the subnets named {{ openstack_subnet_name }}
+      shell: "{{ openstack }} subnet list --name {{ openstack_subnet_name }} --format value -c ID"
+      register: subnets
+      changed_when: false
+
+    # Remove the subnet from the router.
+    - name: Removing the subnet from the router
+      shell: "{{ openstack }} router remove subnet {{ item.0 }} {{ item.1 }}"
+      with_nested:
+        - "{{ routers.stdout_lines }}"
+        - "{{ subnets.stdout_lines }}"
+      ignore_errors: true
+
+    # Delete the subnet.
+    - name: Deleting the subnet {{ openstack_subnet_name }}
+      shell: "{{ openstack }} subnet delete {{ item }}"
+      with_items: "{{ subnets.stdout_lines }}"
+
+    # Get the network ids.
+    - name: Getting the networks named {{ openstack_network_name }}
+      shell: "{{ openstack }} network list --name {{ openstack_network_name }} --format value -c ID"
+      register: networks
+      changed_when: false
+
+    # Delete the networks.
+    - name: Deleting all the networks named {{ openstack_network_name }}
+      shell: "{{ openstack }} network delete {{ item }}"
+      with_items: "{{ networks.stdout_lines }}"
+
+    # Delete the routers.
+    - name: Deleting all the routers
+      shell: "{{ openstack }} router delete {{ item }}"
+      with_items: "{{ routers.stdout_lines }}"
+
+    # Delete the images.
+    - name: Deleting all the OpenStack images
+      shell: "{{ openstack }} image delete {{ item }}"
+      with_items:
+        - "centos-7"
+        - "fedora-26"
+        - "ocp-{{ ocp_major_minor }}-atomic"
+        - "ocp-{{ ocp_major_minor }}-rhel"
+        - "rhel-7.4"
+      ignore_errors: true
+      when: delete_images | bool == true
+
+    # Delete any existing images on the openstack-server.
+    - name: Deleting the files from {{ inventory_hostname }}
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ install_directory }}"
+      when: delete_images | bool == true

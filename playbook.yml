@@ -1,0 +1,27 @@
+---
+- name: Find and prepare the virtual machine images
+  hosts: image-server
+  roles:
+    - image_preperation
+
+- name: Set up one virtual machine server in a new OpenStack environment
+  hosts: openstack-server
+  vars_files:
+    - vars/openstack.yml
+  roles:
+    - openstack_create_server
+
+- name: Install the prerequisite software on the virtual machine server
+  hosts: target-server
+  # This host may not have Python installed, do not collect facts at this time.
+  gather_facts: false
+  roles:
+    - openshift_dependencies
+
+- name: Install OpenShift on OpenStack
+  hosts: target-server
+  vars_files:
+    - vars/openstack.yml
+    - vars/openshift.yml
+  roles:
+    - openshift_on_openstack

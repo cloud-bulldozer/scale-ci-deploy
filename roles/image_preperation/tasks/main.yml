@@ -1,0 +1,151 @@
+---
+# Get all the atomic files matching the pattern.
+- name: Searching for the ocp-{{ ocp_major_minor }} files in {{ image_directory }}/atomic
+  find:
+    paths: "{{ image_directory }}/atomic"
+    patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
+    use_regex: yes
+  register: atomic_images
+  when: atomic_image == ""
+
+# Reverse sort by mtime and the first file is the latest atomic image.
+- name: Finding the latest atomic file
+  set_fact:
+    # mtime = Time of last modification.
+    atomic_image: "{{ (atomic_images['files']|sort(attribute='mtime',reverse=true)|first)['path'] }}"
+  when: atomic_image == ""
+
+# Get all the rhel files matching the pattern.
+- name: Searching for the ocp-{{ ocp_major_minor }} files in {{ image_directory }}/rhel
+  find:
+    paths: "{{ image_directory }}/rhel"
+    patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
+    use_regex: yes
+  register: rhel_images
+  when: rhel_image == ""
+
+# Reverse sort by mtime and the first file is the latest rhel image.
+- name: Finding the latest rhel file
+  set_fact:
+    # mtime = Time of last modification.
+    rhel_image: "{{ (rhel_images['files']|sort(attribute='mtime',reverse=true)|first)['path'] }}"
+  when: rhel_image == ""
+
+# Create a list of the files to convert, transfer, and upload.
+- name: Creating the list of files from the atomic and rhel images
+  set_fact:
+    files: "{{ [ atomic_image, rhel_image ] }}"
+
+# Create the transfer directories to ensure they exist.
+- name: Creating the transfer directories on the image server
+  file:
+    path: "{{ web_root }}/{{ item|dirname }}"
+    state: directory
+  with_items: "{{ files }}"
+
+# Get the disk usage numbers.
+- name: Getting the disk usage information from the image server
+  command: "df --output=avail,pcent {{ web_root }}"
+  register: disk_space
+  changed_when: false
+
+# Print the disk usage information.
+- name: Printing the disk usage information of the image server
+  debug:
+    msg: "{{ disk_space['stdout_lines'][1] }}"
+
+# Parse the disk usage output.
+- name: Setting the disk usage variables
+  set_fact:
+    bytes_available: "{{ disk_space['stdout_lines'][1].split()[0] }}"
+    percent_used: "{{ (disk_space['stdout_lines'][1].split()[1])[:-1] }}"
+
+# Warn if the image server is above a threshold.
+- name: Checking the disk space threshold
+  debug:
+    msg: "WARNING: The image server {{ inventory_hostname }} is over 99% full!"
+  when: "percent_used | int >= 99"
+
+# Get all the atomic files in the web_root matching the pattern.
+- name: Searching for all files in {{ web_root }}/{{ image_directory }}/atomic
+  find:
+    paths: "{{ web_root }}/{{ image_directory }}/atomic"
+  register: atomic_qcow2_images
+
+# Get all the rhel files in the web_root matching the pattern.
+- name: Searching for all files in {{ web_root }}/{{ image_directory }}/rhel
+  find:
+    paths: "{{ web_root }}/{{ image_directory }}/rhel"
+  register: rhel_qcow2_images
+
+# Sort the images by mtime and take the first image.
+- name: Finding the oldest atomic qcow2 image
+  set_fact:
+    oldest_atomic_qcow2_image: "{{ atomic_qcow2_images['files']|sort(attribute='mtime')|first }}"
+  when: atomic_qcow2_images['matched'] > 0
+
+# Deleting the oldest atomic image only if there is one to delete.
+- name: Deleting the oldest atomic image
+  file:
+    path: "{{ oldest_atomic_qcow2_image['path'] }}"
+    state: absent
+  when: delete_qcow2_images and oldest_atomic_qcow2_image is defined
+
+# Sort the images by mtime and take the first image.
+- name: Finding the oldest rhel qcow2 image
+  set_fact:
+    oldest_rhel_qcow2_image: "{{ rhel_qcow2_images['files']|sort(attribute='mtime')|first }}"
+  when: rhel_qcow2_images['matched'] > 0
+
+# Optionally delete the oldest rhel image if there is one to delete.
+- name: Deleting the oldest rhel image
+  file:
+    path: "{{ oldest_rhel_qcow2_image['path'] }}"
+    state: absent
+  when: delete_qcow2_images and oldest_rhel_qcow2_image is defined
+
+# Check for the qcow2 image of the same basename.
+- name: Checking if the qcow2 files already exist
+  stat:
+    get_checksum: no
+    get_md5: no
+    path: "{{ web_root }}/{{ (item|splitext)[0] }}.qcow2"
+  with_items: "{{ files }}"
+  register: qcow2_files
+
+# Convert the raw images to qcow2 when image does not exist
+- name: Converting and compressing the images for transport
+  # qemu-img convert -c -O qcow2 path/image_name.raw path/image_name.qcow2
+  command: "qemu-img convert -c -O qcow2 {{ item[0] }} {{ web_root }}/{{ (item[0]|splitext)[0] }}.qcow2"
+  with_together:
+    - "{{ files }}"
+    - "{{ qcow2_files['results'] }}"
+  when: item[1]['stat']['exists'] == false
+
+# Get the sha256sum of the qcow2 files.
+- name: Generating the checksum of the qcow2 files
+  stat:
+    checksum_algorithm: sha256
+    path: "{{ web_root }}/{{ (item|splitext)[0] }}.qcow2"
+  with_items: "{{ files }}"
+  register: qcow2_files
+
+# Create the image directories on the remote host.
+- name: "Creating the image directories on {{ remote_host }}"
+  file:
+    path: "{{ remote_image_directory }}/{{ item|dirname }}"
+    state: directory
+  with_items: "{{ files }}"
+  delegate_to: "{{ remote_host }}"
+
+# Copy the images from image server to the remote host.
+- name: "Copying the files from the image server to {{ remote_host }}"
+  get_url:
+    checksum: "sha256:{{ item[1]['stat']['checksum'] }}"
+    dest: "{{ remote_image_directory }}/{{ (item[0]|splitext)[0] }}.qcow2"
+    # http://image-server/image_builder/qcow_images/{atomic,rhel}/*.qcow2
+    url: "http://{{ groups['image-server'][0] }}/{{ (item[0]|splitext)[0] }}.qcow2"
+  with_together:
+    - "{{ files }}"
+    - "{{ qcow2_files['results'] }}"
+  delegate_to: "{{ remote_host }}"

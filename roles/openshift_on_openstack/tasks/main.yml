@@ -1,0 +1,199 @@
+---
+# Remove all old directories and files.
+- name: Removing any old directories or files from previous attempts
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "keystonerc"
+    - "openshift-ansible"
+    - "openshift-ansible-contrib"
+    - "inventory"
+    - "ansible.cfg"
+
+# Check if the server contains the openshift-ansible code already.
+- name: Checking file system status for the openshift-ansible directory
+  stat:
+    get_checksum: no
+    get_md5: no
+    path: "/root/openshift-ansible"
+  become: true
+  register: openshift_ansible
+
+# Copy the openshift-ansible files to the user's home directory.
+- name: "Copying the openshift-ansible files to {{ ansible_user_dir }}/openshift-ansible"
+  # Note: The copy module does not support recurisve copy of remote sources.
+  command: "cp -a /root/openshift-ansible/ {{ ansible_user_dir }}/openshift-ansible"
+  become: true
+  #when: openshift_ansible['stat']['exists']
+  when: false
+
+# Change the permissions to be owned by the user.
+- name: Changing the permission of the openshift-ansible files
+  file:
+    path: "{{ ansible_user_dir }}/openshift-ansible"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    recurse: yes
+  become: true
+  #when: openshift_ansible['stat']['exists']
+  when: false
+
+# Print the values that will be used for the openshift-ansible repository.
+- name: Printing the values used to clone openshift-ansible
+  debug:
+    msg: "openshift-ansible repository: {{ openshift_ansible_repo }} {{ openshift_ansible_version }}"
+  #when: openshift_ansible['stat']['exists'] == false
+  when: true
+
+# Get a fresh clone of the openshift-ansible GitHub project.
+- name: Cloning the openshift-ansible repository
+  git:
+    dest: "{{ ansible_user_dir }}/openshift-ansible"
+    # Specify the repo as a variable to test other people's repositories.
+    repo: "{{ openshift_ansible_repo }}"
+    # Specify a version for a different branch, tag, or hash to verify PRs.
+    version: "{{ openshift_ansible_version }}"
+  when: openshift_ansible['stat']['exists'] == false
+
+# Print the values that will be used for openshift-ansible-contrib.
+- name: Printing the values used to clone openshift-ansible-contrib
+  debug:
+    msg: "openshift-ansible-contrib repository: {{ openshift_ansible_contrib_repo }} {{ openshift_ansible_contrib_version }}"
+
+# Get a fresh clone of the openshift-ansible-contrib GitHub project.
+- name: Cloning the openshift-ansible-contrib repository
+  git:
+    dest: "{{ ansible_user_dir }}/openshift-ansible-contrib"
+    # Specify the repo as a variable to test other people's repositories.
+    repo: "{{ openshift_ansible_contrib_repo }}"
+    # Specify a version for a different branch, tag, or hash to verify PRs.
+    version: "{{ openshift_ansible_contrib_version }}"
+
+# Set the contrib playbooks provisioning openstack path.
+- name: Creating the openshift_openstack directory variable
+  set_fact:
+    openshift_openstack_dir: "openshift-ansible-contrib/playbooks/provisioning/openstack"
+
+# Install the ansible-galaxy requirements.
+- name: Running the ansible-galaxy install command
+  command: "ansible-galaxy install -r {{ openshift_openstack_dir }}/galaxy-requirements.yaml -p openshift-ansible-contrib/roles"
+
+# Copy the remote sample-inventory to another remote directory.
+- name: Copying the sample inventory directory
+  # Note: The copy module does not support recurisve copy of remote sources.
+  command: cp -a {{ openshift_openstack_dir }}/sample-inventory/ inventory
+
+# Copy the Ansible configuration file from openshift_openstack_dir.
+- name: Copying the Ansible configuration file from {{ openshift_openstack_dir }}
+  copy:
+    remote_src: true
+    src: "{{ openshift_openstack_dir }}/ansible.cfg"
+    dest: ./ansible.cfg
+
+# Create a .ssh directory if one does not already exist.
+- name: Creating the {{ ansible_user_dir }}/.ssh directory on the target host
+  file:
+    path: "{{ ansible_user_dir }}/.ssh"
+    state: directory
+    mode: 0700
+
+# Copy the private key so this server can access the OpenShift servers.
+- name: Copying the private key to the target host
+  copy:
+    src: "{{ ansible_private_key_file }}"
+    dest: "{{ ansible_user_dir }}/.ssh/id_rsa"
+    mode: 0600
+
+# Copy the public key so this server.
+- name: Copying the public key to the target host
+  copy:
+    src: "{{ ansible_public_key_file }}"
+    dest: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
+    mode: 0644
+
+# Copy the OpenStack rc file from the Ansible host to the target host.
+- name: Copying the OpenStack rc file from Ansible host to target host
+  copy:
+    src: "{{ playbook_dir }}/openstackrc"
+    dest: "{{ openstack_rc }}"
+
+# For each item in the list, search for regular expressions and replace.
+- name: Replacing specific lines in inventory/group_vars/all.yml
+  lineinfile:
+    path: inventory/group_vars/all.yml
+    regexp: "{{ item['find'] }}"
+    line: "{{ item['replace'] }}"
+  with_items: "{{ all_yml }}"
+
+# For each item in the list, search for regular expressions and replace.
+- name: Replacing specific lines in inventory/group_vars/OSEv3.yml
+  lineinfile:
+    path: inventory/group_vars/OSEv3.yml
+    regexp: "{{ item['find'] }}"
+    line: "{{ item['replace'] }}"
+  with_items: "{{ osev3_yml }}"
+
+# Add more configuration to the end of the OSEv3 file.
+- name: Adding a block of configuration to the end of inventory/group_vars/OSEv3.yml
+  blockinfile:
+    backup: yes
+    block: "{{ lookup('file', 'templates/add_block.yml') }}"
+    insertafter: EOF
+    path: inventory/group_vars/OSEv3.yml
+
+# Set a variable for the ansible-playbook.
+- name: Setting the ansible-playbook variable
+  set_fact:
+    ansible_playbook: "source {{ openstack_rc }}; ansible-playbook"
+
+# Get some debug information that makes it easier to file bugs.
+- name: Running commands that create debug information needed to open issues
+  shell: "{{ item }}"
+  register: debug_information
+  with_items:
+    - "printf \"$(uname -srm)\n$(cat /etc/os-release)\n\""
+    - "ansible --version"
+    - "pip freeze | grep -i jinja"
+    - "pip freeze | grep -i shade"
+    - "cd openshift-ansible-contrib/ ; git rev-parse --short HEAD"
+  changed_when: false
+
+# Print the debug information out.
+- name: Printing the debug information to the screen
+  debug:
+    msg: "{{ item['stdout_lines'] }}"
+  with_items: "{{ debug_information['results'] }}"
+
+# Set the path for the OpenStack provision log file.
+- name: Creating the OpenStack provision log file variable
+  set_fact:
+    openstack_provision_log: "{{ ansible_user_dir }}/openstack_provision.log"
+
+# Run the Ansible playbook that installs OpenStack.
+- name: Running the OpenStack install
+  shell: "{{ ansible_playbook }} -vvv {{ openshift_openstack_dir }}/provision.yaml 2>&1 > {{ openstack_provision_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+# Set the path for the OpenShift install log file.
+- name: Creating the OpenShift instal log file variable
+  set_fact:
+    openshift_install_log: "{{ ansible_user_dir }}/openshift_install.log"
+
+# Run the Ansible playbook that installs OpenShift.
+- name: Running the OpenShift install
+  shell: "{{ ansible_playbook }} -vvv openshift-ansible/playbooks/byo/config.yml 2>&1 >> {{ openshift_install_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+  register: openshift_install
+  until: openshift_install['rc'] == 0
+  retries: 2
+  delay: 1
+
+# Print out the log file locations.
+- name: Printing out the log file locations
+  debug:
+    msg: "Installation complete, check the {{ openstack_provision_log }} and {{ openshift_install_log }} for details."

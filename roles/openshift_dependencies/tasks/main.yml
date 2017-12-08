@@ -1,0 +1,59 @@
+---
+# Some cloud images only have python3 installed, Ansible needs python2 to run.
+- name: Bootstrapping Python on this system
+  become: true
+  # Use the raw module to ensure that python2 in installed on this system.
+  raw: yum --assumeyes --debuglevel 1 --errorlevel 1 install python
+  register: install_python_result
+  until: install_python_result['rc'] == 0
+  retries: 3
+  delay: 2
+  # Ignore errors, the next task will fail if python2 is not installed.
+  ignore_errors: true
+
+# With python2 installed Ansible should be able to gather facts.
+- name: Gathering facts on the target host
+  # Need the facts to get the ansible_distribution for OS identification.
+  setup:
+    filter: ansible_*
+
+# Install the common operating system packages on the host.
+- name: Installing the common operating system software packages
+  become: true
+  # Using raw, because the Python yum package may not be installed.
+  raw: yum --assumeyes --debuglevel 1 --errorlevel 1 install {{ item }}
+  with_items: "{{ packages['common'] }}"
+  register: install_common_result
+  until: install_common_result['rc'] == 0
+  retries: 3
+  delay: 2
+
+# Install operating system specific packages on the host.
+- name: Installing operating system specific software packages
+  become: true
+  # Using raw, because the Python yum package may not be installed.
+  raw: yum --assumeyes --debuglevel 1 --errorlevel 1 install {{ item }}
+  with_items: "{{ packages[ ansible_distribution ] }}"
+  register: install_specific_result
+  until: install_specific_result['rc'] == 0
+  retries: 3
+  delay: 2
+
+# Create a virtual Python environment to contain python packages.
+- name: Creating a virtual Python environment to install requirements
+  command: "virtualenv {{ virtualenv_directory }}"
+  when: virtualenv_directory is defined
+
+# Change the path to the virtual environment if necessary.
+- name: Changing the pip path to the virtual Python environment
+  set_fact:
+    pip: "{{ virtualenv_directory }}/bin/pip"
+  when: virtualenv_directory is defined
+
+# Install the Python packages using pip with the command module.
+- name: Installing the Python packages
+  # Only become root when the virtual environment directory is not defined.
+  become: "{{ virtualenv_directory is not defined }}"
+  # Using command module because the Ansible pip module may not be installed.
+  command: "{{ pip }} install {{ item }}"
+  with_items: "{{ packages['python'] }}"

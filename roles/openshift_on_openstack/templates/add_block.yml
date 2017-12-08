@@ -1,0 +1,32 @@
+# Install examples and modify imagestreams.
+openshift_install_examples: true
+openshift_examples_modify_imagestreams: true
+
+# Disable some checks that are likely to fail (mem>=8GiB).
+openshift_disable_check: memory_availability
+
+# Additional Docker registry that contain the images of a specific version/tag.
+openshift_docker_additional_registries: "registry.reg-aws.openshift.com:443"
+openshift_docker_insecure_registries: "registry.reg-aws.openshift.com:443"
+cli_docker_additional_registries: "registry.reg-aws.openshift.com:443"
+cli_docker_insecure_registries: "registry.reg-aws.openshift.com:443"
+
+# Configure usage of openshift_clock role.
+openshift_clock_enabled: true
+
+# Enable cluster metrics
+use_cluster_metrics: true
+
+# Allow all authenthication.
+#openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
+
+# Allow basic authentication using an Apache HTTP server authentication file.
+openshift_master_identity_providers:
+- name: 'htpasswd_auth'
+  login: 'true'
+  challenge: 'true'
+  kind: 'HTPasswdPasswordIdentityProvider'
+  filename: '/etc/origin/master/htpasswd'
+
+openshift_master_htpasswd_users:
+  scale-ci: '$apr1$vUfm7jQS$C6Vn0GDScgOjzvk1PSHe1/'

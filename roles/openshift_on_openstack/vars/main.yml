@@ -1,0 +1,27 @@
+---
+# A list of regular expressions to search and replace in openshift-ansible all.yml.
+all_yml:
+  - { find: "^env_id.*", replace: "env_id: \"{{ openshift_env_id }}\"" }
+  - { find: "^public_dns_nameservers.*", replace: "public_dns_nameservers: [{{ public_dns_nameservers }}]" }
+  - { find: "^openstack_ssh_public_key.*", replace: "openstack_ssh_public_key: \"{{ openstack_keypair_name }}\"" }
+  - { find: "^openstack_external_network_name.*", replace: "openstack_external_network_name: \"{{ openstack_public_network_name }}\"" }
+  - { find: "^openstack_default_image_name.*", replace: "openstack_default_image_name: \"{{ default_image_name }}\"" }
+  - { find: "^openstack_num_masters.*", replace: "openstack_num_masters: 3" }
+  - { find: "^openstack_num_infra.*", replace: "openstack_num_infra: 3" }
+  - { find: "^#openstack_master_flavor.*", replace: "openstack_master_flavor: \"master_etcd\"" }
+  - { find: "^#openstack_infra_flavor.*", replace: "openstack_infra_flavor: \"infra_elastic\"" }
+  - { find: "^#openstack_node_flavor.*", replace: "openstack_node_flavor: \"node_small\"" }
+  - { find: "^#openstack_lb_flavor.*", replace: "openstack_lb_flavor: \"load_balancer\"" }
+  - { find: "^openstack_default_flavor.*", replace: "openstack_default_flavor: \"m1.medium\"" }
+  - { find: "^#openstack_private_ssh_key.*", replace: "openstack_private_ssh_key: ~/.ssh/id_rsa"}
+  - { find: "^#manage_packages.*", replace: "manage_packages: false"}
+  # Do not use Cinder volumes. TODO: Remove this once Cinder is working.
+  - { find: "^#ephemeral_volumes.*", replace: "ephemeral_volumes: true"}
+# The OpenStack image name to use in the templates.
+default_image_name: "{{ lookup('env', 'default_image_name')|default('ocp-3.7-rhel', true) }}"
+# The path to the OpenStack RC file on the remote host, may be named differently than other servers.
+openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
+# A list of regular expressions to search and replace in the openshift-ansible OSEv3.yml.
+osev3_yml:
+  - { find: "^openshift_deployment_type: origin", replace: "#openshift_deployment_type: origin" }
+  - { find: "^#openshift_deployment_type: openshift-enterprise", replace: "openshift_deployment_type: openshift-enterprise" }

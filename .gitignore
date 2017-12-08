@@ -1,0 +1,4 @@
+*.retry
+virtualenv
+openstackrc
+inventory
