@@ -44,7 +44,6 @@
   debug:
     msg: "openshift-ansible repository: {{ openshift_ansible_repo }} {{ openshift_ansible_version }}"
   #when: openshift_ansible['stat']['exists'] == false
-  when: true
 
 # Get a fresh clone of the openshift-ansible GitHub project.
 - name: Cloning the openshift-ansible repository
@@ -54,7 +53,7 @@
     repo: "{{ openshift_ansible_repo }}"
     # Specify a version for a different branch, tag, or hash to verify PRs.
     version: "{{ openshift_ansible_version }}"
-  when: openshift_ansible['stat']['exists'] == false
+  #when: openshift_ansible['stat']['exists'] == false
 
 # Print the values that will be used for openshift-ansible-contrib.
 - name: Printing the values used to clone openshift-ansible-contrib

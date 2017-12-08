@@ -4,7 +4,7 @@
   vars_files:
     - vars/openstack.yml
   vars:
-    openstack_rc: "{{ lookup('env', 'openstack_rc_path') | default(ansible_user_dir ~ '/overcloudrc', true) }}"
+    openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
   vars_prompt:
     - name: "delete_flavors"
       prompt: "Delete the flavors? "
@@ -71,7 +71,7 @@
     - name: Getting all the flavor ids
       shell: "{{ openstack }} flavor list --format value -c ID"
       register: flavors
-      when: delete_flavors | bool == true
+      when: delete_flavors|bool == true
       changed_when: false
 
     # Delete the flavors.
@@ -80,7 +80,7 @@
       with_items: "{{ flavors.stdout_lines }}"
       # Some OpenStack environments do not let anyone delete flavors.
       ignore_errors: true
-      when: delete_flavors | bool == true
+      when: delete_flavors|bool == true
 
     # Get all the floating ips.
     - name: Getting all the floating ip addresses
@@ -150,7 +150,7 @@
         - "ocp-{{ ocp_major_minor }}-rhel"
         - "rhel-7.4"
       ignore_errors: true
-      when: delete_images | bool == true
+      when: delete_images|bool == true
 
     # Delete any existing images on the openstack-server.
     - name: Deleting the files from {{ inventory_hostname }}
@@ -159,4 +159,4 @@
         state: absent
       with_items:
         - "{{ install_directory }}"
-      when: delete_images | bool == true
+      when: delete_images|bool == true
