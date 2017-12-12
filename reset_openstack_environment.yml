@@ -43,6 +43,8 @@
       shell: "{{ openstack }} stack delete --yes --wait {{ item }}"
       with_items: "{{ stacks.stdout_lines }}"
       ignore_errors: true
+      retries: 3
+      delay: 1
 
     # Get the server ids that match the name.
     - name: Getting the server IDs that match {{ openstack_server_name }}
@@ -55,11 +57,14 @@
       shell: "{{ openstack }} server show {{ openstack_server_name }} --format value -c addresses"
       register: server_addresses
       changed_when: false
+      # Ignore the case where the server does not exist.
+      ignore_errors: true
 
     # Delete the servers.
     - name: Deleting the matching servers
       shell: "{{ openstack }} server delete {{ item }}"
       with_items: "{{ servers.stdout_lines }}"
+      # Ignore errors when deleting the jump server.
       ignore_errors: true
 
     # Delete the keypair.
