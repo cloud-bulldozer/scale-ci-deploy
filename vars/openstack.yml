@@ -1,27 +1,27 @@
 ---
 # The location of the openstack client.
-openstack_location: "{{ lookup('env', 'openstack_client_path' ) | default('/usr/bin/openstack', true) }}"
+openstack_location: "{{ lookup('env', 'openstack_client_path' )|default('/usr/bin/openstack', true) }}"
 # The name of the OpenStack project to use when creating quotas, some environments will not have project.
 openstack_project: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
 # The keypair name used to create access to servers in OpenStack.
-openstack_keypair_name: "{{ lookup('env', 'keypair_name') | default('ci_keypair', true) }}"
+openstack_keypair_name: "{{ lookup('env', 'keypair_name')|default('ci_keypair', true) }}"
 # The name of the private network to create for the OpenShift install server.
-openstack_network_name: "{{ lookup('env', 'network_name') | default('ci_network', true) }}"
+openstack_network_name: "{{ lookup('env', 'network_name')|default('ci_network', true) }}"
 # The OpenStack public network that should contain the public subnet.
-openstack_public_network_name: "{{ lookup('env', 'public_network_name') | default('public', true) }}"
+openstack_public_network_name: "{{ lookup('env', 'public_network_name')|default('public', true) }}"
 # The OpenStack public subnet that contains the DNS for this openstack environment.
-openstack_public_subnet_name: "{{ lookup('env', 'public_subnet_name') | default('public_subnet', true) }}"
+openstack_public_subnet_name: "{{ lookup('env', 'public_subnet_name')|default('public_subnet', true) }}"
 # The name of the private router to create for the OpenShift install server.
-openstack_router_name: "{{ lookup('env', 'router_name') | default('ci_router', true) }}"
+openstack_router_name: "{{ lookup('env', 'router_name')|default('ci_router', true) }}"
 # The name of the security group to create for the OpenShift install server.
-openstack_security_group_name: "{{ lookup('env', 'security_group_name') | default('ci_security_group', true) }}"
+openstack_security_group_name: "{{ lookup('env', 'security_group_name')|default('ci_security_group', true) }}"
 # The name of the flavor to use for the OpenShift install server.
-openstack_server_flavor: "{{ lookup('env', 'server_flavor') | default('node_small', true) }}"
+openstack_server_flavor: "{{ lookup('env', 'server_flavor')|default('node_small', true) }}"
 # The name of the image to use for the OpenShift install server.
-openstack_server_image: "{{ lookup('env', 'server_image') | default('ocp-3.7-rhel', true) }}"
+openstack_server_image: "{{ lookup('env', 'server_image')|default('ocp-3.7-rhel', true) }}"
 # The name of the server to use for the OpenShift install server.
-openstack_server_name: "{{ lookup('env', 'server_name') | default('ansible-host', true) }}"
+openstack_server_name: "{{ lookup('env', 'server_name')|default('ansible-host', true) }}"
 # The name of the private subnet for the OpenShift install server.
-openstack_subnet_name: "{{ lookup('env', 'subnet_name') | default('ci_subnet', true) }}"
+openstack_subnet_name: "{{ lookup('env', 'subnet_name')|default('ci_subnet', true) }}"
 # The subnet range to use on the OpenStack private subnet.
-openstack_subnet_range: "{{ lookup('env', 'subnet_range') | default('192.168.4.0/24', true) }}"
+openstack_subnet_range: "{{ lookup('env', 'subnet_range')|default('192.168.4.0/24', true) }}"

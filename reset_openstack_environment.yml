@@ -52,7 +52,7 @@
 
     # Get the server addresses to remove the floating ip.
     - name: Getting the floating ip address for {{ openstack_server_name }}
-      shell: "{{ openstack }} server show {{ servers.stdout }} --format value -c addresses"
+      shell: "{{ openstack }} server show {{ openstack_server_name }} --format value -c addresses"
       register: server_addresses
       changed_when: false
 
