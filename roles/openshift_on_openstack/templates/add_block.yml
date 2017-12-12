@@ -6,10 +6,10 @@ openshift_examples_modify_imagestreams: true
 openshift_disable_check: memory_availability
 
 # Additional Docker registry that contain the images of a specific version/tag.
-openshift_docker_additional_registries: "registry.reg-aws.openshift.com:443"
-openshift_docker_insecure_registries: "registry.reg-aws.openshift.com:443"
-cli_docker_additional_registries: "registry.reg-aws.openshift.com:443"
-cli_docker_insecure_registries: "registry.reg-aws.openshift.com:443"
+openshift_docker_additional_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
+openshift_docker_insecure_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
+cli_docker_additional_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
+cli_docker_insecure_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
 
 # Configure usage of openshift_clock role.
 openshift_clock_enabled: true
@@ -30,3 +30,6 @@ openshift_master_identity_providers:
 
 openshift_master_htpasswd_users:
   scale-ci: '$apr1$vUfm7jQS$C6Vn0GDScgOjzvk1PSHe1/'
+
+# Configure how often node iptables rules are refreshed.
+openshift_node_iptables_sync_period: 30s
