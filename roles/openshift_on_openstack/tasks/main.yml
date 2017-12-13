@@ -231,7 +231,7 @@
 # Get the property file contents.
 - name: Reading the {{ property_file }}
   set_fact:
-    property_contents: "{{ lookup('file', property_file ) }}"
+    property_contents: "{{ lookup('file', property_file) }}"
   delegate_to: localhost
 
 # Print the contents of the property file.
