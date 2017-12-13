@@ -1,5 +1,7 @@
 #!/bin/bash
-# A script to show the status on all the OpenStack objects that are configured.
+
+# Print the status on all OpenStack objects that are configured.
+
 set -x
 
 openstack server list

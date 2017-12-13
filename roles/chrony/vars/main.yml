@@ -1,9 +1,0 @@
----
-# Look for a space separated string of time servers from an environment variable.
-time_servers: "{{ lookup('env', 'time_servers')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true) }}"
-# Break up the space separated string into a list of time servers.
-chrony_time_servers: "{{ time_servers.split(' ') }}"
-# The full path to the chrony drift file.
-chrony_driftfile: "{{ lookup('env', 'chrony_driftfile')|default('/var/lib/chrony/drift', true) }}"
-# The full path to the directory to store the chrony log files.
-chrony_log_dir: "{{ lookup('env', 'chrony_log_dir')|default('/var/log/chrony', true) }}"

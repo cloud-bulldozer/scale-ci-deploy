@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script creates an inventory for this playbook.
+# Create an Ansible inventory based on environment variables.
 # Required environment variables:
 # OPENSTACK_SERVER, OPENSTACK_USER, IMAGE_SERVER, IMAGE_USER.
 

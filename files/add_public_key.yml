@@ -1,0 +1,13 @@
+---
+- name: Add the contents of the public key to all hosts in the inventory
+  hosts: all
+  vars:
+    public_key_file: "{{ ansible_public_key_file|default('~/.ssh/id_rsa.pub', true) }}"
+    public_key: "{{ lookup('file', public_key_file) }}"
+  tasks:
+    # Add the public key to the authorized keys file for ansible_user
+    - name: Adding the public key to the authorized_keys file
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ public_key }}"
+      when: public_key != ""

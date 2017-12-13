@@ -1,12 +1,12 @@
 # {{ ansible_managed }}
 # Server listing use the iburst option:
 # On start, make four measurements over a short duration (rather than the usual periodic measurements).
-{% for server in chrony_time_servers %}
+{% for server in time_servers_list %}
 server {{ server }} iburst
 {% endfor %}
 
 # Record the rate at which the system clock gains/losses time.
-driftfile {{ chrony_driftfile }}
+driftfile /var/lib/chrony/drift
 
 # Allow the system clock to be stepped in the first three updates
 # if its offset is larger than 1 second.
@@ -16,4 +16,4 @@ makestep 1.0 3
 rtcsync
 
 # Specify directory for log files.
-logdir {{ chrony_log_dir }}
+logdir /var/log/chrony

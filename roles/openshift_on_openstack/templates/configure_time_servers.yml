@@ -1,0 +1,26 @@
+---
+- name: Install and configure the time servers for all hosts in the inventory
+  hosts: all
+  tasks:
+    # Ensure the chrony software is installed.
+    - name: Installing the chrony software
+      package:
+        name: chrony
+        state: installed
+      become: true
+
+    # Copy the chrony.config file to the remote host.
+    - name: Copying the chrony configuration to the remote host
+      copy:
+        backup: yes
+        src: chrony.conf
+        dest: /etc/chrony.conf
+      become: true
+
+    # Restart and enable the chronyd service.
+    - name: Restarting the chrony service
+      service:
+        name: chronyd
+        enabled: yes
+        state: restarted
+      become: true
