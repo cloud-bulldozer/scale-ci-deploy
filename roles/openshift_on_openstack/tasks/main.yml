@@ -227,3 +227,14 @@
     line: "MASTER_USER=openshift"
     path: "{{ property_file }}"
   delegate_to: localhost
+
+# Get the property file contents.
+- name: Reading the {{ property_file }}
+  set_fact:
+    property_contents: "{{ lookup('file', property_file ) }}"
+  delegate_to: localhost
+
+# Print the contents of the property file.
+- name: Printing the contents {{ property_file }}
+  debug:
+    msg: "{{ property_contents }}"
