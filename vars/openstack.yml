@@ -1,12 +1,12 @@
 ---
-# The location of the openstack client.
-openstack_location: "{{ lookup('env', 'openstack_client_path' )|default('/usr/bin/openstack', true) }}"
-# The name of the OpenStack project to use when creating quotas, some environments will not have project.
-openstack_project: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
 # The keypair name used to create access to servers in OpenStack.
 openstack_keypair_name: "{{ lookup('env', 'keypair_name')|default('ci_keypair', true) }}"
+# The location of the openstack client.
+openstack_location: "{{ lookup('env', 'openstack_client_path' )|default('/usr/bin/openstack', true) }}"
 # The name of the private network to create for the OpenShift install server.
 openstack_network_name: "{{ lookup('env', 'network_name')|default('ci_network', true) }}"
+# The name of the OpenStack project to use when creating quotas, some environments will not have project.
+openstack_project: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
 # The OpenStack public network that should contain the public subnet.
 openstack_public_network_name: "{{ lookup('env', 'public_network_name')|default('public', true) }}"
 # The OpenStack public subnet that contains the DNS for this openstack environment.

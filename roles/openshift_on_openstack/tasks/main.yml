@@ -195,4 +195,35 @@
 # Print out the log file locations.
 - name: Printing out the log file locations
   debug:
-    msg: "Installation complete, check the {{ openstack_provision_log }} and {{ openshift_install_log }} for details."
+    msg: "Check {{ openstack_provision_log }} and {{ openshift_install_log }} for more details on the install process."
+
+# The openstack variable includes the rc file and the path to the OpenStack client.
+- name: Setting openstack variable to source the rc file and contain path to client
+  set_fact:
+    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
+
+# Get the addresses of a master vm.
+- name: Getting the IP address of a master
+  shell: "{{ openstack }} server show master-0.scale-ci.example.com --format value -c addresses"
+  register: address
+
+# Parse the second address from the addresses field.
+- name: Parsing the floating ip address from the addresses field
+  set_fact:
+    # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
+    master_address: "{{ address['stdout'].split(', ')[1] }}"
+  failed_when: master_address == ""
+
+# Add the master host address to the properties file.
+- name: Adding the MASTER_HOST to the properties file
+  lineinfile:
+    line: "MASTER_HOST={{ master_address.stdout }}"
+    path: "{{ property_file }}"
+  delegate_to: localhost
+
+# Add the master user to the properties file.
+- name: Adding the MASTER_USER to the properties file
+  lineinfile:
+    line: "MASTER_USER=openshift"
+    path: "{{ property_file }}"
+  delegate_to: localhost

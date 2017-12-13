@@ -19,11 +19,7 @@ openshift_flavors:
   - { name: master_etcd, vcpu: 64, memory: 245760, disk: 512 }  #, property: '--property "pci_passthrough:alias"="nvme:1"' }
   - { name: node_small, vcpu: 1, memory: 2048, disk: 80 }
   - { name: node_average, vcpu: 4, memory: 16384, disk: 80 }
-# The path to the openstack client executable.
-openstack_location: "{{ lookup('env', 'openstack_client_path' )|default('/usr/bin/openstack', true) }}"
-# The OpenStack project name, this is not set in some OpenStack environments.
-openstack_project: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
-# The path to the OpenStack rc file on the openstack-server may be different than other systems.
+# The path to the OpenStack RC file on the openstack-server, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
 # The path to the private key, put it the install directory for easy cleanup.
 remote_private_key_path: "{{ lookup('env', 'remote_private_key_path')|default(install_directory ~ '/key.private', true) }}"

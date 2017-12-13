@@ -219,11 +219,11 @@
     # Adding the DNS nameserver list that was pulled from an OpenStack subnet command.
     public_dns_nameservers: "{{ dns_nameservers['stdout'] }}"
 
-# Write out the jump host information.
-- name: Writing the jump host information in property format
+# Write out the proxy host information.
+- name: Writing the proxy host information in property format
   copy:
-    content: "JUMP_HOST={{ floating_ip_address }}\nJUMP_USER=cloud-user"
-    dest: "{{ playbook_dir }}/jump_host"
+    content: "PROXY_HOST={{ inventory_hostname }}\nPROXY_USER={{ ansible_user }}\nUSE_PROXY=True"
+    dest: "{{ property_file }}"
   delegate_to: localhost
   ignore_errors: true
 

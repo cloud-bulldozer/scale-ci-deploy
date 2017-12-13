@@ -19,7 +19,7 @@ all_yml:
   - { find: "^#ephemeral_volumes.*", replace: "ephemeral_volumes: true"}
 # The OpenStack image name to use in the templates.
 default_image_name: "{{ lookup('env', 'default_image_name')|default('ocp-3.7-rhel', true) }}"
-# The path to the OpenStack RC file on the remote host, may be named differently than other servers.
+# The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
 # A list of regular expressions to search and replace in the openshift-ansible OSEv3.yml.
 osev3_yml:
