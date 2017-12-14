@@ -18,18 +18,8 @@ openshift_clock_enabled: true
 use_cluster_metrics: true
 
 # Allow all authenthication.
-#openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
-
-# Allow basic authentication using an Apache HTTP server authentication file.
-openshift_master_identity_providers:
-- name: 'htpasswd_auth'
-  login: 'true'
-  challenge: 'true'
-  kind: 'HTPasswdPasswordIdentityProvider'
-  filename: '/etc/origin/master/htpasswd'
-
-openshift_master_htpasswd_users:
-  scale-ci: '$apr1$vUfm7jQS$C6Vn0GDScgOjzvk1PSHe1/'
+openshift_auth_type: allowall
+openshift_master_identity_providers: [{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
 # Configure how often node iptables rules are refreshed.
 openshift_node_iptables_sync_period: 30s

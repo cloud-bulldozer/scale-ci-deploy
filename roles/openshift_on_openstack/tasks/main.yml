@@ -241,7 +241,7 @@
 # Add the master host address to the properties file.
 - name: Adding the MASTER_HOST to the properties file
   lineinfile:
-    line: "MASTER_HOST={{ master_address.stdout }}"
+    line: "MASTER_HOST={{ master_address }}"
     path: "{{ property_file }}"
   delegate_to: localhost
 
