@@ -185,7 +185,7 @@
 # Copy the configure_time_servers.yml playbook to the target-host.
 - name: Copying the configure_time_servers.yml playbook to the target-host
   copy:
-    src: configure_time_servers.yml
+    src: templates/configure_time_servers.yml
     dest: "{{ ansible_user_dir }}/configure_time_servers.yml"
 
 # Set the path for the OpenStack provision log file.
