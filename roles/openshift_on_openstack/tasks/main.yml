@@ -242,23 +242,30 @@
 - name: Adding the MASTER_HOST to the properties file
   lineinfile:
     line: "MASTER_HOST={{ master_address }}"
-    path: "{{ property_file }}"
+    path: "{{ properties_file }}"
   delegate_to: localhost
 
 # Add the master user to the properties file.
 - name: Adding the MASTER_USER to the properties file
   lineinfile:
     line: "MASTER_USER=openshift"
-    path: "{{ property_file }}"
+    path: "{{ properties_file }}"
   delegate_to: localhost
 
-# Get the property file contents.
-- name: Reading the {{ property_file }}
+# Enable pbench in the properties file.
+- name: Adding ENABLE_PBENCH to the properties file
+  lineinfile:
+    line: "ENABLE_PBENCH=True"
+    path: "{{ properties_file }}"
+  delegate_to: localhost
+
+# Get the properties file contents.
+- name: Reading the {{ properties_file }}
   set_fact:
-    property_contents: "{{ lookup('file', property_file) }}"
+    properties_contents: "{{ lookup('file', properties_file) }}"
   delegate_to: localhost
 
-# Print the contents of the property file.
-- name: Printing the contents {{ property_file }}
+# Print the contents of the properties file.
+- name: Printing the contents {{ properties_file }}
   debug:
-    msg: "{{ property_contents }}"
+    msg: "{{ properties_contents }}"
