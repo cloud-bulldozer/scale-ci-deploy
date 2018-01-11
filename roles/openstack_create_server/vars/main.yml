@@ -2,23 +2,24 @@
 # Rough equivalents of the Amazon ec2 flavors.
 ec2_flavors:
   # https://aws.amazon.com/ec2/previous-generation/
-  - { name: m1.small, vcpu: 1, memory: 1740, disk: 40 }
-  - { name: m1.medium, vcpu: 1, memory: 3840, disk: 80 }
-  - { name: m1.large, vcpu: 2, memory: 7680, disk: 120 }
+  - { name: m1.small, vcpu: 1, memory: 1740, disk: 64 }
+  - { name: m1.medium, vcpu: 1, memory: 3840, disk: 96 }
+  - { name: m1.large, vcpu: 2, memory: 7680, disk: 128 }
   # https://aws.amazon.com/ec2/instance-types/#m4
-  - { name: m4.large, vcpu: 2, memory: 8192, disk: 50 }
-  - { name: m4.xlarge, vcpu: 4, memory: 16384, disk: 100 }
-  - { name: m4.2xlarge, vcpu: 8, memory: 32768, disk: 200 }
-  - { name: m4.4xlarge, vcpu: 16, memory: 65536, disk: 300 }
+  - { name: m4.large, vcpu: 2, memory: 8192, disk: 100 }
+  - { name: m4.xlarge, vcpu: 4, memory: 16384, disk: 200 }
+  - { name: m4.2xlarge, vcpu: 8, memory: 32768, disk: 300 }
+  - { name: m4.4xlarge, vcpu: 16, memory: 65536, disk: 400 }
   - { name: m4.10xlarge, vcpu: 40, memory: 163840, disk: 500 }
 # The OpenShift flavors for the different roles.
 openshift_flavors:
   - { name: container_storage, vcpu: 16, memory: 65536, disk: 128 }
   - { name: load_balancer, vcpu: 4, memory: 16384, disk: 128 }
   - { name: infra_elastic, vcpu: 16, memory: 65536, disk: 128 }
-  - { name: master_etcd, vcpu: 64, memory: 245760, disk: 512 }  #, property: '--property "pci_passthrough:alias"="nvme:1"' }
-  - { name: node_small, vcpu: 1, memory: 2048, disk: 80 }
-  - { name: node_average, vcpu: 4, memory: 16384, disk: 80 }
+  - { name: master_etcd, vcpu: 64, memory: 245760, disk: 512, property: '--property "pci_passthrough:alias"="nvme:1"' }
+  - { name: node_small, vcpu: 1, memory: 2048, disk: 64 }
+  - { name: node_medium, vcpu: 4, memory: 16384, disk: 96 }
+  - { name: node_large, vcpu: 8, memory: 32768, disk: 128 }
 # The path to the OpenStack RC file on the openstack-server, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
 # The path to the private key, put it the install directory for easy cleanup.
@@ -31,10 +32,10 @@ quotas:
 # Rough equivalents of the Google cloud instance sizes.
 standard_flavors:
   # https://cloud.google.com/compute/docs/machine-types
-  - { name: n1-standard-1, vcpu: 1, memory: 3750, disk: 32 }
-  - { name: n1-standard-2, vcpu: 2, memory: 7500, disk: 64 }
-  - { name: n1-standard-4, vcpu: 4, memory: 15000, disk: 64 }
-  - { name: n1-standard-8, vcpu: 8, memory: 30000, disk: 128 }
-  - { name: n1-standard-16, vcpu: 16, memory: 60000, disk: 128 }
-  - { name: n1-standard-32, vcpu: 32, memory: 120000, disk: 256 }
-  - { name: n1-standard-64, vcpu: 64, memory: 240000, disk: 256 }
+  - { name: n1-standard-1, vcpu: 1, memory: 3750, disk: 60 }
+  - { name: n1-standard-2, vcpu: 2, memory: 7500, disk: 80 }
+  - { name: n1-standard-4, vcpu: 4, memory: 15000, disk: 80 }
+  - { name: n1-standard-8, vcpu: 8, memory: 30000, disk: 100 }
+  - { name: n1-standard-16, vcpu: 16, memory: 60000, disk: 100 }
+  - { name: n1-standard-32, vcpu: 32, memory: 120000, disk: 200 }
+  - { name: n1-standard-64, vcpu: 64, memory: 240000, disk: 200 }

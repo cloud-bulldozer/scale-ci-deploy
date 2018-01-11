@@ -1,0 +1,17 @@
+---
+- name: Restart the Nova services on the OpenStack controllers
+  hosts: controller
+  become: true
+  tasks:
+    - name: Restart the services
+      service:
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - openstack-nova-api
+        - openstack-nova-cert
+        - openstack-nova-compute
+        - openstack-nova-conductor
+        - openstack-nova-consoleauth
+        - openstack-nova-novncproxy
+        - openstack-nova-scheduler

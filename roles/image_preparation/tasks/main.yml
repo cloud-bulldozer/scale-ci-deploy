@@ -1,8 +1,9 @@
 ---
-# Get all the atomic files matching the pattern.
+# Get all the atomic files matching using the regex.
 - name: Searching for the ocp-{{ ocp_major_minor }} files in {{ image_directory }}/atomic
   find:
     paths: "{{ image_directory }}/atomic"
+    # Example: 2017-11-12-ocp-3.7.7-1-atomic-gold.raw
     patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
     use_regex: yes
   register: atomic_images
@@ -19,6 +20,7 @@
 - name: Searching for the ocp-{{ ocp_major_minor }} files in {{ image_directory }}/rhel
   find:
     paths: "{{ image_directory }}/rhel"
+    # Example: 2017-12-02-ocp-3.7.11-1-rhel-gold.raw
     patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
     use_regex: yes
   register: rhel_images

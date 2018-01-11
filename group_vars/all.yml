@@ -3,11 +3,11 @@
 ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
 # The path to the private key to access servers using the keypair.
 ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
-# Get the home directory of the ansible controller.
-home_directory: "{{ lookup('env', 'HOME') }}"
 # The remote directory to store any scale-ci files.
 install_directory: "{{ ansible_user_dir }}/scale-ci"
 # The version of OpenShift Container Platform to install and test.
-ocp_major_minor: "{{ lookup('env', 'ocp_major_minor')|default('3.7', true) }}"
+ocp_major_minor: "{{ lookup('env', 'ocp_major_minor')|default('3.9', true) }}"
 # The properties file contains the keys and values for the next job.
-properties_file: "{{ lookup('env', 'properties_file')|default(home_directory ~ '/workspace/next.properties', true) }}"
+properties_file: "{{ lookup('env', 'properties_file')|default('./next.properties', true) }}"
+# The virtual image name to use in OpenStack when creating virtual servers.
+virtual_image_name: "{{ lookup('env', 'default_image_name')|default('ocp-' ~ ocp_major_minor ~ '-rhel', true) }}"

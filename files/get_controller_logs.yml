@@ -1,0 +1,32 @@
+---
+- name: Capture the log files from the OpenStack controllers
+  hosts: controller
+  become: true
+  vars:
+    # The directory to copy the log archives to.
+    local_destination_directory: "{{ ansible_env['PWD'] }}"
+    # The OpenStack controller services to capture the logs.
+    openstack_controller_services:
+      - heat
+      - neutron
+      - nova
+    # The remote server directory to temporarily store the log files.
+    remote_destination_directory: /tmp
+  tasks:
+    - name: Creating archives of the OpenStack controller services log files
+      archive:
+        path: "/var/log/{{ item }}/*.log"
+        dest: "{{ remote_destination_directory }}/{{ item }}_logs.tgz"
+      with_items: "{{ openstack_controller_services }}"
+
+    - name: Copying the archives to this ansible host server
+      fetch:
+        src: "{{ remote_destination_directory }}/{{ item }}_logs.tgz"
+        dest: "{{ local_destination_directory }}"
+      with_items: "{{ openstack_controller_services }}"
+
+    - name: Deleting the log files from the controller servers
+      file:
+        path: "{{ remote_destination_directory }}/{{ item }}_logs.tgz"
+        state: absent
+      with_items: "{{ openstack_controller_services }}"

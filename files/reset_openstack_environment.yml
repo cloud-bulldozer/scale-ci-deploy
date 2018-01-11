@@ -150,11 +150,8 @@
     - name: Deleting all the OpenStack images
       shell: "{{ openstack }} image delete {{ item }}"
       with_items:
-        - "centos-7"
-        - "fedora-26"
         - "ocp-{{ ocp_major_minor }}-atomic"
         - "ocp-{{ ocp_major_minor }}-rhel"
-        - "rhel-7.4"
       ignore_errors: true
       when: delete_images|bool == true
 

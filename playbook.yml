@@ -2,7 +2,7 @@
 - name: Find and prepare the virtual machine images
   hosts: image-server
   roles:
-    - image_preperation
+    - image_preparation
 
 - name: Set up one virtual machine server in a new OpenStack environment
   hosts: openstack-server
