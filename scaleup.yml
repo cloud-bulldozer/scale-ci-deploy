@@ -1,0 +1,15 @@
+---
+- name: Get virtual machine server in a new OpenStack environment
+  hosts: openstack-server
+  vars_files:
+    - vars/openstack.yml
+  roles:
+    - openstack_get_server
+
+- name: Scale OpenShift on OpenStack
+  hosts: target-server
+  vars_files:
+    - vars/openstack.yml
+    - vars/openshift.yml
+  roles:
+    - openshift_on_openstack_scaleup

@@ -8,8 +8,10 @@ all_yml:
   - { find: "^openshift_openstack_default_image_name.*", replace: "openshift_openstack_default_image_name: \"{{ virtual_image_name }}\"" }
   - { find: "^openshift_openstack_num_masters.*", replace: "openshift_openstack_num_masters: 3" }
   - { find: "^openshift_openstack_num_infra.*", replace: "openshift_openstack_num_infra: 3" }
+  - { find: "^openshift_openstack_num_cns.*", replace: "openshift_openstack_num_cns: 0" }	# 3 to enable cns
   - { find: "^#openshift_openstack_master_flavor:.*", replace: "openshift_openstack_master_flavor: \"master_etcd\"" }
   - { find: "^#openshift_openstack_infra_flavor:.*", replace: "openshift_openstack_infra_flavor: \"infra_elastic\"" }
+  - { find: "^#openshift_openstack_cns_flavor:.*", replace: "openshift_openstack_cns_flavor: \"m4.large-pci\"" }
   - { find: "^#openshift_openstack_node_flavor.*", replace: "openshift_openstack_node_flavor: \"node_medium\"" }
   - { find: "^#openshift_openstack_lb_flavor:.*", replace: "openshift_openstack_lb_flavor: \"load_balancer\"" }
   - { find: "^openshift_openstack_default_flavor:.*", replace: "openshift_openstack_default_flavor: \"m1.medium\"" }

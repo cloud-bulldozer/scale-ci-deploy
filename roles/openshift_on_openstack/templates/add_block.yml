@@ -24,3 +24,19 @@ openshift_master_identity_providers: [{'name': 'allow_all', 'login': 'true', 'ch
 
 # Configure how often node iptables rules are refreshed.
 openshift_node_iptables_sync_period: 30s
+
+# CNS
+openshift_storage_glusterfs_wipe: true
+openshift_storage_glusterfs_namespace: glusterfs
+openshift_storage_glusterfs_is_native: true
+openshift_storage_glusterfs_storageclass_default: true
+
+# Prometheus setup
+openshift_prometheus_state: present
+openshift_prometheus_image_prefix: registry.reg-aws.openshift.com:443/openshift3/
+openshift_prometheus_storage_type: pvc
+openshift_prometheus_storage_volume_size: 10Gi
+openshift_prometheus_alertmanager_storage_type: pvc
+openshift_prometheus_alertmanager_storage_volume_size: 10Gi
+openshift_prometheus_alertbuffer_storage_type: pvc
+openshift_prometheus_alertbuffer_storage_volume_size: 10Gi

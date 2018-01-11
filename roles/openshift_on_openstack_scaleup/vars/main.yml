@@ -1,0 +1,8 @@
+---
+# A list of regular expressions to search and replace in openshift-ansible all.yml.
+all_yml:
+  - { find: "^openshift_openstack_num_masters.*", replace: "openshift_openstack_num_masters: 3" }
+  - { find: "^openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: 5" }
+  - { find: "^openshift_openstack_num_infra.*", replace: "openshift_openstack_num_infra: 3" }
+# The path to the OpenStack RC file on the server vm, may be named differently than other servers.
+openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"

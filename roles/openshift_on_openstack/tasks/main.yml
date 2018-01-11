@@ -55,7 +55,7 @@
     version: "{{ openshift_ansible_version }}"
   #when: openshift_ansible['stat']['exists'] == false
 
-# Set the openshift-ansbile openstack path.
+# Set the openshift-ansible openstack path.
 - name: Creating the openshift_openstack directory variable
   set_fact:
     openshift_openstack_dir: "openshift-ansible/playbooks/openstack"

@@ -1,0 +1,61 @@
+---
+# Set the openshift-ansible openstack path.
+- name: Creating the openshift_openstack directory variable
+  set_fact:
+    openshift_openstack_dir: "openshift-ansible/playbooks/openstack"
+
+# For each item in the list, search for regular expressions and replace.
+- name: Replacing specific lines in inventory/group_vars/all.yml
+  lineinfile:
+    path: inventory/group_vars/all.yml
+    regexp: "{{ item['find'] }}"
+    line: "{{ item['replace'] }}"
+  with_items: "{{ all_yml }}"
+
+# Set a variable for the ansible-playbook.
+- name: Setting the ansible-playbook variable
+  set_fact:
+    ansible_playbook: "source {{ openstack_rc }}; ansible-playbook"
+
+# Get some debug information that makes it easier to file bugs.
+- name: Running commands that create debug information needed to open issues
+  shell: "{{ item }}"
+  register: debug_information
+  with_items:
+    - "printf \"$(uname -srm)\n$(cat /etc/os-release)\n\""
+    - "ansible --version"
+    # - "pip freeze | grep -i jinja"
+    # - "pip freeze | grep -i shade"
+    - "cd openshift-ansible ; git describe"
+    - "rpm -q atomic-openshift-utils openshift-ansible"
+  changed_when: false
+  ignore_errors: true
+
+# Print the debug information out.
+- name: Printing the debug information to the screen
+  debug:
+    msg: "{{ item['stdout_lines'] }}"
+  with_items: "{{ debug_information['results'] }}"
+
+# Set the path for the OpenStack scaleup log file.
+- name: Creating the OpenStack scaleup log file variable
+  set_fact:
+    openstack_scaleup_log: "{{ ansible_user_dir }}/openstack_scaleup.log"
+
+# Run the Ansible playbook that creates the OpenStack resources.
+- name: Creating the OpenStack resources
+  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory {{ openshift_openstack_dir }}/openshift-cluster/provision.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openstack_scaleup_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+## TODO:
+## Set the path for the OpenShift scaleup log file.
+#- name: Creating the OpenStack scaleup log file variable
+#  set_fact:
+#    openshift_scaleup_log: "{{ ansible_user_dir }}/openshift_scaleup.log"
+#
+## Scaling up existing OpenShift deployment.
+#- name: Scale up the OpenShift resources
+#  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory openshift-ansible/playbooks/openshift-node/scaleup.yml 2>&1 > {{ openshift_scaleup_log }}"
+#  when: 'groups["new_nodes"] | list'
