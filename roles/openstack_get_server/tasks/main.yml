@@ -1,0 +1,62 @@
+---
+# Check for the existence of the OpenStack client.
+- name: Checking for the OpenStack client
+  stat:
+    path: "{{ openstack_location }}"
+  register: openstack_path
+
+# Fail when the openstack client path does not exist.
+- name: Aborting because the OpenStack client does not exist
+  fail:
+    msg: "The openstack client path '{{ openstack_location }}' is invalid."
+  when: openstack_path.stat.exists == false
+
+# The openstack variable includes the rc file and the path to the OpenStack client.
+- name: Setting openstack variable to source the rc file and contain path to client
+  set_fact:
+    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
+
+# In some cases the "floating ip" is only accessible from the openstack-server.
+- name: Creating an ssh command that will use {{ inventory_hostname }} as a proxy
+  set_fact:
+    # The key path must be from the remote host not the openstack-server.
+    proxy_command: "ssh -i {{ ansible_private_key_file }} -W %h:%p {{ ansible_user }}@{{ inventory_hostname }}"
+
+# Get all the floating ips.
+- name: Getting all the floating ip addresses
+  shell: "{{ openstack }} floating ip list --format value -c 'Floating IP Address'"
+  register: floating_ips
+  changed_when: false
+
+# Get the server ids that match the name.
+- name: Getting the server IDs that match {{ openstack_server_name }}
+  shell: "{{ openstack }} server list --name {{ openstack_server_name }} --format value -c ID"
+  register: servers
+  changed_when: false
+
+# Get the server addresses to figure out its floating ip.
+- name: Getting the floating ip address for {{ openstack_server_name }}
+  shell: "{{ openstack }} server show {{ openstack_server_name }} --format value -c addresses"
+  register: server_addresses
+  changed_when: false
+
+# Set the server floating ip variable.
+- name: Setting the {{ openstack_server_name }} floating ip address
+  set_fact:
+    floating_ip_address: "{{ item }}"
+  when: item in server_addresses.stdout
+  with_items: "{{ floating_ips.stdout_lines }}"
+
+# Add the new host to the in-memory inventory.
+- name: Adding the server floating IP address to the inventory
+  add_host:
+    name: "{{ floating_ip_address }}"
+    groups: [ 'target-server' ]
+    ansible_user: cloud-user
+    # Adding a ProxyCommand allows servers to contact this IP using the openstack-server.
+    ansible_ssh_common_args: "-o ProxyCommand='{{ proxy_command }}'"
+
+# Print out the ssh connection command to the server.
+- name: Printing the ssh command to connect with the server instance
+  debug:
+    msg: "ssh -i {{ remote_private_key_path }} cloud-user@{{ floating_ip_address }}"
