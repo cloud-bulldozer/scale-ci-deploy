@@ -158,7 +158,7 @@
     # List all the images with ocp in the name.
     - name: Listing all the OCP images in OpenStack
       # Have to use grep becuase image list does not support the --name flag.
-      shell: "{{ openstack }} image list --format value -c ID -c Name | grep -i -ocp-"
+      shell: "{{ openstack }} image list --format value -c ID -c Name | grep -i ocp"
       register: images_id_name
 
     # Delete the images (by ID) that have ocp in the name.
