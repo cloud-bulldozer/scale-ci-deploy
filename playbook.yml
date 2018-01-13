@@ -24,4 +24,5 @@
     - vars/openstack.yml
     - vars/openshift.yml
   roles:
+    - openshift_dns
     - openshift_on_openstack

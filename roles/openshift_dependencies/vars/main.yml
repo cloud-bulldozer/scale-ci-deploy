@@ -1,7 +1,11 @@
 ---
+# The path to the OpenStack RC file on the server vm, may be named differently than other servers.
+openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
+# A dictionary of packages to install for different families of operating systems.
 packages:
   common:
     - curl
+    - bind
     - gcc
     - git
     - libselinux-python

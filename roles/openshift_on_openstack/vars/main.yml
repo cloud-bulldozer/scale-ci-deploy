@@ -2,7 +2,7 @@
 # A list of regular expressions to search and replace in openshift-ansible all.yml.
 all_yml:
   - { find: "^openshift_openstack_clusterid.*", replace: "openshift_openstack_clusterid: \"{{ openshift_env_id }}\"" }
-  - { find: "^openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ public_dns_nameservers }}]" }
+  - { find: "^openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ cluster_dns_server }}]" }
   - { find: "^openshift_openstack_keypair_name.*", replace: "openshift_openstack_keypair_name: \"{{ openstack_keypair_name }}\"" }
   - { find: "^openshift_openstack_external_network_name.*", replace: "openshift_openstack_external_network_name: \"{{ openstack_public_network_name }}\"" }
   - { find: "^openshift_openstack_default_image_name.*", replace: "openshift_openstack_default_image_name: \"{{ virtual_image_name }}\"" }
@@ -24,7 +24,7 @@ openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ 
 osev3_yml:
   - { find: "^openshift_deployment_type: origin", replace: "#openshift_deployment_type: origin" }
   - { find: "^#openshift_deployment_type: openshift-enterprise", replace: "openshift_deployment_type: openshift-enterprise" }
-  - { find: "^openshift_master_default_subdomain.*", replace: "openshift_master_default_subdomain: 'router.default.svc.cluster.local'" }
+  # - { find: "^openshift_master_default_subdomain.*", replace: "openshift_master_default_subdomain: 'router.default.svc.cluster.local'" }
   # - { find: "^#openshift_cloudprovider_kind.*", replace: "openshift_cloudprovider_kind: openstack"}
 # Look for a space separated string of time servers from an environment variable.
 time_servers: "{{ lookup('env', 'time_servers')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true) }}"
