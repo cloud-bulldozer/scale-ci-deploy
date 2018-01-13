@@ -1,0 +1,65 @@
+---
+# Remove all old directories and files.
+- name: Removing any old directories or files from previous attempts
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "dns_vars.yml"
+    - "openshift-ansible-contrib"
+
+# Set a variable for the ansible-playbook.
+- name: Setting the ansible-playbook variable
+  set_fact:
+    ansible_playbook: "source {{ openstack_rc }}; ansible-playbook"
+
+# Print the values that will be used for openshift-ansible-contrib.
+- name: Printing the values used to clone openshift-ansible-contrib
+  debug:
+    msg: "openshift-ansible-contrib repository: {{ openshift_ansible_contrib_repo }} {{ openshift_ansible_contrib_version }}"
+
+# Get a fresh clone of the openshift-ansible-contrib GitHub project.
+- name: Cloning the openshift-ansible-contrib repository
+  git:
+    dest: "{{ ansible_user_dir }}/openshift-ansible-contrib"
+    # Specify the repo as a variable to test other people's repositories.
+    repo: "{{ openshift_ansible_contrib_repo }}"
+    # Specify a version for a different branch, tag, or hash to verify PRs.
+    version: "{{ openshift_ansible_contrib_version }}"
+
+# Generate the dns update key.
+- name: Generating the DNS update key
+  shell: 'ddns-confgen -r /dev/urandom | grep secret'
+  register: dns_secret
+  # command: "rndc-confgen -a -c update.key -k update-key -r /dev/urandom"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+# Set the DNS secret.
+- name: Creating a variable with the DNS secret value
+  set_fact:
+    update_key_secret: dns_secret['stdout']
+
+# Print the secret out for debugging purposes.
+- name: Printing the DNS secret update key
+  debug:
+    msg: "{{ update_key_secret }}"
+
+# Render the dns variable file and copy it to the target-host.
+- name: Rendering the DNS variable file to the target-host
+  template:
+    src: dns_vars.yml.j2
+    dest: "{{ ansible_user_dir }}/dns_vars.yml"
+
+# Set the path for the DNS install log file.
+- name: Creating the DNS install log file variable
+  set_fact:
+    openshift_install_log: "{{ ansible_user_dir }}/dns_install.log"
+
+# Run the Ansible playbook that creates the DNS server.
+- name: Creating the DNS server
+  shell: "{{ ansible_playbook }} -vvv --key-file ~/.ssh/id_rsa -e @dns_vars.yml openshift-ansible-contrib/reference-architecture/osp-dns/deploy-dns.yaml 2>&1 > {{ dns_install_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
