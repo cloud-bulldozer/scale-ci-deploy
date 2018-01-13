@@ -70,9 +70,9 @@
   changed_when: false
 
 # Get the DNS server addresses from OpenStack.
-- name: Getting the floating ip address for dns-service.scale-ci.example.com
-  shell: "{{ openstack }} server show dns-service.scale-ci.example.com --format value -c addresses"
-  # "dns-service-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
+- name: Getting the floating ip address for ns-master.scale-ci.example.com
+  shell: "{{ openstack }} server show ns-master.scale-ci.example.com --format value -c addresses"
+  # "ns-master-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
   register: dns_addresses
   changed_when: false
 
