@@ -160,6 +160,8 @@
       # Have to use grep becuase image list does not support the --name flag.
       shell: "{{ openstack }} image list --format value -c ID -c Name | grep -i ocp"
       register: images_id_name
+      # Ignore errors when this list is empty and grep does not find the target.
+      ignore_errors: true
 
     # Delete the images (by ID) that have ocp in the name.
     - name: Deleting the existing OCP images in OpenStack by ID
