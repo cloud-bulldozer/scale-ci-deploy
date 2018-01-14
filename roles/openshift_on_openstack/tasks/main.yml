@@ -80,7 +80,7 @@
 - name: Setting the DNS server floating ip address
   set_fact:
     cluster_dns_server: "{{ item }}"
-  when: item in server_addresses.stdout
+  when: item in dns_addresses.stdout
   with_items: "{{ floating_ips.stdout_lines }}"
 
 # Set the openshift-ansible openstack path.
