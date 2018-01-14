@@ -1,0 +1,23 @@
+---
+ansible_ssh_common_args: ""
+domain_name: "{{ openshift_env_id }}.example.com"
+dns_forwarders: [{{ public_dns_nameservers }}]
+external_network: "{{ openstack_public_network_name }}"
+image: "{{ virtual_image_name }}"
+
+# NOTE: This is specific to the image. It's the user name to
+# SSH to the VMs as
+ssh_user: "{{ ansible_user }}"
+
+# NOTE: Key name from `openstack keypair list`
+ssh_key_name: "{{ openstack_keypair_name }}"
+
+# NOTE: YOU MUST CHANGE THIS!
+# Can be generated with:
+#     ddns-confgen -r /dev/urandom
+# or:
+#     rndc-confgen -a -c update.key -k update-key -r /dev/urandom
+update_key: "{{ update_key_secret }}"
+
+stack_name: "dns-service"
+slave_count: 0

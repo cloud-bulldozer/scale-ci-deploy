@@ -57,3 +57,30 @@
   # Using command module because the Ansible pip module may not be installed.
   command: "{{ pip }} install {{ item }}"
   with_items: "{{ packages['python'] }}"
+
+# Create a .ssh directory if one does not already exist.
+- name: Creating the {{ ansible_user_dir }}/.ssh directory on the target host
+  file:
+    path: "{{ ansible_user_dir }}/.ssh"
+    state: directory
+    mode: 0700
+
+# Copy the private key so this user can access the OpenShift servers.
+- name: Copying the private key to the target host
+  copy:
+    src: "{{ ansible_private_key_file }}"
+    dest: "{{ ansible_user_dir }}/.ssh/id_rsa"
+    mode: 0600
+
+# Copy the public key to the target host.
+- name: Copying the public key to the target host
+  copy:
+    src: "{{ ansible_public_key_file }}"
+    dest: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
+    mode: 0644
+
+# Copy the OpenStack rc file from the Ansible host to the target host.
+- name: Copying the OpenStack rc file from Ansible host to target host
+  copy:
+    src: "{{ playbook_dir }}/openstackrc"
+    dest: "{{ openstack_rc }}"

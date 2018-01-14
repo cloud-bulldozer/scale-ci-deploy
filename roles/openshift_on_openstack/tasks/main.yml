@@ -5,11 +5,19 @@
     path: "{{ item }}"
     state: absent
   with_items:
-    - "{{ openstack_rc }}"
     - "openshift-ansible"
-    # - "openshift-ansible-contrib"
     - "inventory"
     - "ansible.cfg"
+
+# Set a variable for the ansible-playbook.
+- name: Setting the ansible-playbook variable
+  set_fact:
+    ansible_playbook: "source {{ openstack_rc }}; ansible-playbook"
+
+# The openstack variable includes the rc file and the path to the OpenStack client.
+- name: Setting the openstack variable to source the rc file and contain path to client
+  set_fact:
+    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
 
 # Check if the server contains the openshift-ansible code already.
 - name: Checking file system status for the openshift-ansible directory
@@ -55,6 +63,26 @@
     version: "{{ openshift_ansible_version }}"
   #when: openshift_ansible['stat']['exists'] == false
 
+# Get all the floating ips.
+- name: Getting all the floating ip addresses
+  shell: "{{ openstack }} floating ip list --format value -c 'Floating IP Address'"
+  register: floating_ips
+  changed_when: false
+
+# Get the DNS server addresses from OpenStack.
+- name: Getting the floating ip address for ns-master.scale-ci.example.com
+  shell: "{{ openstack }} server show ns-master.scale-ci.example.com --format value -c addresses"
+  # "ns-master-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
+  register: dns_addresses
+  changed_when: false
+
+# Set the DNS server address when the floating ip is in the addresses output.
+- name: Setting the DNS server floating ip address
+  set_fact:
+    cluster_dns_server: "{{ item }}"
+  when: item in dns_addresses['stdout']
+  with_items: "{{ floating_ips['stdout_lines'] }}"
+
 # Set the openshift-ansible openstack path.
 - name: Creating the openshift_openstack directory variable
   set_fact:
@@ -71,33 +99,6 @@
     remote_src: true
     src: "openshift-ansible/ansible.cfg"
     dest: ./ansible.cfg
-
-# Create a .ssh directory if one does not already exist.
-- name: Creating the {{ ansible_user_dir }}/.ssh directory on the target host
-  file:
-    path: "{{ ansible_user_dir }}/.ssh"
-    state: directory
-    mode: 0700
-
-# Copy the private key so this user can access the OpenShift servers.
-- name: Copying the private key to the target host
-  copy:
-    src: "{{ ansible_private_key_file }}"
-    dest: "{{ ansible_user_dir }}/.ssh/id_rsa"
-    mode: 0600
-
-# Copy the public key to the target host.
-- name: Copying the public key to the target host
-  copy:
-    src: "{{ ansible_public_key_file }}"
-    dest: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
-    mode: 0644
-
-# Copy the OpenStack rc file from the Ansible host to the target host.
-- name: Copying the OpenStack rc file from Ansible host to target host
-  copy:
-    src: "{{ playbook_dir }}/openstackrc"
-    dest: "{{ openstack_rc }}"
 
 # For each item in the list, search for regular expressions and replace.
 - name: Replacing specific lines in inventory/group_vars/all.yml
@@ -122,11 +123,6 @@
     block: "{{ lookup('file', 'templates/add_block.yml') }}"
     insertafter: EOF
     path: inventory/group_vars/OSEv3.yml
-
-# Set a variable for the ansible-playbook.
-- name: Setting the ansible-playbook variable
-  set_fact:
-    ansible_playbook: "source {{ openstack_rc }}; ansible-playbook"
 
 # Get some debug information that makes it easier to file bugs.
 - name: Running commands that create debug information needed to open issues
@@ -187,22 +183,18 @@
   debug:
     msg: "Check {{ openshift_install_log }} for more details on the install process."
 
-# The openstack variable includes the rc file and the path to the OpenStack client.
-- name: Setting openstack variable to source the rc file and contain path to client
-  set_fact:
-    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
-
 # Get the addresses of a master vm.
 - name: Getting the IP address of a master
   shell: "{{ openstack }} server show master-0.scale-ci.example.com --format value -c addresses"
-  register: address
+  register: master_addresses
 
-# Parse the second address from the addresses field.
+# Set the master address when the floating ip is in the master addresses output.
 - name: Parsing the floating ip address from the addresses field
   set_fact:
     # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
-    master_address: "{{ address['stdout'].split(', ')[1] }}"
-  failed_when: master_address == ""
+    master_address: "{{ item }}"
+  when: item in master_addresses['stdout']
+  with_items: "{{ floating_ips['stdout_lines'] }}"
 
 # Add the master host address to the properties file.
 - name: Adding the MASTER_HOST to the properties file

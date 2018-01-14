@@ -6,7 +6,7 @@
   register: openstack_path
 
 # Fail when the openstack client path does not exist.
-- name: Aborting because the OpenStack client does not exist
+- name: Aborting when the OpenStack client does not exist
   fail:
     msg: "The openstack client path '{{ openstack_location }}' is invalid."
   when: openstack_path.stat.exists == false
@@ -26,12 +26,6 @@
 - name: Getting all the floating ip addresses
   shell: "{{ openstack }} floating ip list --format value -c 'Floating IP Address'"
   register: floating_ips
-  changed_when: false
-
-# Get the server ids that match the name.
-- name: Getting the server IDs that match {{ openstack_server_name }}
-  shell: "{{ openstack }} server list --name {{ openstack_server_name }} --format value -c ID"
-  register: servers
   changed_when: false
 
 # Get the server addresses to figure out its floating ip.

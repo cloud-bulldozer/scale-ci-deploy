@@ -41,7 +41,7 @@
   register: openstack_path
 
 # Fail when the openstack client path does not exist.
-- name: Aborting because the OpenStack client does not exist
+- name: Aborting when the OpenStack client does not exist
   fail:
     msg: "The openstack client path '{{ openstack_location }}' is invalid."
   when: openstack_path.stat.exists == false
@@ -65,6 +65,7 @@
 - name: Getting the dns_nameservers addresses from the {{ openstack_public_subnet_name }}
   shell: "{{ openstack }} subnet show {{ openstack_public_subnet_name }} --format value -c dns_nameservers"
   register: dns_nameservers
+  changed_when: false
 
 # Create a subnet with a CIDR range and link it to the private network.
 - name: Creating the {{ openstack_subnet_name }} subnet
