@@ -27,24 +27,25 @@
     # Specify a version for a different branch, tag, or hash to verify PRs.
     version: "{{ openshift_ansible_contrib_version }}"
 
-# Generate the dns update key.
+# Generate the DNS update key with rndc-confgen.
 - name: Generating the DNS update key
-  shell: 'ddns-confgen -r /dev/urandom | grep secret'
-  register: dns_secret
-  # command: "rndc-confgen -a -c update.key -k update-key -r /dev/urandom"
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
+  command: "/usr/sbin/rndc-confgen -a -c update.key -k update-key -r /dev/urandom"
 
-# Set the DNS secret.
+# Read the DNS update.key file.
+- name: Reading the update.key file
+  set_fact:
+    update_key: "{{ lookup('file', 'update.key') }}"
+
+# Create a regular expression to get the secret key.
+- name: Setting the regular expression to find the secret
+  set_fact:
+    # Example:        secret "8kjyy/xFvzapFwmcWwLzvA==";
+    secret_regex: 'secret "(.*)";'
+
+# Set the DNS secret value.
 - name: Creating a variable with the DNS secret value
   set_fact:
-    update_key_secret: dns_secret['stdout']
-
-# Print the secret out for debugging purposes.
-- name: Printing the DNS secret update key
-  debug:
-    msg: "{{ update_key_secret }}"
+    update_key_secret: "{{ update_key|regex_findall(secret_regex) }}"
 
 # Render the dns variable file and copy it to the target-host.
 - name: Rendering the DNS variable file to the target-host
