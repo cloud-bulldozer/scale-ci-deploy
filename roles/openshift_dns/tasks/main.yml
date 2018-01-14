@@ -32,9 +32,10 @@
   command: "/usr/sbin/rndc-confgen -a -c update.key -k update-key -r /dev/urandom"
 
 # Read the DNS update.key file.
-- name: Reading the update.key file
+- name: Reading the remote update.key file
   command: "grep secret update.key"
   register: update_secret
+  changed_when: false
 
 # Create a regular expression to get the secret key.
 - name: Setting the regular expression to find the secret
