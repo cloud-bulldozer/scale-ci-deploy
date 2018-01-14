@@ -2,7 +2,7 @@
 ansible_ssh_common_args: ""
 domain_name: "{{ openshift_env_id }}.example.com"
 dns_forwarders: [{{ public_dns_nameservers }}]
-external_network: "{{ public_network_name }}"
+external_network: "{{ openstack_public_network_name }}"
 image: "{{ virtual_image_name }}"
 
 # NOTE: This is specific to the image. It's the user name to
