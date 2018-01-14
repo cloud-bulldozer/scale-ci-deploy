@@ -33,8 +33,8 @@
 
 # Read the DNS update.key file.
 - name: Reading the update.key file
-  set_fact:
-    update_key: "{{ lookup('file', 'update.key') }}"
+  command: "grep secret update.key"
+  register: update_secret
 
 # Create a regular expression to get the secret key.
 - name: Setting the regular expression to find the secret
@@ -45,7 +45,7 @@
 # Set the DNS secret value.
 - name: Creating a variable with the DNS secret value
   set_fact:
-    update_key_secret: "{{ update_key|regex_findall(secret_regex) }}"
+    update_key_secret: "{{ update_secret['stdout']|regex_findall(secret_regex) }}"
 
 # Render the dns variable file and copy it to the target-host.
 - name: Rendering the DNS variable file to the target-host
