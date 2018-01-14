@@ -29,7 +29,8 @@
 
 # Generate the DNS update key with rndc-confgen.
 - name: Generating the DNS update key
-  command: "/usr/sbin/rndc-confgen -a -c update.key -k update-key -r /dev/urandom"
+  # The algorithm needs to be hmac-sha256 or named service will refuse to start.
+  command: "/usr/sbin/rndc-confgen -a -A hmac-sha256 -c update.key -k update-key -r /dev/urandom"
 
 # Read the DNS update.key file.
 - name: Reading the remote update.key file
@@ -57,7 +58,7 @@
 # Set the path for the DNS install log file.
 - name: Creating the DNS install log file variable
   set_fact:
-    openshift_install_log: "{{ ansible_user_dir }}/dns_install.log"
+    dns_install_log: "{{ ansible_user_dir }}/dns_install.log"
 
 # Run the Ansible playbook that creates the DNS server.
 - name: Creating the DNS server

@@ -18,7 +18,7 @@ all_yml:
   - { find: "^#openshift_openstack_external_nsupdate_keys:.*", replace: "openshift_openstack_external_nsupdate_keys:" }
   - { find: "^#  public:.*", replace: "  public:" }
   - { find: "^#    key_secret:.*", replace: "    key_secret: {{ update_key_secret }}" }
-  - { find: "^#    key_algorithm:.*", replace: "    key_algorithm: 'hmac-md5'" }
+  - { find: "^#    key_algorithm:.*", replace: "    key_algorithm: 'hmac-sha256'" }
   - { find: "^#    server:.*", replace: "    server: {{ cluster_dns_server }}" }
   # - { find: "^#manage_packages.*", replace: "manage_packages: false"}
   # Use VM storage only, no Cinder at this time.
