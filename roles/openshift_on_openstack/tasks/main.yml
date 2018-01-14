@@ -80,8 +80,8 @@
 - name: Setting the DNS server floating ip address
   set_fact:
     cluster_dns_server: "{{ item }}"
-  when: item in dns_addresses.stdout
-  with_items: "{{ floating_ips.stdout_lines }}"
+  when: item in dns_addresses['stdout']
+  with_items: "{{ floating_ips['stdout_lines'] }}"
 
 # Set the openshift-ansible openstack path.
 - name: Creating the openshift_openstack directory variable
@@ -193,8 +193,8 @@
   set_fact:
     # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
     master_address: "{{ item }}"
-  when: item in master_addresses.stdout
-  with_items: "{{ floating_ips.stdout_lines }}"
+  when: item in master_addresses['stdout']
+  with_items: "{{ floating_ips['stdout_lines'] }}"
 
 # Add the master host address to the properties file.
 - name: Adding the MASTER_HOST to the properties file
