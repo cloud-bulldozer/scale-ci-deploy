@@ -79,7 +79,7 @@
 # Set the DNS server address when the floating ip is in the addresses output.
 - name: Setting the DNS server floating ip address
   set_fact:
-    cluster_dns_server: "{{ item }}"
+    cluster_dns_ip: "{{ item }}"
   when: item in dns_addresses['stdout']
   with_items: "{{ floating_ips['stdout_lines'] }}"
 
@@ -100,6 +100,23 @@
     src: "openshift-ansible/ansible.cfg"
     dest: ./ansible.cfg
 
+# Check if the nsupdate_file exists.
+- name: Checking file system status for the nsupdate file
+  stat:
+    get_checksum: no
+    get_md5: no
+    path: "{{ nsupdate_file }}"
+  register: nsupdate
+
+# Add a block of configuration to the end of the all.yml file.
+- name: Adding DNS configuration to the end of inventory/group_vars/all.yml
+  blockinfile:
+    backup: yes
+    block: "{{ lookup('file', nsupdate_file) }}"
+    insertafter: EOF
+    path: inventory/group_vars/all.yml
+  when: nsupdate['stat']['exists']
+
 # For each item in the list, search for regular expressions and replace.
 - name: Replacing specific lines in inventory/group_vars/all.yml
   lineinfile:
@@ -108,6 +125,14 @@
     line: "{{ item['replace'] }}"
   with_items: "{{ all_yml }}"
 
+# Add a block of configuration to the end of the OSEv3 file.
+- name: Adding a block of configuration to the end of inventory/group_vars/OSEv3.yml
+  blockinfile:
+    backup: yes
+    block: "{{ lookup('file', 'templates/add_block.yml') }}"
+    insertafter: EOF
+    path: inventory/group_vars/OSEv3.yml
+
 # For each item in the list, search for regular expressions and replace.
 - name: Replacing specific lines in inventory/group_vars/OSEv3.yml
   lineinfile:
@@ -115,14 +140,6 @@
     regexp: "{{ item['find'] }}"
     line: "{{ item['replace'] }}"
   with_items: "{{ osev3_yml }}"
-
-# Add more configuration to the end of the OSEv3 file.
-- name: Adding a block of configuration to the end of inventory/group_vars/OSEv3.yml
-  blockinfile:
-    backup: yes
-    block: "{{ lookup('file', 'templates/add_block.yml') }}"
-    insertafter: EOF
-    path: inventory/group_vars/OSEv3.yml
 
 # Get some debug information that makes it easier to file bugs.
 - name: Running commands that create debug information needed to open issues

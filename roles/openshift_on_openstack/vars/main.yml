@@ -2,7 +2,7 @@
 # A list of regular expressions to search and replace in openshift-ansible all.yml.
 all_yml:
   - { find: "^openshift_openstack_clusterid.*", replace: "openshift_openstack_clusterid: \"{{ openshift_env_id }}\"" }
-  - { find: "^openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ cluster_dns_server }}]" }
+  - { find: "^openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ cluster_dns_ip }}]" }
   - { find: "^openshift_openstack_keypair_name.*", replace: "openshift_openstack_keypair_name: \"{{ openstack_keypair_name }}\"" }
   - { find: "^openshift_openstack_external_network_name.*", replace: "openshift_openstack_external_network_name: \"{{ openstack_public_network_name }}\"" }
   - { find: "^openshift_openstack_default_image_name.*", replace: "openshift_openstack_default_image_name: \"{{ virtual_image_name }}\"" }
@@ -15,14 +15,13 @@ all_yml:
   - { find: "^#openshift_openstack_node_flavor.*", replace: "openshift_openstack_node_flavor: \"node_medium\"" }
   - { find: "^#openshift_openstack_lb_flavor:.*", replace: "openshift_openstack_lb_flavor: \"load_balancer\"" }
   - { find: "^openshift_openstack_default_flavor:.*", replace: "openshift_openstack_default_flavor: \"m1.medium\"" }
-  - { find: "^#openshift_openstack_external_nsupdate_keys:.*", replace: "openshift_openstack_external_nsupdate_keys:" }
-  - { find: "^#  public:.*", replace: "  public:" }
-  - { find: "^#    key_secret:.*", replace: "    key_secret: {{ update_key_secret }}" }
-  - { find: "^#    key_algorithm:.*", replace: "    key_algorithm: 'hmac-sha256'" }
-  - { find: "^#    server:.*", replace: "    server: {{ cluster_dns_server }}" }
   # - { find: "^#manage_packages.*", replace: "manage_packages: false"}
   # Use VM storage only, no Cinder at this time.
   - { find: "^# openshift_openstack_ephemeral_volumes.*", replace: "openshift_openstack_ephemeral_volumes: true"}
+  - { find: "public_dns_ip", replace: "{{ cluster_dns_ip }}" }
+  - { find: "private_dns_ip", replace: "{{ cluster_dns_ip }}" }
+# The file name that contains the name server update information.
+nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(playbook_dir ~ '/nsupdate_keys.yml', true) }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
 # A list of regular expressions to search and replace in the openshift-ansible OSEv3.yml.
