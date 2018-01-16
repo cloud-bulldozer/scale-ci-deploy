@@ -1,5 +1,5 @@
 ---
-# A list of regular expressions to search and replace in openshift-ansible all.yml.
+# A list of regular expressions to match lines and replace lines in inventory/group_vars/all.yml.
 all_yml:
   - { find: "^openshift_openstack_clusterid.*", replace: "openshift_openstack_clusterid: \"{{ openshift_env_id }}\"" }
   - { find: "^openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ cluster_dns_ip }}]" }
@@ -16,15 +16,14 @@ all_yml:
   - { find: "^#openshift_openstack_lb_flavor:.*", replace: "openshift_openstack_lb_flavor: \"load_balancer\"" }
   - { find: "^openshift_openstack_default_flavor:.*", replace: "openshift_openstack_default_flavor: \"m1.medium\"" }
   # - { find: "^#manage_packages.*", replace: "manage_packages: false"}
-  # Use VM storage only, no Cinder at this time.
   - { find: "^# openshift_openstack_ephemeral_volumes.*", replace: "openshift_openstack_ephemeral_volumes: true"}
-  - { find: "public_dns_ip", replace: "{{ cluster_dns_ip }}" }
-  - { find: "private_dns_ip", replace: "{{ cluster_dns_ip }}" }
+  - { find: "server: private_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
+  - { find: "server: public_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
 # The file name that contains the name server update information.
 nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
-# A list of regular expressions to search and replace in the openshift-ansible OSEv3.yml.
+# A list of regular expressions to match lines and replace lines in the inventory/group_vars/OSEv3.yml.
 osev3_yml:
   - { find: "^openshift_deployment_type: origin", replace: "#openshift_deployment_type: origin" }
   - { find: "^#openshift_deployment_type: openshift-enterprise", replace: "openshift_deployment_type: openshift-enterprise" }
