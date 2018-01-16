@@ -108,11 +108,17 @@
     path: "{{ nsupdate_file }}"
   register: nsupdate
 
+- name: Reading the contents of the nsupdate file
+  shell: "cat {{ nsupdate_file }}"
+  register: nsupdate_contents
+  when: nsupdate['stat']['exists']
+  changed_when: false
+
 # Add a block of configuration to the end of the all.yml file.
 - name: Adding DNS configuration to the end of inventory/group_vars/all.yml
   blockinfile:
     backup: yes
-    block: "{{ lookup('file', nsupdate_file) }}"
+    block: "{{ nsupdate_contents['stdout'] }}"
     insertafter: EOF
     path: inventory/group_vars/all.yml
   when: nsupdate['stat']['exists']
