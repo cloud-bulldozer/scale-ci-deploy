@@ -21,7 +21,7 @@ all_yml:
   - { find: "public_dns_ip", replace: "{{ cluster_dns_ip }}" }
   - { find: "private_dns_ip", replace: "{{ cluster_dns_ip }}" }
 # The file name that contains the name server update information.
-nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(playbook_dir ~ '/nsupdate_keys.yml', true) }}"
+nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
 # A list of regular expressions to search and replace in the openshift-ansible OSEv3.yml.
