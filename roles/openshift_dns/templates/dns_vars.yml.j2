@@ -17,7 +17,7 @@ ssh_key_name: "{{ openstack_keypair_name }}"
 #     ddns-confgen -r /dev/urandom
 # or:
 #     rndc-confgen -a -c update.key -k update-key -r /dev/urandom
-update_key: "{{ update_key_secret }}"
+update_key: "{{ dns_key_secret }}"
 
 stack_name: "dns-service"
 slave_count: 0
