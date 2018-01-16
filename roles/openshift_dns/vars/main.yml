@@ -6,4 +6,4 @@ dns_key_file: "{{ lookup('env', 'dns_update_file')|default('dns_update.key', tru
 # The key name when creating the DNS update key.
 dns_key_name: "{{ lookup('env', 'dns_key_name')|default('update-key', true) }}"
 # The file name to store the nsupdate information.
-nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(playbook_dir ~ '/nsupdate_keys.yml', true) }}"
+nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
