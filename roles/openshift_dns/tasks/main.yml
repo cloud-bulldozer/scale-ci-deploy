@@ -80,7 +80,7 @@
 # Set the OpenShift update keys with the public and private information.
 - name: Setting the OpenShift name server update keys
   set_fact:
-    nsupdate_keys: { openshift_openstack_external_nsupdate_keys: { public: "{{ public_key }}", private: "{{ private_key }}" } }
+    nsupdate_keys: { openshift_openstack_external_nsupdate_keys: { public: "{{ dns_public_info }}", private: "{{ dns_private_info }}" } }
 
 # Write the OpenShift update keys to a YAML file.
 - name: Writing the OpenShift name server update keys to a file
