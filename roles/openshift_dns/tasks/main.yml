@@ -47,7 +47,7 @@
 # Set the DNS secret value.
 - name: Creating a variable with the DNS secret value
   set_fact:
-    update_key_secret: "{{ update_secret['stdout']|regex_findall(secret_regex)|first }}"
+    dns_key_secret: "{{ update_secret['stdout']|regex_findall(secret_regex)|first }}"
 
 # Render the dns variable file and copy it to the target-host.
 - name: Rendering the DNS variable file to the target-host
