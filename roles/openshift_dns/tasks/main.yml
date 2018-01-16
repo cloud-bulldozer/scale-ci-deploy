@@ -30,11 +30,11 @@
 # Generate the DNS update key with rndc-confgen.
 - name: Generating the DNS update key
   # The key name (-k) is important here and must match the key_name in all.yml.
-  command: "/usr/sbin/rndc-confgen -a -A {{ dns_key_algorithm }} -c dns_update.key -k {{ dns_key_name }} -r /dev/urandom"
+  command: "/usr/sbin/rndc-confgen -a -A {{ dns_key_algorithm }} -c {{ dns_key_file }} -k {{ dns_key_name }} -r /dev/urandom"
 
-# Read the DNS update.key file.
-- name: Reading the remote update.key file
-  command: "grep secret update.key"
+# Read the DNS update key file.
+- name: Reading the remote {{ dns_key_file }} file
+  command: "grep secret {{ dns_key_file }}"
   register: update_secret
   changed_when: false
 

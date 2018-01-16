@@ -1,6 +1,8 @@
 ---
 # The algorithm to use when creating the DNS update key.
 dns_key_algorithm: "{{ lookup('env', 'dns_key_algorithm')|default('hmac-sha256', true) }}"
+# The DNS update key file name.
+dns_key_file: "{{ lookup('env', 'dns_update_file')|default('dns_update.key') }}"
 # The key name when creating the DNS update key.
 dns_key_name: "{{ lookup('env', 'dns_key_name')|default('update-key', true) }}"
 # The file name to store the nsupdate information.
