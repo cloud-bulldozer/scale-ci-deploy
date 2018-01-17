@@ -1,0 +1,30 @@
+---
+- name: A playbook to prepare and mount block devices
+  hosts: masters
+  become: true
+  vars:
+    device_path: "{{ block_device|default('/dev/nvme0n1') }}"
+    mount_path: "{{ mount_directory|default('/var/lib/etcd') }}"
+  tasks:
+    # Make sure the device is not already mounted.
+    - name: Make sure the path is not already mounted
+      # Unable to use mount module because it does not umount devices, only paths.
+      command: "umount {{ device_path }}"
+
+    # Create the path to the mount directory.
+    - name: Creating the mount path
+      file:
+        path: "{{ mount_path }}"
+        state: directory
+
+    # Create a filesystem on this device.
+    - name: Creating an xfs filesystem on {{ device_path }}
+      command: "mkfs.xfs -f {{ device_path }}"
+
+    # Mount and create an entry in fstab.
+    - name: Creating an entry in fstab and mounting the device
+      mount:
+        path: "{{ mount_path }}"
+        src: "{{ device_path }}"
+        fstype: xfs
+        state: mounted

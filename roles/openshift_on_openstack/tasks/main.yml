@@ -201,14 +201,32 @@
     src: templates/configure_time_servers.yml
     dest: "{{ ansible_user_dir }}/configure_time_servers.yml"
 
-# Set the path for the OpenStack provision log file.
-- name: Creating the time servers log file variable
+# Set the path for the time servers log file.
+- name: Creating a variable for the time servers log file
   set_fact:
     time_servers_log: "{{ ansible_user_dir }}/time_servers.log"
 
 # Configure the time servers on all the provisioned nodes.
 - name: Configuring the time servers on all the provisioned nodes
-  shell: "{{ ansible_playbook }} -vv -i {{ inventory_py }} configure_time_servers.yml 2>&1 >> {{ time_servers_log }}"
+  shell: "{{ ansible_playbook }} -vv --user openshift -i {{ inventory_py }} configure_time_servers.yml 2>&1 >> {{ time_servers_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+# Copy the prepare_block_devices.yml playbook to the target-host.
+- name: Copying the prepare_block_devices.yml playbook to the target-host
+  copy:
+    src: templates/prepare_block_devices.yml
+    dest: "{{ ansible_user_dir }}/prepare_block_devices.yml"
+
+# Set the path for the block devices log file.
+- name: Creating a variable for the the block devices log file
+  set_fact:
+    block_devices_log: "{{ ansible_user_dir }}/block_devices.log"
+
+# Configure the block devices on the master nodes.
+- name: Configuring the block devices on the master nodes
+  shell: "{{ ansible_playbook }} -vv --user openshift -i {{ inventory_py }} prepare_block_devices.yml 2>&1 >> {{ block_devices_log }}"
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
