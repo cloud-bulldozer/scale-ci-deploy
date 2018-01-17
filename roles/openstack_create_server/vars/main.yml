@@ -17,8 +17,8 @@ ec2_flavors:
   - { name: r4.xlarge, vcpu: 4, memory: 31232, disk: 64 }
   - { name: r4.2xlarge, vcpu: 8, memory: 62464, disk: 96 }
   - { name: r4.4xlarge, vcpu: 16, memory: 124928, disk: 128 }
-  - { name: r4.8xlarge, vcpu: 32, memory: 249856, disk: 160 }
-  - { name: r4.4xlarge, vcpu: 16, memory: 499712, disk: 192 }
+  - { name: r4.8xlarge, vcpu: 32, memory: 249856, disk: 256 }
+  - { name: r4.16xlarge, vcpu: 64, memory: 499712, disk: 512 }
 # The OpenShift flavors for the different roles.
 openshift_flavors:
   - { name: container_storage, vcpu: 16, memory: 65536, disk: 128 }
