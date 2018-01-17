@@ -81,6 +81,11 @@
   set_fact:
     openshift_openstack_dir: "openshift-ansible/playbooks/openstack"
 
+# Set the path to the OpenShift inventory file.
+- name: Creating a variable to the inventory file
+  set_fact:
+    inventory_py: "{{ openshift_openstack_dir }}/inventory.py"
+
 # Copy the remote sample-inventory to another remote directory.
 - name: Copying the sample inventory directory
   # Note: The copy module does not support recurisve copy of remote sources.
@@ -158,14 +163,28 @@
     msg: "{{ item['stdout_lines'] }}"
   with_items: "{{ debug_information['results'] }}"
 
-# Set the path for the OpenShift install log file.
-- name: Creating the OpenShift install log file variable
+# Set the path for the prerequisite log file.
+- name: Creating a variable for the prerequsite log file
   set_fact:
-    openshift_install_log: "{{ ansible_user_dir }}/openshift_install.log"
+    prerequisite_log: "{{ ansible_user_dir }}/openshift_prerequisites.log"
 
-# Run the Ansible playbook that creates the OpenStack resources.
+# Run the Ansible playbook that checks the prerequisites in OpenStack.
+- name: Checking the prerequisites for cluster provisioning in OpenStack
+  # Using two inventory flags here as the README instructs.
+  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_openstack_dir }}/openshift-cluster/prerequisites.yml 2>&1 >> {{ prerequisite_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+# Set the path for the OpenStack provision log file.
+- name: Creating a variable for the OpenStack provision log file
+  set_fact:
+    openstack_provision_log: "{{ ansible_user_dir }}/openstack_provision.log"
+
+# Run the Ansible playbook that provisions the OpenStack resources.
 - name: Creating the OpenStack resources
-  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory {{ openshift_openstack_dir }}/openshift-cluster/provision_install.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openshift_install_log }}"
+  # Using two inventory flags here as the README instructs.
+  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_openstack_dir }}/openshift-cluster/provision.yml 2>&1 >> {{ openstack_provision_log }}"
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
@@ -189,15 +208,23 @@
 
 # Configure the time servers on all the provisioned nodes.
 - name: Configuring the time servers on all the provisioned nodes
-  shell: "{{ ansible_playbook }} -vv -i inventory configure_time_servers.yml 2>&1 >> {{ time_servers_log }}"
+  shell: "{{ ansible_playbook }} -vv -i {{ inventory_py }} configure_time_servers.yml 2>&1 >> {{ time_servers_log }}"
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
 
-# Print out the log file locations.
-- name: Printing out the log file locations
-  debug:
-    msg: "Check {{ openshift_install_log }} for more details on the install process."
+# Set the path for the OpenShift install log file.
+- name: Creating the OpenShift install log file variable
+  set_fact:
+    openshift_install_log: "{{ ansible_user_dir }}/openshift_install.log"
+
+# Run the Ansible playbook that installs OpenShift.
+- name: Installing OpenShift on OpenStack
+  # Using two inventory flags here as the README instructs.
+  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_openstack_dir }}/openshift-cluster/install.yml 2>&1 >> {{ openshift_install_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
 
 # Get the addresses of a master vm.
 - name: Getting the IP address of master-0.{{ openshift_env_id }}.example.com
