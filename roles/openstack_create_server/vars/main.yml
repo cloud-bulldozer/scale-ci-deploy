@@ -7,7 +7,6 @@ ec2_flavors:
   - { name: m1.large, vcpu: 2, memory: 7680, disk: 128 }
   # https://aws.amazon.com/ec2/instance-types/#m4
   - { name: m4.large, vcpu: 2, memory: 8192, disk: 100 }
-  - { name: m4.large-pci, vcpu: 2, memory: 8192, disk: 100, property: '--property "pci_passthrough:alias"="nvme:1"' }
   - { name: m4.xlarge, vcpu: 4, memory: 16384, disk: 200 }
   - { name: m4.2xlarge, vcpu: 8, memory: 32768, disk: 300 }
   - { name: m4.4xlarge, vcpu: 16, memory: 65536, disk: 400 }
@@ -24,7 +23,7 @@ openshift_flavors:
   - { name: container_storage, vcpu: 16, memory: 65536, disk: 128 }
   - { name: load_balancer, vcpu: 4, memory: 16384, disk: 128 }
   - { name: infra_elastic, vcpu: 16, memory: 124928, disk: 128 }
-  - { name: master_etcd, vcpu: 16, memory: 124928, disk: 512, property: '--property "pci_passthrough:alias"="nvme:1"' }
+  - { name: master_etcd, vcpu: 16, memory: 124928, disk: 256, property: '--property "pci_passthrough:alias"="nvme:1"' }
   - { name: node_small, vcpu: 1, memory: 2048, disk: 64 }
   - { name: node_medium, vcpu: 4, memory: 16384, disk: 96 }
   - { name: node_large, vcpu: 8, memory: 32768, disk: 128 }
