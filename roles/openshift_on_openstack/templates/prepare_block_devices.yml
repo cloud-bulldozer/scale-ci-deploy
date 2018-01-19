@@ -10,6 +10,7 @@
     - name: Make sure the path is not already mounted
       # Unable to use mount module because it does not umount devices, only paths.
       command: "umount {{ device_path }}"
+      ignore_errors: true
 
     # Create the path to the mount directory.
     - name: Creating the mount path
