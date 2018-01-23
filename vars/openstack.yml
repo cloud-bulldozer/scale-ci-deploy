@@ -16,7 +16,7 @@ openstack_router_name: "{{ lookup('env', 'router_name')|default('ci_router', tru
 # The name of the security group to create for the OpenShift install server.
 openstack_security_group_name: "{{ lookup('env', 'security_group_name')|default('ci_security_group', true) }}"
 # The name of the flavor to use for the OpenShift install server.
-openstack_server_flavor: "{{ lookup('env', 'server_flavor')|default('load_balancer', true) }}"
+openstack_server_flavor: "{{ lookup('env', 'server_flavor')|default('m4.4xlarge', true) }}"
 # The name of the image to use for the OpenShift install server.
 openstack_server_image: "{{ lookup('env', 'server_image')|default(virtual_image_name, true) }}"
 # The name of the server to use for the OpenShift install server.
