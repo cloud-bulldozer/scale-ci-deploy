@@ -147,6 +147,7 @@
   shell: "{{ openstack }} quota set --{{ item }} {{ quotas[ item ] }} {{ openstack_project }}"
   with_items:
     - cores
+    - floating-ips
     - gigabytes
     - instances
     - ports

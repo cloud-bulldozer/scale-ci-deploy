@@ -8,6 +8,7 @@
     - "openshift-ansible"
     - "inventory"
     - "ansible.cfg"
+    - ".kube"
 
 # Set a variable for the ansible-playbook.
 - name: Setting the ansible-playbook variable
@@ -256,6 +257,16 @@
     # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
     master_address: "{{ address['stdout'].split(', ')[1] }}"
   failed_when: master_address == ""
+
+# Create the Kubernetes configuration directory on this target host.
+- name: Creating the ~/.kube directory on target host
+  file:
+    path: ".kube"
+    state: directory
+
+# Copy the kubeconfig to the target host.
+- name: Copying the kubernetes config file from the master to the target host
+  command: "scp openshift@{{ master_address }}:.kube/config ./kube/config"
 
 # Add the master host address to the properties file.
 - name: Adding the MASTER_HOST to the properties file

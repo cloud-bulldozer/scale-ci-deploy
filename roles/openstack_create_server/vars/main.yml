@@ -35,7 +35,14 @@ remote_private_key_path: "{{ lookup('env', 'remote_private_key_path')|default(in
 remote_public_key_path: "{{ lookup('env', 'remote_public_key_path')|default(install_directory ~ '/key.public', true) }}"
 # The quota structure to set for this OpenStack installation.
 quotas:
-    { cores: 1444, gigabytes: 50000, instances: 550, ports: 10000, ram: 5865472, secgroups: 25, volumes: 50000 }
+  cores: 1444
+  gigabytes: 50000
+  instances: 550
+  ports: 10000
+  ram: 5865472
+  secgroups: 25
+  volumes: 50000
+  floating-ips: 512
 # Rough equivalents of the Google cloud instance sizes.
 standard_flavors:
   # https://cloud.google.com/compute/docs/machine-types
