@@ -27,7 +27,7 @@ packages:
     - dnspython==1.15.0
     - Jinja2==2.7.2
     - jmespath==0.9.0
-    - python-openstackclient==3.8.1
+    - python-openstackclient==3.14.0
     - python-heatclient==1.13.0
     - shade==1.26.0
 pip: pip
