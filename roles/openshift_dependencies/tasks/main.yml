@@ -79,6 +79,14 @@
     dest: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
     mode: 0644
 
+# Increase the sshd MaxSessions.
+- name: Increasing the sshd maximum sessions
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^#MaxSessions"
+    line: "MaxSessions 100"
+  become: true
+
 # Copy the OpenStack rc file from the Ansible host to the target host.
 - name: Copying the OpenStack rc file from Ansible host to target host
   copy:
