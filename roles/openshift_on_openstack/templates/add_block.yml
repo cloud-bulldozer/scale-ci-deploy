@@ -42,11 +42,12 @@ openshift_storage_glusterfs_is_native: true
 openshift_storage_glusterfs_storageclass_default: true
 
 # Prometheus setup
+openshift_hosted_prometheus_deploy: true
 openshift_prometheus_state: present
 openshift_prometheus_image_prefix: registry.reg-aws.openshift.com:443/openshift3/
 openshift_prometheus_storage_type: pvc
-openshift_prometheus_storage_volume_size: 10Gi
+openshift_prometheus_storage_volume_size: 40Gi
 openshift_prometheus_alertmanager_storage_type: pvc
-openshift_prometheus_alertmanager_storage_volume_size: 10Gi
+openshift_prometheus_alertmanager_storage_volume_size: 40Gi
 openshift_prometheus_alertbuffer_storage_type: pvc
-openshift_prometheus_alertbuffer_storage_volume_size: 10Gi
+openshift_prometheus_alertbuffer_storage_volume_size: 40Gi
