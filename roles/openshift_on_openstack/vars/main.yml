@@ -20,6 +20,7 @@ all_yml:
   - { find: "^# openshift_openstack_public_hostname_suffix.*", replace: "openshift_openstack_public_hostname_suffix: '-public'" }
   - { find: "server: private_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
   - { find: "server: public_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
+  - { find: "^openshift_openstack_disable_root:.*", replace: "openshift_openstack_disable_root: false" }
 # The file name that contains the name server update information.
 nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
