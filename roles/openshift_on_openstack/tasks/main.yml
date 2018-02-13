@@ -258,15 +258,15 @@
     master_address: "{{ address['stdout'].split(', ')[1] }}"
   failed_when: master_address == ""
 
-# Create the Kubernetes configuration directory on this target host.
-- name: Creating the ~/.kube directory on target host
+# Create the Kubernetes configuration directory on the target host.
+- name: Creating the {{ ansible_user_dir }}/.kube directory on target host
   file:
-    path: ".kube"
+    path: "{{ ansible_user_dir }}/.kube"
     state: directory
 
 # Copy the kubeconfig to the target host.
-- name: Copying the kubernetes config file from the master to the target host
-  command: "scp openshift@{{ master_address }}:.kube/config ./kube/config"
+- name: Copying the kubeconfig file from the master to the target host
+  command: "scp openshift@{{ master_address }}:.kube/config {{ ansible_user_dir }}/.kube/config"
 
 # Add the master host address to the properties file.
 - name: Adding the MASTER_HOST to the properties file

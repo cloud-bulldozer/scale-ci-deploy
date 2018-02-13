@@ -62,7 +62,7 @@
 
 # Run the Ansible playbook that creates the DNS server.
 - name: Creating the DNS server
-  shell: "{{ ansible_playbook }} -vvv --key-file ~/.ssh/id_rsa -e @dns_vars.yml openshift-ansible-contrib/reference-architecture/osp-dns/deploy-dns.yaml 2>&1 > {{ dns_install_log }}"
+  shell: "{{ ansible_playbook }} -vvv --key-file {{ ansible_user_dir }}/.ssh/id_rsa -e @dns_vars.yml openshift-ansible-contrib/reference-architecture/osp-dns/deploy-dns.yaml 2>&1 > {{ dns_install_log }}"
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash

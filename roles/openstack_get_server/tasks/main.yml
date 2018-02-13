@@ -22,23 +22,15 @@
     # The key path must be from the remote host not the openstack-server.
     proxy_command: "ssh -i {{ ansible_private_key_file }} -W %h:%p {{ ansible_user }}@{{ inventory_hostname }}"
 
-# Get all the floating ips.
-- name: Getting all the floating ip addresses
-  shell: "{{ openstack }} floating ip list --format value -c 'Floating IP Address'"
-  register: floating_ips
-  changed_when: false
-
-# Get the server addresses to figure out its floating ip.
 - name: Getting the floating ip address for {{ openstack_server_name }}
-  shell: "{{ openstack }} server show {{ openstack_server_name }} --format value -c addresses"
-  register: server_addresses
+  shell: "{{ openstack }} server show {{ openstack_server_name }} --format value -c addresses | awk '{print $2}'"
+  register: floating_ips
   changed_when: false
 
 # Set the server floating ip variable.
 - name: Setting the {{ openstack_server_name }} floating ip address
   set_fact:
     floating_ip_address: "{{ item }}"
-  when: item in server_addresses.stdout
   with_items: "{{ floating_ips.stdout_lines }}"
 
 # Add the new host to the in-memory inventory.

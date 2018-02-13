@@ -19,9 +19,18 @@ openshift_clock_enabled: true
 # Enable cluster metrics
 use_cluster_metrics: true
 
-# Allow all authenthication.
-openshift_auth_type: allowall
-openshift_master_identity_providers: [{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
+# Allow authentication using an Apache HTTP server authentication file.
+openshift_master_identity_providers:
+- name: 'htpasswd_auth'
+  login: 'true'
+  challenge: 'true'
+  kind: 'HTPasswdPasswordIdentityProvider'
+  filename: '/etc/origin/master/htpasswd'
+# Defining htpasswd users
+openshift_master_htpasswd_users:
+  - admin: 'admin'
+  - developer: 'developer'
+  - test: 'test'
 
 # Configure how often node iptables rules are refreshed.
 openshift_node_iptables_sync_period: 30s
@@ -33,11 +42,12 @@ openshift_storage_glusterfs_is_native: true
 openshift_storage_glusterfs_storageclass_default: true
 
 # Prometheus setup
+openshift_hosted_prometheus_deploy: true
 openshift_prometheus_state: present
 openshift_prometheus_image_prefix: registry.reg-aws.openshift.com:443/openshift3/
 openshift_prometheus_storage_type: pvc
-openshift_prometheus_storage_volume_size: 10Gi
+openshift_prometheus_storage_volume_size: 40Gi
 openshift_prometheus_alertmanager_storage_type: pvc
-openshift_prometheus_alertmanager_storage_volume_size: 10Gi
+openshift_prometheus_alertmanager_storage_volume_size: 40Gi
 openshift_prometheus_alertbuffer_storage_type: pvc
-openshift_prometheus_alertbuffer_storage_volume_size: 10Gi
+openshift_prometheus_alertbuffer_storage_volume_size: 40Gi
