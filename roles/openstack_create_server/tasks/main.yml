@@ -109,6 +109,10 @@
 - name: Creating the security group for secure http
   shell: "{{ openstack }} security group rule create --ingress --protocol tcp --dst-port 443 {{ security_group_uuid['stdout'] }} --format value -c id"
 
+# Create the security group rule that allows connections to cluster loader synchronization endpoint (TCP port 9090).
+- name: Creating the security group for secure http
+  shell: "{{ openstack }} security group rule create --ingress --protocol tcp --dst-port 9090 {{ security_group_uuid['stdout'] }} --format value -c id"
+
 # Create the floating ip address on the public network.
 - name: Creating a floating ip on the {{ openstack_public_network_name }}
   shell: "{{ openstack }} floating ip create {{ openstack_public_network_name }} --format value -c floating_ip_address"
