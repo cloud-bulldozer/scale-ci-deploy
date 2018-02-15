@@ -5,6 +5,7 @@
   vars:
     device_path: "{{ block_device|default('/dev/nvme0n1') }}"
     mount_path: "{{ mount_directory|default('/var/lib/etcd') }}"
+    etcd_device_wipe: True
   tasks:
     # Make sure the device is not already mounted.
     - name: Make sure the path is not already mounted
@@ -17,6 +18,25 @@
       file:
         path: "{{ mount_path }}"
         state: directory
+
+    # Get etcd storage device state.
+    - name: Get etcd storage device state
+      command: "pvdisplay -C --noheadings -o pv_name,vg_name {{ device_path }}"
+      register: device_info
+      failed_when: False
+      when: etcd_device_wipe
+
+    # Clear etcd storage device contents.
+    - name: Clear etcd storage device contents
+      shell: "{% for line in device_info.stdout_lines %}{% set fields = line.split() %}{% if fields | count > 1 %}lvremove -ff {{ fields[1] }}; vgremove -fy {{ fields[1] }}; {% endif %}pvremove -fy {{ fields[0] }}; {% endfor %}"
+      register: clear_devices
+      until:
+      - "'contains a filesystem in use' not in clear_devices.stderr"
+      delay: 1
+      retries: 30
+      when:
+      - etcd_device_wipe
+      - device_info.stdout_lines | count > 0
 
     # Create a filesystem on this device.
     - name: Creating an xfs filesystem on {{ device_path }}
