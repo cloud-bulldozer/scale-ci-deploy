@@ -100,6 +100,14 @@
     dest: /etc/ansible/ansible.cfg
   become: true
 
+# Enable ansible logging.
+- name: Enabling ansible logging
+  replace:
+    dest: /etc/ansible/ansible.cfg
+    regexp: '^#?log_path\s*=.*'
+    replace: 'log_path = /var/tmp/ansible.log'
+  become: true
+
 # Check if the nsupdate_file exists.
 - name: Checking file system status for the nsupdate file
   stat:
