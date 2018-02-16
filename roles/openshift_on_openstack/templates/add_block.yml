@@ -5,14 +5,6 @@ openshift_examples_modify_imagestreams: true
 # Disable some checks that are likely to fail (mem>=8GiB).
 openshift_disable_check: memory_availability
 
-# Additional Docker registry that contain the images of a specific version/tag.
-oreg_url: 'registry.reg-aws.openshift.com:443/openshift3/ose-${component}:${version}'
-openshift_docker_additional_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
-openshift_docker_insecure_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
-openshift_web_console_prefix: 'registry.reg-aws.openshift.com:443/openshift3/ose-'
-cli_docker_additional_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
-cli_docker_insecure_registries: ['registry.reg-aws.openshift.com:443','brew-pulp-docker01.web.prod.ext.phx2.redhat.com:8888']
-
 # Configure usage of openshift_clock role.
 openshift_clock_enabled: true
 
@@ -35,16 +27,15 @@ openshift_master_htpasswd_users:
 # Configure how often node iptables rules are refreshed.
 openshift_node_iptables_sync_period: 30s
 
-# CNS
+# Container Native Storage (CNS).
 openshift_storage_glusterfs_wipe: true
 openshift_storage_glusterfs_namespace: glusterfs
 openshift_storage_glusterfs_is_native: true
 openshift_storage_glusterfs_storageclass_default: true
 
-# Prometheus setup
+# Prometheus variables.
 openshift_hosted_prometheus_deploy: true
 openshift_prometheus_state: present
-openshift_prometheus_image_prefix: registry.reg-aws.openshift.com:443/openshift3/
 openshift_prometheus_storage_type: pvc
 openshift_prometheus_storage_volume_size: 40Gi
 openshift_prometheus_alertmanager_storage_type: pvc

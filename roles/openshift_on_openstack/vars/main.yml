@@ -1,5 +1,5 @@
 ---
-# A list of regular expressions to match lines and replace lines in inventory/group_vars/all.yml.
+# A list of regular expressions to find and replace lines in inventory/group_vars/all.yml.
 all_yml:
   - { find: "^openshift_openstack_clusterid.*", replace: "openshift_openstack_clusterid: \"{{ openshift_env_id }}\"" }
   - { find: "^openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ cluster_dns_ip }}]" }
@@ -23,17 +23,33 @@ all_yml:
   - { find: "server: private_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
   - { find: "server: public_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
   - { find: "^openshift_openstack_disable_root:.*", replace: "openshift_openstack_disable_root: false" }
-# The file name that contains the name server update information.
+# The path to the file that contains the name server update information.
 nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
+# Look up the environment variable with a space separated string of image registry servers to add to the container configuration.
+openshift_registries: "{{ lookup('env', 'openshift_registries') }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
-# A list of regular expressions to match lines and replace lines in the inventory/group_vars/OSEv3.yml.
+# A list of regular expressions to find and replace lines in inventory/group_vars/OSEv3.yml.
 osev3_yml:
-  - { find: "^openshift_deployment_type: origin", replace: "#openshift_deployment_type: origin" }
-  - { find: "^#openshift_deployment_type: openshift-enterprise", replace: "openshift_deployment_type: openshift-enterprise" }
-  # - { find: "^openshift_master_default_subdomain.*", replace: "openshift_master_default_subdomain: 'router.default.svc.cluster.local'" }
-  # - { find: "^#openshift_cloudprovider_kind.*", replace: "openshift_cloudprovider_kind: openstack"}
-# Look for a space separated string of time servers from an environment variable.
+  - { find: "^#?openshift_deployment_type: origin", replace: "#openshift_deployment_type: origin" }
+  - { find: "^#?openshift_deployment_type: openshift-enterprise", replace: "openshift_deployment_type: openshift-enterprise" }
+  - { find: "^oreg_url:.*", replace: "oreg_url: \"{{ registries[0] }}/openshift3/ose-${component}:${version}\"" }
+  - { find: "^openshift_docker_additional_registries:.*", replace: "openshift_docker_additional_registries: {{ registries|to_json }}" }
+  - { find: "^openshift_docker_insecure_registries:.*", replace: "openshift_docker_insecure_registries: {{ registries|to_json }}" }
+  - { find: "^openshift_web_console_prefix:.*", replace: "openshift_web_console_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
+  - { find: "^cli_docker_additional_registries:.*", replace: "cli_docker_additional_registries: {{ registries|to_json }}" }
+  - { find: "^cli_docker_insecure_registries:.*", replace: "cli_docker_insecure_registries: {{ registries|to_json }}" }
+  - { find: "^openshift_prometheus_image_prefix:.*", replace: "openshift_prometheus_image_prefix: \"{{ registries[0] }}/openshift3/\"" }
+  - { find: "^openshift_prometheus_image_version:.*", replace: "openshift_prometheus_image_version: \"v{{ ocp_major_minor }}\"" }
+  - { find: "^openshift_prometheus_proxy_image_prefix:.*", replace: "openshift_prometheus_proxy_image_prefix: \"{{ registries[0] }}/openshift3/\"" }
+  - { find: "^openshift_prometheus_proxy_image_version:.*", replace: "openshift_prometheus_proxy_image_version: \"v{{ ocp_major_minor }}\"" }
+  - { find: "^openshift_prometheus_alertmanager_image_prefix:.*", replace: "openshift_prometheus_alertmanager_image_prefix: \"{{ registries[0] }}/openshift3/\"" }
+  - { find: "^openshift_prometheus_alertmanager_image_version:.*", replace: "openshift_prometheus_alertmanager_image_version: \"v{{ ocp_major_minor }}\"" }
+  - { find: "^openshift_prometheus_alertbuffer_image_prefix:.*", replace: "openshift_prometheus_alertbuffer_image_prefix: \"{{ registries[0] }}/openshift3/\"" }
+  - { find: "^openshift_prometheus_alertbuffer_image_version:.*", replace: "openshift_prometheus_alertbuffer_image_version: \"v{{ ocp_major_minor }}\"" }
+# Break up the space separate string into a list of image registries for the OSEv3.yml variables.
+registries: "{{ openshift_registries.split(' ') }}"
+# Look up the environment variable with a space separated string of time servers.
 time_servers: "{{ lookup('env', 'time_servers')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true) }}"
 # Break up the space separated string into a list of time servers.
 time_servers_list: "{{ time_servers.split(' ') }}"
