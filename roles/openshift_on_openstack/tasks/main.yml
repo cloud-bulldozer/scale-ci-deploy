@@ -174,7 +174,7 @@
   with_items: "{{ debug_information['results'] }}"
 
 # Set the path for the prerequisite log file.
-- name: Creating a variable for the prerequsite log file
+- name: Creating a variable for the prerequisite log file
   set_fact:
     prerequisite_log: "{{ ansible_user_dir }}/openshift_prerequisites.log"
 
