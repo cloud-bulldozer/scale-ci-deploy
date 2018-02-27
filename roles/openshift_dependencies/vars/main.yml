@@ -29,7 +29,7 @@ packages:
     - jmespath==0.9.3
     - python-openstackclient==3.14.0
     - python-heatclient==1.14.0
-    - shade==1.27.0
+    - shade==1.26.0
 pip: pip
 # When the virtualenv_directory is defined, a Python virtual environment is created.
 # virtualenv_directory: virtualenv
