@@ -105,12 +105,16 @@
 - name: Creating the security group rule that allows ssh
   shell: "{{ openstack }} security group rule create --ingress --protocol tcp --dst-port 22 {{ security_group_uuid['stdout'] }} --format value -c id"
 
+# Create the security group rule that allows HTTP (TCP port 80-81).
+- name: Creating the security group rule for http
+  shell: "{{ openstack }} security group rule create --ingress --protocol tcp --dst-port 80:81 {{ security_group_uuid['stdout'] }} --format value -c id"
+
 # Create the security group rule that allows secure HTTP (TCP port 443).
-- name: Creating the security group for secure http
+- name: Creating the security group rule for secure http
   shell: "{{ openstack }} security group rule create --ingress --protocol tcp --dst-port 443 {{ security_group_uuid['stdout'] }} --format value -c id"
 
 # Create the security group rule that allows connections to cluster loader synchronization endpoint (TCP port 9090).
-- name: Creating the security group for secure http
+- name: Creating the security group rule for cluster loader synchronization endpoint
   shell: "{{ openstack }} security group rule create --ingress --protocol tcp --dst-port 9090 {{ security_group_uuid['stdout'] }} --format value -c id"
 
 # Create the floating ip address on the public network.
