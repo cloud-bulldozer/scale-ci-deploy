@@ -1,0 +1,79 @@
+---
+- name: Tasks to create an inventory of servers from openstack commands
+  hosts: openstack-server
+  vars:
+    # The remote directory to store any scale-ci files.
+    install_directory: "{{ ansible_user_dir }}/scale-ci"
+    # The name of the user for the OpenStack servers.
+    openstack_user: "{{ lookup('env', 'OPENSTACK_USER') | default('heat-admin', true) }}"
+    # The path of the new inventory file to create.
+    new_inventory_file: "{{ install_directory }}/openstack_inventory"
+    # The path to the OpenStack rc file that contains authentication.
+    rc_file: "{{ lookup('env', 'OPENSTACK_RC_FILE') | default(ansible_user_dir ~ '/stackrc', true) }}"
+  tasks:
+    # Ensure the remote install directory exists.
+    - name: Creating the {{ install_directory }} directory on {{ inventory_hostname }}
+      file:
+        path: "{{ install_directory }}"
+        state: directory
+        mode: 0700
+
+    # Create a variable that sources the rc file and runs the openstack client.
+    - name: Creating a variable that sources the OpenStack rc file and run the openstack client command
+      set_fact:
+        openstack: ". {{ rc_file }}; openstack"
+
+    # Get the list of server names and networks.
+    - name: Creating a list of the names and networks of the OpenStack servers
+      shell: "{{ openstack }} server list --format value -c Name -c Networks"
+      args:
+        # Use bash to run multiple commands at once.
+        executable: /bin/bash
+      changed_when: false
+      register: names_networks
+
+    # Create a list from the standard output of the command.
+    - name: Creating a reverse list of the standard output
+      set_fact:
+        openstack_servers: "{{ names_networks['stdout_lines'] | reverse | list }}"
+
+    # Create the new inventory file with the group headers.
+    - name: Creating {{ new_inventory_file }} with groups
+      copy:
+        content: "[compute]\n[controller]\n[cephstorage]\n"
+        dest: "{{ new_inventory_file }}"
+
+    # Write the compute addresses to the new inventory file.
+    - name: Write the compute address to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: overcloud-1029pcompute-10 ctlplane=192.168.24.66
+        line: "{{ item.split('=')[1] }} ansible_user={{ openstack_user }}"
+        insertafter: "\\[compute\\]"
+      when: "'compute-' in item"
+      with_items: "{{ openstack_servers }}"
+
+    # Write the controller addresses to the new inventory file.
+    - name: Write the controller address to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: overcloud-controller-0 ctlplane=192.168.24.62
+        line: "{{ item.split('=')[1] }} ansible_user={{ openstack_user }}"
+        insertafter: "\\[controller\\]"
+      when: "'controller-' in item"
+      with_items: "{{ openstack_servers }}"
+
+    # Write the cephstorage addresses to the new inventory file.
+    - name: Write the cephstorage address to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: overcloud-cephstorage-2 ctlplane=192.168.24.63
+        line: "{{ item.split('=')[1] }} ansible_user={{ openstack_user }}"
+        insertafter: "\\[cephstorage\\]"
+      when: "'cephstorage-' in item"
+      with_items: "{{ openstack_servers }}"
+
+    # Print the number of OpenStack addresses were found.
+    - name: Printing how many OpenStack addresses were found
+      debug:
+        msg: "OpenStack servers: {{ openstack_servers | length }}"
