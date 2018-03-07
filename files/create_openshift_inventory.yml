@@ -1,0 +1,111 @@
+---
+- name: Tasks to create an inventory of OpenShift VMs running on OpenStack
+  hosts: openstack-server
+  vars:
+    # The name of users for the VMs that are not part of OpenShift.
+    cloud_user: "{{ lookup('env', 'CLOUD_USER') | default('cloud-user', true) }}"
+    # The remote directory to store any scale-ci files.
+    install_directory: "{{ ansible_user_dir }}/scale-ci"
+    # The path of the new inventory file to create.
+    new_inventory_file: "{{ install_directory }}/openshift_inventory"
+    # The names of users for the VMs in the OpenShift cluster.
+    openshift_user: "{{ lookup('env', 'OPENSHIFT_USER') | default('openshift', true) }}"
+    # The path to the OpenStack rc file that contains authentication.
+    rc_file: "{{ lookup('env', 'OPENSTACK_RC_FILE') | default(ansible_user_dir ~ '/overcloudrc', true) }}"
+  tasks:
+    # Ensure the remote install directory exists.
+    - name: Creating the {{ install_directory }} directory on {{ inventory_hostname }}
+      file:
+        path: "{{ install_directory }}"
+        state: directory
+        mode: 0700
+
+    # Create a variable that sources the rc file and runs the openstack client.
+    - name: Creating a variable that sources the OpenStack rc file and run the openstack client command
+      set_fact:
+        openstack: ". {{ rc_file }}; openstack"
+
+    # Get the list of server names and networks.
+    - name: Creating a list of the names and networks running in OpenStack
+      shell: "{{ openstack }} server list --format value -c Name -c Networks"
+      args:
+        # Use bash to run multiple commands at once.
+        executable: /bin/bash
+      changed_when: false
+      register: names_networks
+
+    # Create a list from the standard output of the command.
+    - name: Creating a reverse list of the standard output
+      set_fact:
+        vms: "{{ names_networks['stdout_lines'] | reverse | list }}"
+
+    # Create the new inventory file with the group headers.
+    - name: Creating {{ new_inventory_file }} with groups
+      copy:
+        content: "[node]\n[master]\n[infra]\n[cns]\n[lb]\n[other]\n"
+        dest: "{{ new_inventory_file }}"
+
+    # Write each OpenShift node to the new inventory file.
+    - name: Appending each OpenShift node to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: app-node-38.scale-ci.example.com openshift-ansible-scale-ci.example.com-net=192.168.96.28, 172.21.0.141
+        line: "{{ item.split(', ')[1] }} ansible_user={{ openshift_user }}"
+        insertafter: "\\[node\\]"
+      when: "'-node-' in item and 'openshift-ansible-' in item"
+      with_items: "{{ vms }}"
+
+    # Write each OpenShift master to the new inventory file.
+    - name: Appending each OpenShift master to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: master-2.scale-ci.example.com openshift-ansible-scale-ci.example.com-net=192.168.96.25, 172.21.0.113
+        line: "{{ item.split(', ')[1] }} ansible_user={{ openshift_user }}"
+        insertafter: "\\[master\\]"
+      when: "'master-' in item and 'openshift-ansible-' in item"
+      with_items: "{{ vms }}"
+
+    # Write each OpenShift infra to the new inventory file.
+    - name: Appending each OpenShift infra to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: infra-node-1.scale-ci.example.com openshift-ansible-scale-ci.example.com-net=192.168.96.23, 172.21.0.134
+        line: "{{ item.split(', ')[1] }} ansible_user={{ openshift_user }}"
+        insertafter: "\\[infra\\]"
+      when: "'infra-' in item and 'openshift-ansible-' in item"
+      with_items: "{{ vms }}"
+
+    # Write each OpenShift lb to the new inventory file.
+    - name: Appending each OpenShift lb to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: lb-0.scale-ci.example.com openshift-ansible-scale-ci.example.com-net=192.168.96.16, 172.21.0.111
+        line: "{{ item.split(', ')[1] }} ansible_user={{ openshift_user }}"
+        insertafter: "\\[lb\\]"
+      when: "'lb-' in item and 'openshift-ansible-' in item"
+      with_items: "{{ vms }}"
+
+    # Write each OpenShift cns to the new inventory file.
+    - name: Appending each OpenShift cns to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: cns-2.scale-ci.example.com openshift-ansible-scale-ci.example.com-net=192.168.96.6, 172.21.0.121
+        line: "{{ item.split(', ')[1] }} ansible_user={{ openshift_user }}"
+        insertafter: "\\[cns\\]"
+      when: "'cns-' in item and 'openshift-ansible-' in item"
+      with_items: "{{ vms }}"
+
+    # Write each cloud address to the new inventory file.
+    - name: Appending the other to {{ new_inventory_file }}
+      lineinfile:
+        path: "{{ new_inventory_file }}"
+        # Example: ns-master.scale-ci.example.com dns-network=192.168.0.9, 172.21.0.112
+        line: "{{ item.split(', ')[1] }} ansible_user={{ cloud_user }}"
+        insertafter: "\\[other\\]"
+      when: "'openshift-ansible-' not in item"
+      with_items: "{{ vms }}"
+
+    # Print the number of virtual machine addresses were found.
+    - name: Printing how many Virtual Machine addresses were found
+      debug:
+        msg: "Total OpenShift VMs: {{ vms | length }}"
