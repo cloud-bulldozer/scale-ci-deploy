@@ -1,71 +1,122 @@
 ---
-# Set the openshift-ansible openstack path.
-- name: Creating the openshift_openstack directory variable
+# Create a variable that sources the rc file and runs the ansible-playbook command.
+- name: Creating a variable that sources the OpenStack rc file and runs the ansible-playbook command
   set_fact:
-    openshift_openstack_dir: "openshift-ansible/playbooks/openstack"
+    ansible_playbook: ". {{ openstack_rc }}; ansible-playbook"
 
-# For each item in the list, search for regular expressions and replace.
-- name: Replacing specific lines in inventory/group_vars/all.yml
+# Create a variable that sources the rc file and runs the OpenStack client command.
+- name: Creating a variable that sources the OpenStack rc file and runs the openstack client command
+  set_fact:
+    openstack: ". {{ openstack_rc }}; openstack"
+
+# Run the dynamic inventory to get the current hosts in JSON format.
+- name: Running the dynamic inventory file to get the current hosts in JSON format
+  shell: ". {{ rc_file }}; python {{ inventory_py }}"
+  register: output
+  changed_when: false
+
+# Parse the JSON from the standard output from the previous command.
+- name: Creating variable from the JSON output of the last command
+  set_fact:
+    dynamic_inventory: "{{ output['stdout'] | from_json }}"
+
+# Get the number of nodes in the group
+  - name: Setting the current node count
+    set_fact:
+      current_node_count: "{{ dynamic_inventory['app']['hosts'] | length }}"
+
+# Exit if the node target is less than how many nodes that are already running.
+- fail:
+    msg: "The OpenShift node target {{ openshift_node_target }} is less than or equal to than the current node count {{ current_node_count }}"
+  when: openshift_node_target | int <= current_node_count | int
+
+# Find the difference between node target and current nodes.
+- name: Calculating the difference
+  set_fact:
+    difference: "{{ openshift_node_target | int - current_node_count | int }}"
+
+# The current node count is the starting node number.
+- name: Setting the start number
+  set_fact:
+    start_node_number: "{{ current_node_count }}"
+
+# The current node count + difference - 1 is the ending node number.
+- name: Setting the end number
+  set_fact:
+    end_node_number: "{{ current_node_count | int + difference | int - 1 }}"
+
+# Create the new nodes inventory file name
+- name: Creating the file name for the new nodes inventory
+  set_fact:
+    new_nodes_inventory: "{{ ansible_user_dir }}/new_nodes_{{ start_node_number }}-{{ end_node_number }}_inventory"
+
+# Search for regular expressions and replace in file.
+- name: Replacing specific lines in {{ all_yml }}
   lineinfile:
-    path: inventory/group_vars/all.yml
+    path: {{ all_yml }}
     regexp: "{{ item['find'] }}"
     line: "{{ item['replace'] }}"
-  with_items: "{{ all_yml }}"
-
-# Set a variable for the ansible-playbook.
-- name: Setting the ansible-playbook variable
-  set_fact:
-    ansible_playbook: "source {{ openstack_rc }}; ansible-playbook"
-
-# Set the openshift-ansible openstack path.
-- name: Creating the openshift_openstack directory variable
-  set_fact:
-    openshift_openstack_dir: "openshift-ansible/playbooks/openstack"
-
-# Set the path to the OpenShift inventory file.
-- name: Creating a variable to the inventory file
-  set_fact:
-    inventory_py: "{{ openshift_openstack_dir }}/inventory.py"
-  
-# Get some debug information that makes it easier to file bugs.
-- name: Running commands that create debug information needed to open issues
-  shell: "{{ item }}"
-  register: debug_information
   with_items:
-    - "printf \"$(uname -srm)\n$(cat /etc/os-release)\n\""
-    - "ansible --version"
-    # - "pip freeze | grep -i jinja"
-    # - "pip freeze | grep -i shade"
-    - "cd openshift-ansible ; git describe"
-    - "rpm -q atomic-openshift-utils openshift-ansible"
-  changed_when: false
-  ignore_errors: true
-
-# Print the debug information out.
-- name: Printing the debug information to the screen
-  debug:
-    msg: "{{ item['stdout_lines'] }}"
-  with_items: "{{ debug_information['results'] }}"
-
-# Set the path for the OpenStack scaleup log file.
-- name: Creating the OpenStack scaleup log file variable
-  set_fact:
-    openstack_scaleup_log: "{{ ansible_user_dir }}/openstack_scaleup.log"
+    - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ openshift_node_target }}" }
 
 # Run the Ansible playbook that creates the OpenStack resources.
 - name: Creating the OpenStack resources
-  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_openstack_dir }}/openshift-cluster/provision.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openstack_scaleup_log }}"
+#  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_cluster_directory }}/provision.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openstack_scaleup_log }}"
+  shell: >
+    {{ ansible_playbook }} -vvv
+    --user openshift
+    -i inventory
+    -i {{ inventory_py }}
+    {{ openshift_cluster_directory }}/provision.yml 2>&1 >> {{ openstack_scaleup_log }}
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
 
-## TODO:
-## Set the path for the OpenShift scaleup log file.
-#- name: Creating the OpenStack scaleup log file variable
-#  set_fact:
-#    openshift_scaleup_log: "{{ ansible_user_dir }}/openshift_scaleup.log"
-#
-## Scaling up existing OpenShift deployment.
-#- name: Scale up the OpenShift resources
-#  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} openshift-ansible/playbooks/openshift-node/scaleup.yml 2>&1 > {{ openshift_scaleup_log }}"
-#  when: 'groups["new_nodes"] | list'
+# Get the new OpenStack VMs by name.
+- name: Getting the new OpenStack VM network information by name
+  shell: "{{ openstack }} server list --name app-node-{{ item }}.scale-ci.example.com --format value -c Networks"
+  with_sequence: "start={{ start_node_number }} end={{ end_node_number }}"
+  register: networks
+
+# Create a list of addresses from the standard output of the last commands.
+- name: Creating a list of addresses from the OpenStack networks output
+  set_fact:
+    addresses: "{{ addresses }} + ['{{ item['stdout'].split(', ')[1] }}' ]"
+  with_items: "{{ networks['results'] }}"
+
+# Write the group name for the new nodes inventory file.
+- name: Writing the group header for the new nodes inventory file
+  copy:
+    content: "[new-nodes]\n"
+    dest: "{{ new_nodes_inventory }}"
+
+# Create the new inventory file
+- name: Adding the addresses to the new nodes inventory file
+  lineinfile:
+    path: "{{ new_nodes_inventory }}"
+    line: "{{ item }} openshift_node_labels=\"{'region': 'primary'}\""
+  with_items: "{{ addresses }}"
+
+# Configure the time servers on all the new nodes.
+- name: Configuring the time servers on all the new nodes
+  shell: >
+    {{ ansible_playbook }} -vvv
+    --user openshift
+    -i {{ new_node_inventory }}
+    configure_time_servers.yml 2>&1 >> {{ ansible_user_dir }}/time_servers.log"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+# Scale up the OpenShift cluster.
+- name: Scaling up the OpenShift resources
+  shell: >
+    {{ ansible_playbook }} -vvv
+    --user openshift
+    -i inventory
+    -i {{ inventory_py }}
+    -i {{ new_nodes_inventory }}
+    openshift-ansible/playbooks/openshift-node/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}"
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash

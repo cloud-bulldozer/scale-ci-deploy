@@ -1,12 +1,12 @@
 ---
-- name: Get virtual machine server in a new OpenStack environment
+- name: Find the target-server and add it to the in-memory inventory
   hosts: openstack-server
   vars_files:
     - vars/openstack.yml
   roles:
     - openstack_get_server
 
-- name: Scale OpenShift on OpenStack
+- name: Create additional OpenStack VMs and add them to OpenShift
   hosts: target-server
   vars_files:
     - vars/openstack.yml

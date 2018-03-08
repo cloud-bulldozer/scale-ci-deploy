@@ -1,8 +1,15 @@
 ---
-# A list of regular expressions to search and replace in openshift-ansible all.yml.
-all_yml:
-#  - { find: "^openshift_openstack_num_masters.*", replace: "openshift_openstack_num_masters: 3" }
-  - { find: "^openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: 5" }
-#  - { find: "^openshift_openstack_num_infra.*", replace: "openshift_openstack_num_infra: 3" }
+# The path to the all.yml file on the target-server.
+all_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/all.yml"
+# The path to the inventory.py file on the target-server.
+inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/inventory.py"
+# The path to the openshift-cluster directory.
+openshift_cluster_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/openshift-cluster"
+# Get the number of nodes to scale to.
+openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default('5', true) }}"
+# The path to the OpenShift scale output file.
+openshift_scaleup_log: "{{ ansible_user_dir }}/openshift_scaleup.log"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
+# The path to store the openstack scale output.
+openstack_scaleup_log: "{{ ansible_user_dir }}/openstack_scaleup.log"
