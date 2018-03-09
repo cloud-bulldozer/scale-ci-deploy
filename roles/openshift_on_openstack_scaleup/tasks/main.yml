@@ -11,7 +11,7 @@
 
 # Run the dynamic inventory to get the current hosts in JSON format.
 - name: Running the dynamic inventory file to get the current hosts in JSON format
-  shell: ". {{ rc_file }}; python {{ inventory_py }}"
+  shell: ". {{ openstack_rc }}; python {{ inventory_py }}"
   register: output
   changed_when: false
 
@@ -21,9 +21,9 @@
     dynamic_inventory: "{{ output['stdout'] | from_json }}"
 
 # Get the number of nodes in the group
-  - name: Setting the current node count
-    set_fact:
-      current_node_count: "{{ dynamic_inventory['app']['hosts'] | length }}"
+- name: Setting the current node count
+  set_fact:
+    current_node_count: "{{ dynamic_inventory['app']['hosts'] | length }}"
 
 # Exit if the node target is less than how many nodes that are already running.
 - fail:
@@ -51,9 +51,9 @@
     new_nodes_inventory: "{{ ansible_user_dir }}/new_nodes_{{ start_node_number }}-{{ end_node_number }}_inventory"
 
 # Search for regular expressions and replace in file.
-- name: Replacing specific lines in {{ all_yml }}
+- name: Replacing specific lines in {{ all_yml_path }}
   lineinfile:
-    path: {{ all_yml }}
+    path: "{{ all_yml_path }}"
     regexp: "{{ item['find'] }}"
     line: "{{ item['replace'] }}"
   with_items:
@@ -78,6 +78,10 @@
   with_sequence: "start={{ start_node_number }} end={{ end_node_number }}"
   register: networks
 
+- name: Create an empty list.
+  set_fact:
+    addresses: []
+
 # Create a list of addresses from the standard output of the last commands.
 - name: Creating a list of addresses from the OpenStack networks output
   set_fact:
@@ -87,7 +91,7 @@
 # Write the group name for the new nodes inventory file.
 - name: Writing the group header for the new nodes inventory file
   copy:
-    content: "[new-nodes]\n"
+    content: "[new_nodes]\n"
     dest: "{{ new_nodes_inventory }}"
 
 # Create the new inventory file
@@ -102,8 +106,8 @@
   shell: >
     {{ ansible_playbook }} -vvv
     --user openshift
-    -i {{ new_node_inventory }}
-    configure_time_servers.yml 2>&1 >> {{ ansible_user_dir }}/time_servers.log"
+    -i {{ new_nodes_inventory }}
+    configure_time_servers.yml 2>&1 >> {{ ansible_user_dir }}/time_servers.log
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
@@ -113,10 +117,11 @@
   shell: >
     {{ ansible_playbook }} -vvv
     --user openshift
-    -i inventory
+    -i inventory/
     -i {{ inventory_py }}
     -i {{ new_nodes_inventory }}
-    openshift-ansible/playbooks/openshift-node/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}"
+    -e @inventory/group_vars/OSEv3.yml
+    openshift-ansible/playbooks/openshift-node/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
