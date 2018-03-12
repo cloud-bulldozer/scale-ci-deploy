@@ -30,4 +30,4 @@ openstack_permissive_secgroup_enable: "{{ lookup('env', 'permissive_secgroup_ena
 # Permissive common security group rules inbound TCP/UDP port range.
 openstack_permissive_secgroup_ports: "{{ lookup('env', 'permissive_secgroup_ports')|default('1024:65535', true) }}"
 # OpenStack security group name to add permissive security group rules to.
-openstack_permissive_secgroup_name: "{{ lookup('env', 'permissive_secgroup_name')|default('openshift-ansible-scale-ci.example.com-common-secgrp', true) }}"
+openstack_permissive_secgroup_name: "{{ lookup('env', 'permissive_secgroup_name')|default('openshift-ansible-' ~ clusterid ~ '.' ~ dns_domain ~ '-common-secgrp', true) }}"

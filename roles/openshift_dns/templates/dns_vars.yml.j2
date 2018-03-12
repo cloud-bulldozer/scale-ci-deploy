@@ -1,6 +1,6 @@
 ---
 ansible_ssh_common_args: ""
-domain_name: "{{ openshift_env_id }}.example.com"
+domain_name: "{{ clusterid }}.{{ dns_domain }}"
 dns_forwarders: [{{ public_dns_nameservers }}]
 external_network: "{{ openstack_public_network_name }}"
 image: "{{ virtual_image_name }}"

@@ -34,8 +34,7 @@
   # Note: The copy module does not support recurisve copy of remote sources.
   command: "cp -a /root/openshift-ansible/ {{ ansible_user_dir }}/openshift-ansible"
   become: true
-  #when: openshift_ansible['stat']['exists']
-  when: false
+  when: openshift_ansible['stat']['exists']
 
 # Change the permissions to be owned by the user.
 - name: Changing the permission of the openshift-ansible files
@@ -45,14 +44,13 @@
     group: "{{ ansible_user }}"
     recurse: yes
   become: true
-  #when: openshift_ansible['stat']['exists']
-  when: false
+  when: openshift_ansible['stat']['exists']
 
 # Print the values that will be used for the openshift-ansible repository.
 - name: Printing the values used to clone openshift-ansible
   debug:
     msg: "openshift-ansible repository: {{ openshift_ansible_repo }} {{ openshift_ansible_version }}"
-  #when: openshift_ansible['stat']['exists'] == false
+  when: openshift_ansible['stat']['exists'] == false
 
 # Get a fresh clone of the openshift-ansible GitHub project.
 - name: Cloning the openshift-ansible repository
@@ -62,17 +60,17 @@
     repo: "{{ openshift_ansible_repo }}"
     # Specify a version for a different branch, tag, or hash to verify PRs.
     version: "{{ openshift_ansible_version }}"
-  #when: openshift_ansible['stat']['exists'] == false
+  when: openshift_ansible['stat']['exists'] == false
 
 # Get the DNS server addresses from OpenStack.
-- name: Getting the IP address for ns-master.{{ openshift_env_id }}.example.com
-  shell: "{{ openstack }} server show ns-master.{{ openshift_env_id }}.example.com --format value -c addresses"
+- name: Getting the IP address for the DNS VM ns-master
+  shell: "{{ openstack }} server show ns-master.{{ clusterid}}.{{ dns_domain }} --format value -c addresses"
   # "ns-master-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
   register: dns_addresses
   changed_when: false
 
 # Parse the IP address from the addresses output.
-- name: Parsing the DNS IP address from the addresses
+- name: Parsing the floating ip from the DNS VM addresses
   set_fact:
     cluster_dns_ip: "{{ dns_addresses['stdout'].split(', ')[1] }}"
   failed_when: cluster_dns_ip == ""
@@ -254,14 +252,14 @@
     # Use bash to get the posix style redirects.
     executable: /bin/bash
 
-# Get the addresses of a master vm.
-- name: Getting the IP address of master-0.{{ openshift_env_id }}.example.com
-  shell: "{{ openstack }} server show master-0.{{ openshift_env_id }}.example.com --format value -c addresses"
+# Get the addresses of a master virtual machine.
+- name: Getting the IP address of master-0 VM
+  shell: "{{ openstack }} server show master-0.{{ clusterid }}.{{ dns_domain }} --format value -c addresses"
   register: master_addresses
   changed_when: false
 
 # Parse the second IP address from the addresses field.
-- name: Parsing the master server IP address from the addresses
+- name: Parsing the floaing ip address from the master addresses
   set_fact:
     # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
     master_address: "{{ address['stdout'].split(', ')[1] }}"
