@@ -18,6 +18,13 @@
   roles:
     - openshift_dependencies
 
+- name: OpenShift on OpenStack permissive security groups
+  hosts: openstack-server
+  vars_files:
+    - vars/openstack.yml
+  roles:
+    - openshift_on_openstack_secgroup
+
 - name: Install OpenShift on OpenStack
   hosts: target-server
   vars_files:
@@ -26,10 +33,3 @@
   roles:
     - openshift_dns
     - openshift_on_openstack
-
-- name: OpenShift on OpenStack permissive security groups
-  hosts: openstack-server
-  vars_files:
-    - vars/openstack.yml
-  roles:
-    - openshift_on_openstack_secgroup
