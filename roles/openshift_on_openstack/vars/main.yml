@@ -37,6 +37,7 @@ osev3_yml:
   - { find: "^#?oreg_url:.*", replace: "oreg_url: \"{{ registries[0] }}/openshift3/ose-${component}:${version}\"" }
   - { find: "^#?openshift_docker_additional_registries:.*", replace: "openshift_docker_additional_registries: {{ registries|to_json }}" }
   - { find: "^#?openshift_docker_insecure_registries:.*", replace: "openshift_docker_insecure_registries: {{ registries|to_json }}" }
+  - { find: "^#?openshift_cockpit_deployer_prefix:.*", replace: "openshift_cockpit_deployer_prefix: \"{{ registries[0] }}/openshift3/\"" }
   - { find: "^#?openshift_service_catalog_image_prefix:.*", replace: "openshift_service_catalog_image_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
   - { find: "^#?openshift_web_console_prefix:.*", replace: "openshift_web_console_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
   - { find: "^#?cli_docker_additional_registries:.*", replace: "cli_docker_additional_registries: {{ registries|to_json }}" }
@@ -49,6 +50,11 @@ osev3_yml:
   - { find: "^#?openshift_prometheus_alertmanager_image_version:.*", replace: "openshift_prometheus_alertmanager_image_version: \"v{{ ocp_major_minor }}\"" }
   - { find: "^#?openshift_prometheus_alertbuffer_image_prefix:.*", replace: "openshift_prometheus_alertbuffer_image_prefix: \"{{ registries[0] }}/openshift3/\"" }
   - { find: "^#?openshift_prometheus_alertbuffer_image_version:.*", replace: "openshift_prometheus_alertbuffer_image_version: \"v{{ ocp_major_minor }}\"" }
+  - { find: "^#?ansible_service_broker_image_prefix:.*", replace: "ansible_service_broker_image_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
+  - { find: "^#?ansible_service_broker_image_tag:.*", replace: "ansible_service_broker_image_tag: \"v{{ ocp_major_minor }}\"" }
+  - { find: "^#?template_service_broker_prefix:.*", replace: "template_service_broker_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
+  - { find: "^#?template_service_broker_version:.*", replace: "template_service_broker_version: \"v{{ ocp_major_minor }}\"" }
+
 # Break up the space separate string into a list of image registries for the OSEv3.yml variables.
 registries: "{{ openshift_registries.split(' ') }}"
 # Look up the environment variable with a space separated string of time servers.
