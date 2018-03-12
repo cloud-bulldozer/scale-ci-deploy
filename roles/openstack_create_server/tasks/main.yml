@@ -229,6 +229,15 @@
     # Adding the DNS nameserver list that was pulled from an OpenStack subnet command.
     public_dns_nameservers: "{{ dns_nameservers['stdout'] }}"
 
+# Add the floating ip address to the /etc/hosts file.
+- name: Adding the floating ip address to the hosts file
+  lineinfile:
+    backup: yes
+    dest: /etc/hosts
+    regexp: ".*{{ openstack_server_name }}$"
+    line: "{{ floating_ip_address }} {{ openstack_server_name }}"
+  become: true
+
 # Write out the proxy host information to a properties file for the next job.
 - name: Writing the proxy host information to the properties file
   copy:
