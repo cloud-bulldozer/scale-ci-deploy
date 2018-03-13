@@ -20,7 +20,7 @@
   set_fact:
     dynamic_inventory: "{{ output['stdout'] | from_json }}"
 
-# Get the number of nodes in the group
+# Get the number of nodes in the app.hosts group.
 - name: Setting the current node count
   set_fact:
     current_node_count: "{{ dynamic_inventory['app']['hosts'] | length }}"
@@ -59,6 +59,16 @@
   with_items:
     - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ openshift_node_target }}" }
 
+# Make sure that openshift_release does not have a 'v' in the value due to an inconsistent usage in openshift-ansible.
+# https://github.com/openshift/openshift-ansible/issues/6471
+- name: Replacing specific lines in {{ osev3_yml_path }}
+  lineinfile:
+    path: "{{ osev3_yml_path }}"
+    regexp: "{{ item['find'] }}"
+    line: "{{ item['replace'] }}"
+  with_items:
+    - { find: "^#?openshift_release.*", replace: "openshift_release: \"{{ ocp_major_minor }}\"" }
+
 # Run the Ansible playbook that creates the OpenStack resources.
 - name: Creating the OpenStack resources
 #  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_cluster_directory }}/provision.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openstack_scaleup_log }}"
@@ -74,7 +84,7 @@
 
 # Get the new OpenStack VMs by name.
 - name: Getting the new OpenStack VM network information by name
-  shell: "{{ openstack }} server list --name app-node-{{ item }}.scale-ci.example.com --format value -c Networks"
+  shell: "{{ openstack }} server list --name app-node-{{ item }}.{{ clusterid }}.{{ dns_domain }} --format value -c Networks"
   with_sequence: "start={{ start_node_number }} end={{ end_node_number }}"
   register: networks
 
@@ -120,8 +130,8 @@
     -i inventory/
     -i {{ inventory_py }}
     -i {{ new_nodes_inventory }}
-    -e @inventory/group_vars/OSEv3.yml
-    openshift-ansible/playbooks/openshift-node/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}
+    -e @{{ osev3_yml_path }}
+    {{ openshift_node_directory }}/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
