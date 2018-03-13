@@ -15,5 +15,3 @@ openshift_scaleup_log: "{{ ansible_user_dir }}/openshift_scaleup.log"
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
 # The path to store the OpenStack scale output.
 openstack_scaleup_log: "{{ ansible_user_dir }}/openstack_scaleup.log"
-# The path to the OSEv3.yml file on the target server.
-osev3_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/OSEv3.yml"
