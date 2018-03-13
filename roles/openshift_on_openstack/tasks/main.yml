@@ -62,6 +62,11 @@
     version: "{{ openshift_ansible_version }}"
   when: openshift_ansible['stat']['exists'] == false
 
+# Include the tasks from the openshift_ansible_patch role.
+- name: Include the tasks to patch files in the openshift-ansible directory
+  include_role:
+    name: openshift_ansible_patch
+
 # Get the DNS server addresses from OpenStack.
 - name: Getting the IP address for the DNS VM ns-master
   shell: "{{ openstack }} server show ns-master.{{ clusterid}}.{{ dns_domain }} --format value -c addresses"
