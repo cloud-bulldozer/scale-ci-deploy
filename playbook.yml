@@ -25,7 +25,6 @@
     - vars/openshift.yml
   roles:
     - openshift_dns
-    - openshift_ansible_patch
     - openshift_on_openstack
 
 - name: OpenShift on OpenStack permissive security groups
