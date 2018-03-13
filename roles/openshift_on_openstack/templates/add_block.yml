@@ -12,17 +12,9 @@ openshift_clock_enabled: true
 use_cluster_metrics: true
 
 # Allow authentication using an Apache HTTP server authentication file.
-openshift_master_identity_providers:
-- name: 'htpasswd_auth'
-  login: 'true'
-  challenge: 'true'
-  kind: 'HTPasswdPasswordIdentityProvider'
-  filename: '/etc/origin/master/htpasswd'
+openshift_master_identity_providers: [{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 # Defining htpasswd users
-openshift_master_htpasswd_users:
-  - admin: 'admin'
-  - developer: 'developer'
-  - test: 'test'
+openshift_master_htpasswd_users: {'admin': 'admin', 'test': 'test'}
 
 # Configure how often node iptables rules are refreshed.
 openshift_node_iptables_sync_period: 30s
@@ -32,7 +24,6 @@ openshift_storage_glusterfs_wipe: true
 openshift_storage_glusterfs_namespace: glusterfs
 openshift_storage_glusterfs_is_native: true
 openshift_storage_glusterfs_storageclass_default: true
-
 openshift_storage_glusterfs_block_storageclass: true
 openshift_storage_glusterfs_block_version: "3.3.0-362"
 openshift_storage_glusterfs_version: "3.3.1-3"
@@ -40,24 +31,22 @@ openshift_storage_glusterfs_heketi_version: "3.3.0-364"
 openshift_storage_glusterfs_s3_version: "3.3.0-362"
 openshift_storage_glusterfs_heketi_version: "3.3.0-364"
 
-
 # Prometheus variables.
-
-openshift_prometheus_node_exporter_install: true
-openshift_prometheus_storage_class: "glusterfs-storage-block"
-openshift_prometheus_alertmanager_storage_class: "glusterfs-storage-block"
-openshift_prometheus_alertbuffer_storage_class: "glusterfs-storage-block"
-
 openshift_hosted_prometheus_deploy: true
-openshift_prometheus_state: present
-openshift_prometheus_storage_type: pvc
-openshift_prometheus_storage_volume_size: 40Gi
-openshift_prometheus_alertmanager_storage_type: pvc
-openshift_prometheus_alertmanager_storage_volume_size: 40Gi
+openshift_prometheus_alertbuffer_storage_class: "glusterfs-storage-block"
 openshift_prometheus_alertbuffer_storage_type: pvc
 openshift_prometheus_alertbuffer_storage_volume_size: 40Gi
+openshift_prometheus_alertmanager_storage_class: "glusterfs-storage-block"
+openshift_prometheus_alertmanager_storage_type: pvc
+openshift_prometheus_alertmanager_storage_volume_size: 40Gi
+openshift_prometheus_node_exporter_install: true
+openshift_prometheus_state: present
+openshift_prometheus_storage_class: "glusterfs-storage-block"
+openshift_prometheus_storage_type: pvc
+openshift_prometheus_storage_volume_size: 40Gi
 
-
+# Disable cockpit.
+osm_use_cockpit: false
 
 # Configure kubeletArguments on the nodes, such as maximum pods per node.
 openshift_node_kubelet_args: { 'pods-per-core': ['0'], 'max-pods':['510'] }

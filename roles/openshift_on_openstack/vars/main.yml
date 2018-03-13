@@ -1,28 +1,29 @@
 ---
 # A list of regular expressions to find and replace lines in inventory/group_vars/all.yml.
 all_yml:
-  - { find: "^openshift_openstack_clusterid.*", replace: "openshift_openstack_clusterid: \"{{ openshift_env_id }}\"" }
-  - { find: "^openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ cluster_dns_ip }}]" }
-  - { find: "^openshift_openstack_keypair_name.*", replace: "openshift_openstack_keypair_name: \"{{ openstack_keypair_name }}\"" }
-  - { find: "^openshift_openstack_external_network_name.*", replace: "openshift_openstack_external_network_name: \"{{ openstack_public_network_name }}\"" }
-  - { find: "^openshift_openstack_default_image_name.*", replace: "openshift_openstack_default_image_name: \"{{ virtual_image_name }}\"" }
-  - { find: "^openshift_openstack_num_masters.*", replace: "openshift_openstack_num_masters: 3" }
-  - { find: "^openshift_openstack_num_infra.*", replace: "openshift_openstack_num_infra: 3" }
-  - { find: "^openshift_openstack_num_cns.*", replace: "openshift_openstack_num_cns: 3" }
-  - { find: "^#openshift_openstack_master_flavor:.*", replace: "openshift_openstack_master_flavor: \"master_etcd\"" }
-  - { find: "^#openshift_openstack_infra_flavor:.*", replace: "openshift_openstack_infra_flavor: \"infra_elastic\"" }
-  - { find: "^#openshift_openstack_cns_flavor:.*", replace: "openshift_openstack_cns_flavor: \"container_storage\"" }
-  - { find: "^#openshift_openstack_node_flavor.*", replace: "openshift_openstack_node_flavor: \"node_large\"" }
-  - { find: "^#openshift_openstack_lb_flavor:.*", replace: "openshift_openstack_lb_flavor: \"load_balancer\"" }
-  - { find: "^openshift_openstack_default_flavor:.*", replace: "openshift_openstack_default_flavor: \"m1.medium\"" }
-  - { find: "^openshift_openstack_subnet_cidr:.*", replace: "openshift_openstack_subnet_cidr: \"192.168.96.0/20\""}
-  - { find: "^openshift_openstack_pool_start:.*", replace: "openshift_openstack_pool_start: \"192.168.96.3\""}
-  - { find: "^openshift_openstack_pool_end:.*", replace: "openshift_openstack_pool_end: \"192.168.111.254\""}
+  - { find: "^#?openshift_openstack_clusterid.*", replace: "openshift_openstack_clusterid: \"{{ clusterid }}\"" }
+  - { find: "^#?openshift_openstack_public_dns_domain.*", replace: "openshift_openstack_public_dns_domain: \"{{ dns_domain }}\"" }
+  - { find: "^#?openshift_openstack_dns_nameservers:.*", replace: "openshift_openstack_dns_nameservers: [{{ cluster_dns_ip }}]" }
+  - { find: "^#?openshift_openstack_keypair_name.*", replace: "openshift_openstack_keypair_name: \"{{ openstack_keypair_name }}\"" }
+  - { find: "^#?openshift_openstack_external_network_name.*", replace: "openshift_openstack_external_network_name: \"{{ openstack_public_network_name }}\"" }
+  - { find: "^#?openshift_openstack_default_image_name.*", replace: "openshift_openstack_default_image_name: \"{{ virtual_image_name }}\"" }
+  - { find: "^#?openshift_openstack_num_masters.*", replace: "openshift_openstack_num_masters: 3" }
+  - { find: "^#?openshift_openstack_num_infra.*", replace: "openshift_openstack_num_infra: 3" }
+  - { find: "^#?openshift_openstack_num_cns.*", replace: "openshift_openstack_num_cns: 3" }
+  - { find: "^#?openshift_openstack_master_flavor:.*", replace: "openshift_openstack_master_flavor: \"master_etcd\"" }
+  - { find: "^#?openshift_openstack_infra_flavor:.*", replace: "openshift_openstack_infra_flavor: \"infra_elastic\"" }
+  - { find: "^#?openshift_openstack_cns_flavor:.*", replace: "openshift_openstack_cns_flavor: \"container_storage\"" }
+  - { find: "^#?openshift_openstack_node_flavor.*", replace: "openshift_openstack_node_flavor: \"node_large\"" }
+  - { find: "^#?openshift_openstack_lb_flavor:.*", replace: "openshift_openstack_lb_flavor: \"load_balancer\"" }
+  - { find: "^#?openshift_openstack_default_flavor:.*", replace: "openshift_openstack_default_flavor: \"m1.medium\"" }
+  - { find: "^#?openshift_openstack_subnet_cidr:.*", replace: "openshift_openstack_subnet_cidr: \"192.168.96.0/20\""}
+  - { find: "^#?openshift_openstack_pool_start:.*", replace: "openshift_openstack_pool_start: \"192.168.96.3\""}
+  - { find: "^#?openshift_openstack_pool_end:.*", replace: "openshift_openstack_pool_end: \"192.168.111.254\""}
   - { find: "^# openshift_openstack_ephemeral_volumes.*", replace: "openshift_openstack_ephemeral_volumes: true" }
   - { find: "^# openshift_openstack_public_hostname_suffix.*", replace: "openshift_openstack_public_hostname_suffix: '-public'" }
   - { find: "server: private_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
   - { find: "server: public_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
-  - { find: "^openshift_openstack_disable_root:.*", replace: "openshift_openstack_disable_root: false" }
+  - { find: "^#?openshift_openstack_disable_root:.*", replace: "openshift_openstack_disable_root: false" }
 # The path to the file that contains the name server update information.
 nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
 # Look up the environment variable with a space separated string of image registry servers to add to the container configuration.
@@ -37,6 +38,7 @@ osev3_yml:
   - { find: "^#?oreg_url:.*", replace: "oreg_url: \"{{ registries[0] }}/openshift3/ose-${component}:${version}\"" }
   - { find: "^#?openshift_docker_additional_registries:.*", replace: "openshift_docker_additional_registries: {{ registries|to_json }}" }
   - { find: "^#?openshift_docker_insecure_registries:.*", replace: "openshift_docker_insecure_registries: {{ registries|to_json }}" }
+  - { find: "^#?openshift_cockpit_deployer_prefix:.*", replace: "openshift_cockpit_deployer_prefix: \"{{ registries[0] }}/openshift3/\"" }
   - { find: "^#?openshift_service_catalog_image_prefix:.*", replace: "openshift_service_catalog_image_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
   - { find: "^#?openshift_web_console_prefix:.*", replace: "openshift_web_console_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
   - { find: "^#?cli_docker_additional_registries:.*", replace: "cli_docker_additional_registries: {{ registries|to_json }}" }
@@ -49,9 +51,10 @@ osev3_yml:
   - { find: "^#?openshift_prometheus_alertmanager_image_version:.*", replace: "openshift_prometheus_alertmanager_image_version: \"v{{ ocp_major_minor }}\"" }
   - { find: "^#?openshift_prometheus_alertbuffer_image_prefix:.*", replace: "openshift_prometheus_alertbuffer_image_prefix: \"{{ registries[0] }}/openshift3/\"" }
   - { find: "^#?openshift_prometheus_alertbuffer_image_version:.*", replace: "openshift_prometheus_alertbuffer_image_version: \"v{{ ocp_major_minor }}\"" }
+  - { find: "^#?ansible_service_broker_image_prefix:.*", replace: "ansible_service_broker_image_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
+  - { find: "^#?ansible_service_broker_image_tag:.*", replace: "ansible_service_broker_image_tag: \"v{{ ocp_major_minor }}\"" }
+  - { find: "^#?template_service_broker_prefix:.*", replace: "template_service_broker_prefix: \"{{ registries[0] }}/openshift3/ose-\"" }
+  - { find: "^#?template_service_broker_version:.*", replace: "template_service_broker_version: \"v{{ ocp_major_minor }}\"" }
+
 # Break up the space separate string into a list of image registries for the OSEv3.yml variables.
 registries: "{{ openshift_registries.split(' ') }}"
-# Look up the environment variable with a space separated string of time servers.
-time_servers: "{{ lookup('env', 'time_servers')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true) }}"
-# Break up the space separated string into a list of time servers.
-time_servers_list: "{{ time_servers.split(' ') }}"
