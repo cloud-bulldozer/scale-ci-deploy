@@ -27,9 +27,3 @@
   shell: "{{ openstack }} security group rule create --ingress --protocol udp --dst-port {{ permissive_secgroup_ports }} {{ permissive_secgroup_name }}"
   failed_when: False
   when: permissive_secgroup_enable
-
-# Create the security group rule that allows RPC bind for CNS block.
-- name: Create the security group rule that allows RPC bind for CNS block.
-  shell: "{{ openstack }} security group rule create --ingress --protocol tcp --dst-port 111 {{ cns_secgroup_name }}"
-  failed_when: False
-  when: permissive_secgroup_enable
