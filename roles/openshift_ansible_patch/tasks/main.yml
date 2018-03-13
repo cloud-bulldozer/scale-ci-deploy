@@ -1,0 +1,8 @@
+---
+- name: Apply patches to openshift-ansible
+  patch:
+    src: "{{ item }}"
+    basedir: openshift-ansible
+    strip: 1
+  with_fileglob:
+    - "*.patch"
