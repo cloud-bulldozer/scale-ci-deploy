@@ -59,16 +59,6 @@
   with_items:
     - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ openshift_node_target }}" }
 
-# Make sure that openshift_release does not have a 'v' in the value due to an inconsistent usage in openshift-ansible.
-# https://github.com/openshift/openshift-ansible/issues/6471
-- name: Replacing specific lines in {{ osev3_yml_path }}
-  lineinfile:
-    path: "{{ osev3_yml_path }}"
-    regexp: "{{ item['find'] }}"
-    line: "{{ item['replace'] }}"
-  with_items:
-    - { find: "^#?openshift_release.*", replace: "openshift_release: \"{{ ocp_major_minor }}\"" }
-
 # Run the Ansible playbook that creates the OpenStack resources.
 - name: Creating the OpenStack resources
 #  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_cluster_directory }}/provision.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openstack_scaleup_log }}"
@@ -130,7 +120,6 @@
     -i inventory/
     -i {{ inventory_py }}
     -i {{ new_nodes_inventory }}
-    -e @{{ osev3_yml_path }}
     {{ openshift_node_directory }}/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}
   args:
     # Use bash to get the posix style redirects.
