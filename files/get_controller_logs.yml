@@ -4,7 +4,7 @@
   become: true
   vars:
     # The directory to copy the log archives to.
-    local_destination_directory: "{{ ansible_env['PWD'] }}"
+    local_destination_directory: "{{ lookup('env', 'PWD')|default('.', true) }}"
     # The OpenStack controller services to capture the logs.
     openstack_controller_services:
       - heat
@@ -22,10 +22,10 @@
     - name: Copying the archives to this ansible host server
       fetch:
         src: "{{ remote_destination_directory }}/{{ item }}_logs.tgz"
-        dest: "{{ local_destination_directory }}"
+        dest: "{{ local_destination_directory }}/"
       with_items: "{{ openstack_controller_services }}"
 
-    - name: Deleting the log files from the controller servers
+    - name: Deleting the archive files from the controller servers
       file:
         path: "{{ remote_destination_directory }}/{{ item }}_logs.tgz"
         state: absent
