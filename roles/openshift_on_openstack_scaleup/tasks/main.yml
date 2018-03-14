@@ -91,7 +91,7 @@
 # Write the group name for the new nodes inventory file.
 - name: Writing the group header for the new nodes inventory file
   copy:
-    content: "[new_nodes]\n"
+    content: "[OSEv3:children]\nnew_nodes\n[new_nodes]\n"
     dest: "{{ new_nodes_inventory }}"
 
 # Create the new inventory file
