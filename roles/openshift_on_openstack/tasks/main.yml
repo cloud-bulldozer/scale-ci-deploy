@@ -267,7 +267,7 @@
 - name: Parsing the floaing ip address from the master addresses
   set_fact:
     # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
-    master_address: "{{ address['stdout'].split(', ')[1] }}"
+    master_address: "{{ master_addresses['stdout'].split(', ')[1] }}"
   failed_when: master_address == ""
 
 # Create the Kubernetes configuration directory on the target host.
