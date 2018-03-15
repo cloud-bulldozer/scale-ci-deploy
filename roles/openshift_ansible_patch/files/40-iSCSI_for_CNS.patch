@@ -1,0 +1,14 @@
+--- openshift-ansible.orig/roles/openshift_openstack/templates/heat_stack.yaml.j2
++++ openshift-ansible/roles/openshift_openstack/templates/heat_stack.yaml.j2
+@@ -435,6 +435,11 @@
+           protocol: tcp
+           port_range_min: 2222
+           port_range_max: 2222
++        # CNS block requires access to iSCSI 3260
++        - direction: ingress
++          protocol: tcp
++          port_range_min: 3260
++          port_range_max: 3260
+         # heketi dialing backends
+         - direction: ingress
+           protocol: tcp
