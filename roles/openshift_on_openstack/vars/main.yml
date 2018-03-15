@@ -13,7 +13,7 @@ all_yml:
   - { find: "^#?openshift_openstack_master_flavor:.*", replace: "openshift_openstack_master_flavor: \"master_etcd\"" }
   - { find: "^#?openshift_openstack_infra_flavor:.*", replace: "openshift_openstack_infra_flavor: \"infra_elastic\"" }
   - { find: "^#?openshift_openstack_cns_flavor:.*", replace: "openshift_openstack_cns_flavor: \"container_storage\"" }
-  - { find: "^#?openshift_openstack_node_flavor.*", replace: "openshift_openstack_node_flavor: \"node_large\"" }
+  - { find: "^#?openshift_openstack_node_flavor.*", replace: "openshift_openstack_node_flavor: \"node_medium\"" }
   - { find: "^#?openshift_openstack_lb_flavor:.*", replace: "openshift_openstack_lb_flavor: \"load_balancer\"" }
   - { find: "^#?openshift_openstack_default_flavor:.*", replace: "openshift_openstack_default_flavor: \"m1.medium\"" }
   - { find: "^#?openshift_openstack_subnet_cidr:.*", replace: "openshift_openstack_subnet_cidr: \"192.168.96.0/20\""}
