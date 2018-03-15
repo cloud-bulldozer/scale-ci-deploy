@@ -26,7 +26,7 @@ openshift_flavors:
   - { name: master_etcd, vcpu: 16, memory: 124928, disk: 256, property: '--property "pci_passthrough:alias"="nvme:1"' }
   - { name: node_small, vcpu: 1, memory: 2048, disk: 71 }
   - { name: node_medium, vcpu: 4, memory: 16384, disk: 96 }
-  - { name: node_large, vcpu: 8, memory: 32768, disk: 128 }
+  - { name: node_large, vcpu: 8, memory: 31744, disk: 128 }
 # The path to the OpenStack RC file on the openstack-server, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
 # The path to the private key, put it the install directory for easy cleanup.
@@ -35,14 +35,14 @@ remote_private_key_path: "{{ lookup('env', 'remote_private_key_path')|default(in
 remote_public_key_path: "{{ lookup('env', 'remote_public_key_path')|default(install_directory ~ '/key.public', true) }}"
 # The quota structure to set for this OpenStack installation.
 quotas:
-  cores: 2432
-  gigabytes: 50000
-  instances: 550
+  cores: 2432         # Number of instance cores (VCPUs) allowed per project.
+  gigabytes: 100000   # Volume gigabytes allowed for each project.
+  instances: 2001     # Number of instances (VMs) allowed per project.
   ports: 10000
-  ram: 9961472
+  ram: 9961472        # Megabytes of instance ram allowed per project.
   secgroups: 25
-  volumes: 50000
-  floating-ips: 512
+  volumes: 50000      # Volumes allowed for each project.
+  floating-ips: 2046  # Number of floating IP addresses allowed per project.
 # Rough equivalents of the Google cloud instance sizes.
 standard_flavors:
   # https://cloud.google.com/compute/docs/machine-types
