@@ -1,0 +1,23 @@
+--- openshift-ansible.orig/playbooks/openstack/inventory.py	2018-03-15 16:09:05.963878499 +0100
++++ openshift-ansible/playbooks/openstack/inventory.py	2018-03-15 16:11:56.902622891 +0100
+@@ -11,6 +11,7 @@
+ 
+ from collections import Mapping
+ import json
++import os
+ 
+ import shade
+ 
+@@ -38,7 +39,11 @@
+     cns = [server.name for server in cluster_hosts
+            if server.metadata['host-type'] == 'cns']
+ 
+-    nodes = list(set(masters + infra_hosts + app + cns))
++    no_app_nodes = os.environ.get('INV_NO_APP_NODES', 'false').lower() == "true"
++    if no_app_nodes:
++        nodes = list(set(masters + infra_hosts + cns))
++    else:
++        nodes = list(set(masters + infra_hosts + app + cns))
+ 
+     dns = [server.name for server in cluster_hosts
+            if server.metadata['host-type'] == 'dns']
