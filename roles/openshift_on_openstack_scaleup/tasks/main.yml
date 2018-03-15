@@ -4,6 +4,11 @@
   set_fact:
     ansible_playbook: ". {{ openstack_rc }}; ansible-playbook"
 
+# Create a variable that sources the rc file, sets INV_NO_APP_NODES=true and runs the ansible-playbook command.
+- name: Creating a variable that sources the OpenStack rc file, sets INV_NO_APP_NODES=true and runs the ansible-playbook command
+  set_fact:
+    ansible_playbook_scaleup: ". {{ openstack_rc }}; INV_NO_APP_NODES=true ansible-playbook"
+
 # Create a variable that sources the rc file and runs the OpenStack client command.
 - name: Creating a variable that sources the OpenStack rc file and runs the openstack client command
   set_fact:
@@ -115,7 +120,7 @@
 # Scale up the OpenShift cluster.
 - name: Scaling up the OpenShift resources
   shell: >
-    {{ ansible_playbook }} -vvv
+    {{ ansible_playbook_scaleup }} -vvv
     --user openshift
     -i inventory/
     -i {{ inventory_py }}
