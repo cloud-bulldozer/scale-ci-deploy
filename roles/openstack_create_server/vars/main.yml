@@ -37,7 +37,7 @@ remote_public_key_path: "{{ lookup('env', 'remote_public_key_path')|default(inst
 quotas:
   cores: 2432         # Number of instance cores (VCPUs) allowed per project.
   gigabytes: 100000   # Volume gigabytes allowed for each project.
-  instances: 2001     # Number of instances (VMs) allowed per project.
+  instances: 2046     # Number of instances (VMs) allowed per project.
   ports: 10000
   ram: 9961472        # Megabytes of instance ram allowed per project.
   secgroups: 25
