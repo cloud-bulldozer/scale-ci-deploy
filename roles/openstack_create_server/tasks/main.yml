@@ -165,8 +165,22 @@
   # Only set quotas when the project is defined.
   when: openstack_project != ""
 
+# Find the qcow2 images to convert.
+- name: Searching for qcow2 image files in {{ install_directory }}
+  find:
+    paths: "{{ install_directory }}"
+    patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+[.]qcow2$"
+    use_regex: yes
+    recurse: true
+  register: qcow2_images
+
+# Convert qcow2 images to raw format.
+- name: Converting qcow2 images to raw format
+  shell: "qemu-img convert -f qcow2 -O raw {{ item['path'] }} {{ (item['path']|splitext)[0] }}.raw"
+  with_items: "{{ qcow2_images['files'] }}"
+
 # Find the images to upload.
-- name: Searching for the ocp-{{ ocp_major_minor }} files in {{ install_directory }}
+- name: Searching for raw image files in {{ install_directory }}
   find:
     paths: "{{ install_directory }}"
     patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
