@@ -169,7 +169,7 @@
 - name: Searching for the ocp-{{ ocp_major_minor }} files in {{ install_directory }}
   find:
     paths: "{{ install_directory }}"
-    patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+qcow2"
+    patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
     use_regex: yes
     recurse: true
   register: images
@@ -183,7 +183,7 @@
 
 # Upload the images to Glance.
 - name: Uploading the images to OpenStack
-  shell: "{{ openstack }} image create --disk-format qcow2 --container-format bare --file {{ item['path'] }} ocp-{{ ocp_major_minor }}-{{ ('atomic' in item['path'])|ternary('atomic','rhel') }} --format value -c id"
+  shell: "{{ openstack }} image create --disk-format raw --container-format bare --file {{ item['path'] }} ocp-{{ ocp_major_minor }}-{{ ('atomic' in item['path'])|ternary('atomic','rhel') }} --format value -c id"
   with_items: "{{ images['files'] }}"
   register: create_result
   # Wait for a successful return code.
