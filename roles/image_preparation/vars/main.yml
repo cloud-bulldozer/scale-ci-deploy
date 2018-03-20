@@ -6,9 +6,9 @@ image_directory: image_builder/qcow_images
 # Copy the images to this remote host.
 remote_host: "{{ groups['openstack-server'][0] }}"
 # The remote host user.
-remote_user: "{{ hostvars[remote_host] }}"
+user_remote: "{{ hostvars[remote_host] }}"
 # Copy the images to this directory on the remote host.
-remote_image_directory: "/home/{{ remote_user }}/{{ clusterid }}"
+remote_image_directory: "/home/{{ user_remote }}/{{ clusterid }}"
 # A string path relative to the user's home directory to the rhel image.
 rhel_image: "{{ lookup('env', 'rhel_image') }}"
 # The root directory of the Apache httpd server.
