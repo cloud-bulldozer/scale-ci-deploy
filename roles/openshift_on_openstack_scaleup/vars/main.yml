@@ -10,8 +10,8 @@ openshift_node_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/op
 # Get the number of OpenShift nodes to scale to.
 openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default('5', true) }}"
 # The path to the OpenShift scale output file.
-openshift_scaleup_log: "{{ ansible_user_dir }}/openshift_scaleup.log"
+openshift_scaleup_log: "{{ ansible_user_dir }}/openshift_scaleup-{{ openshift_node_target }}.log"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
 # The path to store the OpenStack scale output.
-openstack_scaleup_log: "{{ ansible_user_dir }}/openstack_scaleup.log"
+openstack_scaleup_log: "{{ ansible_user_dir }}/openstack_scaleup-{{ openshift_node_target }}.log"
