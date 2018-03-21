@@ -79,12 +79,30 @@
     dest: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
     mode: 0644
 
-# Increase the sshd MaxSessions.
-- name: Increasing the sshd maximum sessions
+# Add the public key to the root user's authorized_keys file.
+- name: Copying the public key to the root user's authorized_keys
+  copy:
+    src: "{{ ansible_public_key_file }}"
+    dest: /root/.ssh/authorized_keys
+    mode: 0600
+  become: true
+
+# Change the sshd configuration.
+- name: Change the sshd configuration
   lineinfile:
     path: /etc/ssh/sshd_config
-    regexp: "^#MaxSessions"
-    line: "MaxSessions 100"
+    regexp: "{{ item['search'] }}"
+    line: "{{ item['replace'] }}"
+  with_items:
+    - { search: "^#?MaxSessions.*", replace: "MaxSessions 100" }
+    - { search: "^#?PermitRootLogin.*", replace: "PermitRootLogin yes"}
+  become: true
+
+# Restart the sshd service to enable the changes.
+- name: Restarting the sshd service
+  service:
+    name: sshd
+    state: restarted
   become: true
 
 # Copy the OpenStack rc file from the Ansible host to the target host.
