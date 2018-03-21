@@ -281,9 +281,9 @@
   command: "scp openshift@{{ master_address }}:.kube/config {{ ansible_user_dir }}/.kube/config"
 
 # Add the master host address to the properties file.
-- name: Adding the MASTER_HOST to the properties file
+- name: Adding the MASTER_HOSTNAME to the properties file
   lineinfile:
-    line: "MASTER_HOST={{ master_address }}"
+    line: "MASTER_HOSTNAME={{ master_address }}"
     path: "{{ properties_file }}"
   delegate_to: localhost
 
