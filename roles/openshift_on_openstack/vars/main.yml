@@ -34,6 +34,7 @@ openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ 
 osev3_yml:
   - { find: "^#?openshift_deployment_type: origin", replace: "#openshift_deployment_type: origin" }
   - { find: "^#?openshift_deployment_type: openshift-enterprise", replace: "openshift_deployment_type: openshift-enterprise" }
+  - { find: "^#?osm_cluster_network_cidr:.*", replace: "osm_cluster_network_cidr: 10.128.0.0/10" }
   - { find: "^#?openshift_release:.*", replace: "openshift_release: \"v{{ ocp_major_minor }}\"" }
   - { find: "^#?oreg_url:.*", replace: "oreg_url: \"{{ registries[0] }}/openshift3/ose-${component}:${version}\"" }
   - { find: "^#?openshift_docker_additional_registries:.*", replace: "openshift_docker_additional_registries: {{ registries|to_json }}" }
