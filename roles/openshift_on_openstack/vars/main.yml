@@ -19,6 +19,7 @@ all_yml:
   - { find: "^#?openshift_openstack_subnet_cidr:.*", replace: "openshift_openstack_subnet_cidr: \"192.168.96.0/20\""}
   - { find: "^#?openshift_openstack_pool_start:.*", replace: "openshift_openstack_pool_start: \"192.168.96.3\""}
   - { find: "^#?openshift_openstack_pool_end:.*", replace: "openshift_openstack_pool_end: \"192.168.111.254\""}
+  - { find: "^#?openshift_openstack_resolve_heat_outputs:.*", replace: "openshift_openstack_resolve_heat_outputs: False"}
   - { find: "^# openshift_openstack_ephemeral_volumes.*", replace: "openshift_openstack_ephemeral_volumes: true" }
   - { find: "^# openshift_openstack_public_hostname_suffix.*", replace: "openshift_openstack_public_hostname_suffix: '-public'" }
   - { find: "server: private_dns_ip", replace: "        server: {{ cluster_dns_ip }}" }
