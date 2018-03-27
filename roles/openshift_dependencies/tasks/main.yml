@@ -88,12 +88,14 @@
   become: true
 
 # Change the sshd configuration.
-- name: Change the sshd configuration
+- name: Changing the sshd configuration
   lineinfile:
     path: /etc/ssh/sshd_config
     regexp: "{{ item['search'] }}"
     line: "{{ item['replace'] }}"
   with_items:
+    - { search: "^#?ClientAliveCountMax.*", replace: "ClientAliveCountMax 3" }
+    - { search: "^#?ClientAliveInterval.*", replace: "ClientAliveInterval 20" }
     - { search: "^#?MaxSessions.*", replace: "MaxSessions 100" }
     - { search: "^#?PermitRootLogin.*", replace: "PermitRootLogin yes"}
   become: true
