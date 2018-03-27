@@ -94,9 +94,13 @@
     regexp: "{{ item['search'] }}"
     line: "{{ item['replace'] }}"
   with_items:
+    # ClientAliveCountMax the number of client alive messages which may be sent without the ssh server receiving any messages back from the client.
     - { search: "^#?ClientAliveCountMax.*", replace: "ClientAliveCountMax 3" }
+    # ClientAliveInterval a timeout interval in seconds after which if no data has been received from the client, sshd server will send an alive message.
     - { search: "^#?ClientAliveInterval.*", replace: "ClientAliveInterval 20" }
+    # MaxSessions the maximum number of open shell, login or subsystem sessions permitted per network connection.
     - { search: "^#?MaxSessions.*", replace: "MaxSessions 100" }
+    # PermitRootLogin specifies whether root can log in using ssh.
     - { search: "^#?PermitRootLogin.*", replace: "PermitRootLogin yes"}
   become: true
 
