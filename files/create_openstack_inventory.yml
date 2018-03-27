@@ -23,9 +23,9 @@
       set_fact:
         openstack: ". {{ rc_file }}; openstack"
 
-    # Get the list of server names and networks.
-    - name: Creating a list of the names and networks of the OpenStack servers
-      shell: "{{ openstack }} server list --format value -c Name -c Networks"
+    # Get the list of all the server names and networks.
+    - name: Creating a list of all the names and networks of the OpenStack servers
+      shell: "{{ openstack }} server list --format value -c Name -c Networks --limit -1"
       args:
         # Use bash to run multiple commands at once.
         executable: /bin/bash

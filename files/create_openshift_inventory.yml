@@ -27,7 +27,7 @@
 
     # Get the list of server names and networks.
     - name: Creating a list of the names and networks running in OpenStack
-      shell: "{{ openstack }} server list --format value -c Name -c Networks"
+      shell: "{{ openstack }} server list --format value -c Name -c Networks --limit -1"
       args:
         # Use bash to run multiple commands at once.
         executable: /bin/bash

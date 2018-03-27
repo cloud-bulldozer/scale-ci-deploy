@@ -4,7 +4,7 @@
 
 set -x
 
-openstack server list
+openstack server list --limit -1
 openstack router list
 openstack network list
 openstack subnet list

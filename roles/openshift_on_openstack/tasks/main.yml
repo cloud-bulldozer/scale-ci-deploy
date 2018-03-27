@@ -103,12 +103,15 @@
     dest: /etc/ansible/ansible.cfg
   become: true
 
-# Enable ansible logging.
-- name: Enabling ansible logging
+# Edit the ansible.cfg file to turn on some features.
+- name: Changing the Ansible configuration for this host
   replace:
     dest: /etc/ansible/ansible.cfg
-    regexp: '^#?log_path\s*=.*'
-    replace: 'log_path = /var/tmp/ansible.log'
+    regexp: "{{ item['search'] }}"
+    line: "{{ item['replace'] }}"
+  with_items:
+    - { search: "^#?log_path\s*=.*", replace: "log_path = /var/tmp/ansible.log" }
+    - { search: "^#?ssh_args\s*=.*", replace: "ssh_args = -o ControlMaster=auto -o ControlPersist=600s -o ServerAliveInterval=20 -o ServerAliveCountMax=3" }
   become: true
 
 # Check if the nsupdate_file exists.
