@@ -110,12 +110,12 @@
     regexp: "{{ item['search'] }}"
     line: "{{ item['replace'] }}"
   with_items:
-    - { search: "^#?log_path\s*=.*", replace: "log_path = /var/tmp/ansible.log" }
+    - { search: "^#?log_path =.*", replace: "log_path = /var/tmp/ansible.log" }
     # ControlMaster enables the sharing of multiple sessions over a single network connection.
     # ControlPersist the master connection should remain open in the background (waiting for future client connections) after the initial client connection has been closed.
     # ServerAliveInterval a timeout interval in seconds after which if no data has been received from the server, the ssh client will send an alive message.
     # ServerAliveCountMax the number of server alive messages which may be sent without the ssh client receiving any messages back from the server.
-    - { search: "^#?ssh_args\s*=.*", replace: "ssh_args = -o ControlMaster=auto -o ControlPersist=600s -o ServerAliveInterval=20 -o ServerAliveCountMax=3" }
+    - { search: "^#?ssh_args =.*", replace: "ssh_args = -o ControlMaster=auto -o ControlPersist=600s -o ServerAliveInterval=20 -o ServerAliveCountMax=3" }
   become: true
 
 # Check if the nsupdate_file exists.
