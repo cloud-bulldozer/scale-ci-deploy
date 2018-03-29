@@ -1,0 +1,11 @@
+--- openshift-ansible.orig/playbooks/openstack/openshift-cluster/provision_resources.yml
++++ openshift-ansible/playbooks/openstack/openshift-cluster/provision_resources.yml
+@@ -0,0 +1,8 @@
++---
++- name: Create the OpenStack resources for cluster installation
++  hosts: localhost
++  tasks:
++  - name: provision cluster
++    import_role:
++      name: openshift_openstack
++      tasks_from: provision.yml
