@@ -1,4 +1,21 @@
 ---
+# Run the dynamic inventory to get the current app hosts.
+- name: Running the dynamic inventory file to get the current app hosts
+  shell: ". {{ openstack_rc }}; python {{ inventory_py }} | jq '.app.hosts|length'"
+  register: output
+  changed_when: false
+
+# Get the number of nodes in the app.hosts group.
+- name: Setting the current node count
+  set_fact:
+    current_node_count: "{{ output['stdout'] }}"
+
+# Exit if the node target is less than how many nodes that are already running.
+- name: Checking the node count
+  fail:
+    msg: "The OpenShift node target {{ openshift_node_target }} is less than or equal to than the current node count {{ current_node_count }}"
+  when: openshift_node_target|int <= current_node_count|int
+
 # Create a variable that sources the rc file and runs the ansible-playbook command.
 - name: Creating a variable that sources the OpenStack rc file and runs the ansible-playbook command
   set_fact:
@@ -14,74 +31,25 @@
   set_fact:
     openstack: ". {{ openstack_rc }}; openstack"
 
-# Run the dynamic inventory to get the current hosts in JSON format.
-- name: Running the dynamic inventory file to get the current hosts in JSON format
-  shell: ". {{ openstack_rc }}; python {{ inventory_py }}"
-  register: output
-  changed_when: false
+# Get the DNS information once before the loop.
+- name: Getting the DNS information
+  include_tasks: dns.yml
 
-# Parse the JSON from the standard output from the previous command.
-- name: Creating variable from the JSON output of the last command
+# Create an empty list.
+- name: Creating an empty list of blocks
   set_fact:
-    dynamic_inventory: "{{ output['stdout'] | from_json }}"
+    blocks: []
 
-# Get the number of nodes in the app.hosts group.
-- name: Setting the current node count
+#  Create the blocks for scaling up.
+- name: Creating begin and end blocks for scaling
   set_fact:
-    current_node_count: "{{ dynamic_inventory['app']['hosts'] | length }}"
+    blocks: "{{ blocks }} + [{'begin': {{ item }}, 'end': {{ (item|int + block_size|int < openshift_node_target|int)|ternary(item|int + block_size|int - 1, openshift_node_target|int - 1) }} }]"
+  with_sequence: "start={{ current_node_count }} end={{ openshift_node_target|int - 1 }} stride={{ block_size }}"
 
-# Exit if the node target is less than how many nodes that are already running.
-- fail:
-    msg: "The OpenShift node target {{ openshift_node_target }} is less than or equal to than the current node count {{ current_node_count }}"
-  when: (openshift_scaleup | bool) and (openshift_node_target | int <= current_node_count | int)
-
-# Find the difference between node target and current nodes.
-- name: Calculating the difference
-  set_fact:
-    difference: "{{ openshift_node_target | int - current_node_count | int }}"
-
-# The current node count is the starting node number.
-- name: Setting the start number
-  set_fact:
-    start_node_number: "{{ current_node_count }}"
-
-# The current node count + difference - 1 is the ending node number.
-- name: Setting the end number
-  set_fact:
-    end_node_number: "{{ current_node_count | int + difference | int - 1 }}"
-
-# Create the new nodes inventory file name
-- name: Creating the file name for the new nodes inventory
-  set_fact:
-    new_nodes_inventory: "{{ ansible_user_dir }}/new_nodes_{{ start_node_number }}-{{ end_node_number }}_inventory"
-
-# Search for regular expressions and replace in file.
-- name: Replacing specific lines in {{ all_yml_path }}
-  lineinfile:
-    path: "{{ all_yml_path }}"
-    regexp: "{{ item['find'] }}"
-    line: "{{ item['replace'] }}"
-  with_items:
-    - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ openshift_node_target }}" }
-
-# Get the old OpenStack VMs by name.
-- name: Getting the old OpenStack VM network information by name
-  shell: "{{ openstack }} server list --name app-node-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks"
-  register: networks_old
-
-# Run the Ansible playbook that creates the OpenStack resources.
-- name: Creating the OpenStack resources
-#  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_cluster_directory }}/provision.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openstack_scaleup_log }}"
-  shell: >
-    {{ ansible_playbook }} -vvv
-    --user openshift
-    -i inventory
-    -i {{ inventory_py }}
-    {{ openshift_cluster_directory }}/provision_resources.yml 2>&1 >> {{ openstack_scaleup_log }}
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
-
-- name: Scaleup
+# Call the scale up tasks for each block in blocks.
+- name: Scaling up
   include_tasks: scaleup.yml
-  when: openshift_scaleup | bool == true
+  with_items: "{{ blocks }}"
+  loop_control:
+    # The loop_var changes the variable name from item to avoid name collisions.
+    loop_var: block

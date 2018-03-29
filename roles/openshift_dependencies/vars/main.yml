@@ -4,10 +4,11 @@ openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ 
 # A dictionary of packages to install for different families of operating systems.
 packages:
   common:
-    - curl
     - bind
+    - curl
     - gcc
     - git
+    - jq
     - libselinux-python
     - redhat-rpm-config
     - python-crypto
