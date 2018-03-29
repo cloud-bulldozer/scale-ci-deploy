@@ -8,7 +8,7 @@
 # Get the number of nodes in the app.hosts group.
 - name: Setting the current node count
   set_fact:
-    current_node_count: "{{ output['sdtout'] }}"
+    current_node_count: "{{ output['stdout'] }}"
 
 # Exit if the node target is less than how many nodes that are already running.
 - name: Checking the node count
@@ -35,10 +35,15 @@
 - name: Getting the DNS information
   include_tasks: dns.yml
 
+# Create an empty list.
+- name: Creating an empty list of blocks
+  set_fact:
+    blocks: []
+
 #  Create the blocks for scaling up.
 - name: Creating begin and end blocks for scaling
   set_fact:
-    blocks: "{{ blocks }} [{'begin': {{ item }}, 'end': {{ (item|int + block_size|int < openshift_node_target|int)|ternary(item|int + block_size|int - 1, openshift_node_target|int - 1) }} }]"
+    blocks: "{{ blocks }} + [{'begin': {{ item }}, 'end': {{ (item|int + block_size|int < openshift_node_target|int)|ternary(item|int + block_size|int - 1, openshift_node_target|int - 1) }} }]"
   with_sequence: "start={{ current_node_count }} end={{ openshift_node_target|int - 1 }} stride={{ block_size }}"
 
 # Call the scale up tasks for each block in blocks.

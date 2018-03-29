@@ -3,6 +3,7 @@
 - name: Getting the pre-scale up list of app-nodes
   shell: "{{ openstack }} server list --name app-node-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks --limit -1"
   register: networks_old
+  changed_when: false
 
 # Search for regular expressions and replace in file.
 - name: Replacing specific lines in {{ all_yml_path }}
@@ -29,6 +30,7 @@
 - name: Getting the post scale up list of app-nodes
   shell: "{{ openstack }} server list --name app-node-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks --limit -1"
   register: networks_new
+  changed_when: false
 
 # Create an empty list.
 - name: Creating an empty list of new hosts
@@ -46,7 +48,7 @@
 # Create the new nodes inventory file name
 - name: Creating the file name for the new nodes inventory
   set_fact:
-    new_nodes_inventory: "{{ ansible_user_dir }}/new_nodes_{{ block['start'] }}-{{ block['end'] }}_inventory"
+    new_nodes_inventory: "{{ ansible_user_dir }}/new_nodes_{{ block['begin'] }}-{{ block['end'] }}_inventory"
 
 # Write the group name for the new nodes inventory file.
 - name: Writing the group header for the new nodes inventory file
