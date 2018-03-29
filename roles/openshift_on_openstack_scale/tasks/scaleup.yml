@@ -1,18 +1,52 @@
 ---
-# Get the new OpenStack VMs by name.
-- name: Getting the new OpenStack VM network information by name
-  shell: "{{ openstack }} server list --name app-node-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks"
+# Get the pre-scale up OpenStack VMs by name.
+- name: Getting the pre-scale up list of app-nodes
+  shell: "{{ openstack }} server list --name app-node-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks --limit -1"
+  register: networks_old
+
+# Search for regular expressions and replace in file.
+- name: Replacing specific lines in {{ all_yml_path }}
+  lineinfile:
+    path: "{{ all_yml_path }}"
+    regexp: "{{ item['find'] }}"
+    line: "{{ item['replace'] }}"
+  with_items:
+    - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ block['end']|int + 1 }}" }
+
+# Run the Ansible playbook that creates the OpenStack resources.
+- name: Creating the OpenStack resources
+  shell: >
+    {{ ansible_playbook }} -vv
+    --user openshift
+    -i inventory
+    -i {{ inventory_py }}
+    {{ openshift_cluster_directory }}/provision_resources.yml 2>&1 >> openshift-scaleup-{{ block['end'] }}.log
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
+
+# Get the post scale up OpenStack VMs by name.
+- name: Getting the post scale up list of app-nodes
+  shell: "{{ openstack }} server list --name app-node-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks --limit -1"
   register: networks_new
 
-- name: Create an empty list of new hosts.
+# Create an empty list.
+- name: Creating an empty list of new hosts
   set_fact:
     hosts_new: []
   run_once: true
 
+# Creating a list of new host information.
 - name: Creating a list of new hosts from the OpenStack networks output
   set_fact:
+    # Example: app-node-90.scale-ci.example.com openshift-ansible-scale-ci.example.com-net=192.168.96.36, 172.21.0.114
     hosts_new: "{{ hosts_new }} + [{ 'name': '{{ item.split(' ')[0].split('.')[0] }}', 'private_ip': '{{ item.split('=')[1].split(', ')[0] }}', 'public_ip': '{{ item.split(', ')[1] }}' }]"
   with_items: "{{ networks_new.stdout_lines | difference(networks_old.stdout_lines) }}"
+
+# Create the new nodes inventory file name
+- name: Creating the file name for the new nodes inventory
+  set_fact:
+    new_nodes_inventory: "{{ ansible_user_dir }}/new_nodes_{{ block['start'] }}-{{ block['end'] }}_inventory"
 
 # Write the group name for the new nodes inventory file.
 - name: Writing the group header for the new nodes inventory file
@@ -27,18 +61,26 @@
     line: "{{ item.public_ip }} openshift_node_labels=\"{'region': 'primary'}\""
   with_items: "{{ hosts_new }}"
 
-# Configure the time servers on all the new nodes.
-- name: Configuring the time servers on all the new nodes
-  shell: >
-    {{ ansible_playbook }} -vvv
-    --user openshift
-    -i {{ new_nodes_inventory }}
-    configure_time_servers.yml 2>&1 >> {{ timeservers_log }}
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
+# Add the new nodes to DNS.
+- name: Adding the new VMs to DNS
+  nsupdate:
+    key_name: "{{ dns_key_name }}"
+    key_secret: "{{ dns_key_secret }}"
+    key_algorithm: "{{ dns_key_algorithm }}"
+    server: "{{ cluster_dns_ip }}"
+    zone: "{{ clusterid }}.{{ dns_domain }}"
+    record: "{{ item.name }}"
+    type: "A"
+    value: "{{ item.private_ip }}"
+    state: present
+  with_items:
+    - "{{ hosts_new | default([]) }}"
+  register: nsupdate_add_result
+  until: nsupdate_add_result is succeeded
+  retries: 10
 
-- name: Wait for all the new nodes to respond to ssh
+# Wait for the new nodes to respond to ssh
+- name: Waiting for the new nodes to respond to ssh
   wait_for:
     delay: 1
     host: "{{ item.public_ip }}"
@@ -47,18 +89,26 @@
     timeout: 120
   with_items: "{{ hosts_new }}"
 
-- name: DNS
-  include_tasks: dns.yml
+# Configure the time servers on all the new nodes.
+- name: Configuring the time servers on the new nodes
+  shell: >
+    {{ ansible_playbook }} -vv
+    --user openshift
+    -i {{ new_nodes_inventory }}
+    configure_time_servers.yml 2>&1 >> time_servers-{{ block['end'] }}.log
+  args:
+    # Use bash to get the posix style redirects.
+    executable: /bin/bash
 
 # Scale up the OpenShift cluster.
 - name: Scaling up the OpenShift resources
   shell: >
-    {{ ansible_playbook_scaleup }} -vvv
+    {{ ansible_playbook_scaleup }} -vv
     --user openshift
     -i inventory/
     -i {{ inventory_py }}
     -i {{ new_nodes_inventory }}
-    {{ openshift_node_directory }}/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}
+    {{ openshift_node_directory }}/scaleup.yml 2>&1 >> openshift-scaleup-{{ block['end'] }}.log
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash

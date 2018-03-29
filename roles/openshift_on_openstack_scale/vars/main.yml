@@ -1,29 +1,23 @@
 ---
 # The path to the all.yml file on the target-server.
 all_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/all.yml"
-# The path to the inventory.py file on the target-server.
-inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/inventory.py"
-# The path to the openshift-ansible openshift-cluster directory.
-openshift_cluster_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/openshift-cluster"
-# The path to the openshift-ansible openshift-node directory.
-openshift_node_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openshift-node"
-# Get the number of OpenShift nodes to scale to.
-openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default('5', true) }}"
-# The path to the time-servers scale output file.
-timeservers_log: "{{ ansible_user_dir }}/time_servers-{{ openshift_node_target }}.log"
-# The path to the OpenShift scale output file.
-openshift_scaleup_log: "{{ ansible_user_dir }}/openshift_scaleup-{{ openshift_node_target }}.log"
-# The path to the OpenStack RC file on the server vm, may be named differently than other servers.
-openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
-# The path to store the OpenStack scale output.
-openstack_scaleup_log: "{{ ansible_user_dir }}/openstack_scaleup-{{ openshift_node_target }}.log"
-# Perform scaleup (true) or scaledown (false).
-openshift_scaleup: "{{ lookup('env', 'OPENSHIFT_SCALEUP') | default('true', true) }}"
+# The size of blocks to scale up.
+block_size: "{{ lookup('env', 'scale_block_size') | default('100', true) }}"
 # The algorithm to use when creating the DNS update key.
 dns_key_algorithm: "{{ lookup('env', 'dns_key_algorithm')|default('hmac-md5', true) }}"
 # The DNS update key file name.
 dns_key_file: "{{ lookup('env', 'dns_update_file')|default('dns_update.key', true) }}"
 # The key name when creating the DNS update key.
 dns_key_name: "{{ lookup('env', 'dns_key_name')|default('update-key', true) }}"
+# The path to the inventory.py file on the target-server.
+inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/inventory.py"
 # The file name to store the nsupdate information.
 nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
+# The path to the openshift-ansible openshift-cluster directory.
+openshift_cluster_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/openshift-cluster"
+# The path to the openshift-ansible openshift-node directory.
+openshift_node_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openshift-node"
+# Get the number of OpenShift nodes to scale to.
+openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default('5', true) }}"
+# The path to the OpenStack RC file on the server vm, may be named differently than other servers.
+openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
