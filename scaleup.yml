@@ -12,4 +12,4 @@
     - vars/openstack.yml
     - vars/openshift.yml
   roles:
-    - openshift_on_openstack_scaleup
+    - openshift_on_openstack_scale

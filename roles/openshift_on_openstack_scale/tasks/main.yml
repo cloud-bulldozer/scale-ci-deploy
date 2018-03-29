@@ -33,7 +33,7 @@
 # Exit if the node target is less than how many nodes that are already running.
 - fail:
     msg: "The OpenShift node target {{ openshift_node_target }} is less than or equal to than the current node count {{ current_node_count }}"
-  when: openshift_node_target | int <= current_node_count | int
+  when: (openshift_scaleup | bool) and (openshift_node_target | int <= current_node_count | int)
 
 # Find the difference between node target and current nodes.
 - name: Calculating the difference
@@ -64,6 +64,11 @@
   with_items:
     - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ openshift_node_target }}" }
 
+# Get the old OpenStack VMs by name.
+- name: Getting the old OpenStack VM network information by name
+  shell: "{{ openstack }} server list --name app-node-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks"
+  register: networks_old
+
 # Run the Ansible playbook that creates the OpenStack resources.
 - name: Creating the OpenStack resources
 #  shell: "{{ ansible_playbook }} -vvv --user openshift -i inventory -i {{ inventory_py }} {{ openshift_cluster_directory }}/provision.yml -e openshift_repos_enable_testing=true 2>&1 > {{ openstack_scaleup_log }}"
@@ -72,60 +77,11 @@
     --user openshift
     -i inventory
     -i {{ inventory_py }}
-    {{ openshift_cluster_directory }}/provision.yml 2>&1 >> {{ openstack_scaleup_log }}
+    {{ openshift_cluster_directory }}/provision_resources.yml 2>&1 >> {{ openstack_scaleup_log }}
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
 
-# Get the new OpenStack VMs by name.
-- name: Getting the new OpenStack VM network information by name
-  shell: "{{ openstack }} server list --name app-node-{{ item }}.{{ clusterid }}.{{ dns_domain }} --format value -c Networks"
-  with_sequence: "start={{ start_node_number }} end={{ end_node_number }}"
-  register: networks
-
-- name: Create an empty list.
-  set_fact:
-    addresses: []
-
-# Create a list of addresses from the standard output of the last commands.
-- name: Creating a list of addresses from the OpenStack networks output
-  set_fact:
-    addresses: "{{ addresses }} + ['{{ item['stdout'].split(', ')[1] }}' ]"
-  with_items: "{{ networks['results'] }}"
-
-# Write the group name for the new nodes inventory file.
-- name: Writing the group header for the new nodes inventory file
-  copy:
-    content: "[OSEv3:children]\nnew_nodes\n[new_nodes]\n"
-    dest: "{{ new_nodes_inventory }}"
-
-# Create the new inventory file
-- name: Adding the addresses to the new nodes inventory file
-  lineinfile:
-    path: "{{ new_nodes_inventory }}"
-    line: "{{ item }} openshift_node_labels=\"{'region': 'primary'}\""
-  with_items: "{{ addresses }}"
-
-# Configure the time servers on all the new nodes.
-- name: Configuring the time servers on all the new nodes
-  shell: >
-    {{ ansible_playbook }} -vvv
-    --user openshift
-    -i {{ new_nodes_inventory }}
-    configure_time_servers.yml 2>&1 >> {{ ansible_user_dir }}/time_servers.log
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
-
-# Scale up the OpenShift cluster.
-- name: Scaling up the OpenShift resources
-  shell: >
-    {{ ansible_playbook_scaleup }} -vvv
-    --user openshift
-    -i inventory/
-    -i {{ inventory_py }}
-    -i {{ new_nodes_inventory }}
-    {{ openshift_node_directory }}/scaleup.yml 2>&1 >> {{ openshift_scaleup_log }}
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
+- name: Scaleup
+  include_tasks: scaleup.yml
+  when: openshift_scaleup | bool == true
