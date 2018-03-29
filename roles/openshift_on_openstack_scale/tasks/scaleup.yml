@@ -21,7 +21,7 @@
     --user openshift
     -i inventory
     -i {{ inventory_py }}
-    {{ openshift_cluster_directory }}/provision_resources.yml 2>&1 >> openshift-scaleup-{{ block['end'] }}.log
+    {{ openshift_cluster_directory }}/provision_resources.yml 2>&1 >> openstack_provision_resources_{{ block['end'] }}.log
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
@@ -97,7 +97,7 @@
     {{ ansible_playbook }} -vv
     --user openshift
     -i {{ new_nodes_inventory }}
-    configure_time_servers.yml 2>&1 >> time_servers-{{ block['end'] }}.log
+    configure_time_servers.yml 2>&1 >> time_servers_{{ block['end'] }}.log
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
@@ -110,7 +110,7 @@
     -i inventory/
     -i {{ inventory_py }}
     -i {{ new_nodes_inventory }}
-    {{ openshift_node_directory }}/scaleup.yml 2>&1 >> openshift-scaleup-{{ block['end'] }}.log
+    {{ openshift_node_directory }}/scaleup.yml 2>&1 >> openshift_scaleup_{{ block['end'] }}.log
   args:
     # Use bash to get the posix style redirects.
     executable: /bin/bash
