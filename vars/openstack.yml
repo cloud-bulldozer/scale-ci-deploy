@@ -25,9 +25,3 @@ openstack_server_name: "{{ lookup('env', 'server_name')|default('ansible-host', 
 openstack_subnet_name: "{{ lookup('env', 'subnet_name')|default('ci_subnet', true) }}"
 # The subnet range to use on the OpenStack private subnet (\23 == 510 addresses).
 openstack_subnet_range: "{{ lookup('env', 'subnet_range')|default('192.168.4.0/23', true) }}"
-# Allow permissive security group rules by calling openshift_on_openstack_secgroup role.
-openstack_permissive_secgroup_enable: "{{ lookup('env', 'permissive_secgroup_enable')|default('true', true) }}"
-# Permissive common security group rules inbound TCP/UDP port range.
-openstack_permissive_secgroup_ports: "{{ lookup('env', 'permissive_secgroup_ports')|default('1024:65535', true) }}"
-# OpenStack security group name to add permissive security group rules to.
-openstack_permissive_secgroup_name: "{{ lookup('env', 'permissive_secgroup_name')|default('openshift-ansible-' ~ clusterid ~ '.' ~ dns_domain ~ '-common-secgrp', true) }}"

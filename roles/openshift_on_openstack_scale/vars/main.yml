@@ -11,8 +11,6 @@ dns_key_file: "{{ lookup('env', 'dns_update_file')|default('dns_update.key', tru
 dns_key_name: "{{ lookup('env', 'dns_key_name')|default('update-key', true) }}"
 # The path to the inventory.py file on the target-server.
 inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/inventory.py"
-# The file name to store the nsupdate information.
-nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
 # The path to the openshift-ansible openshift-cluster directory.
 openshift_cluster_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/openshift-cluster"
 # The path to the openshift-ansible openshift-node directory.

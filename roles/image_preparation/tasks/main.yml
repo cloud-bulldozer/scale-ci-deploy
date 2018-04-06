@@ -141,7 +141,7 @@
   delegate_to: "{{ remote_host }}"
 
 # Copy the images from image server to the remote host.
-- name: "Copying the files from the image server to {{ remote_host }}"
+- name: "Copying qcow2 images from the image server to {{ remote_host }}"
   get_url:
     checksum: "sha256:{{ item[1]['stat']['checksum'] }}"
     dest: "{{ remote_image_directory }}/{{ (item[0]|splitext)[0] }}.qcow2"

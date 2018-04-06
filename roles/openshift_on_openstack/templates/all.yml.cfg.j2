@@ -1,0 +1,42 @@
+---
+openshift_openstack_clusterid: "{{ clusterid }}"
+openshift_openstack_public_dns_domain: "{{ dns_domain }}"
+openshift_openstack_keypair_name: "{{ openstack_keypair_name }}"
+openshift_openstack_external_network_name: "{{ openstack_public_network_name }}"
+openshift_openstack_default_image_name: "{{ virtual_image_name }}"
+openshift_openstack_num_masters: 3
+openshift_openstack_num_infra: 3
+openshift_openstack_num_cns: 3
+openshift_openstack_master_flavor: "master_etcd"
+openshift_openstack_infra_flavor: "infra_elastic"
+openshift_openstack_cns_flavor: "container_storage"
+openshift_openstack_node_flavor: "{{ openshift_node_flavor }}"
+openshift_openstack_lb_flavor: "load_balancer"
+openshift_openstack_default_flavor: "{{ openshift_default_flavor }}"
+openshift_openstack_subnet_cidr: "192.168.96.0/20"
+openshift_openstack_pool_start: "192.168.96.3"
+openshift_openstack_pool_end: "192.168.111.254"
+openshift_openstack_resolve_heat_outputs: False
+openshift_openstack_ephemeral_volumes: true
+openshift_openstack_public_hostname_suffix: '-public'
+
+# Permissive security groups
+openshift_openstack_cns_secgroup_rules: []
+openshift_openstack_infra_secgroup_rules: []
+openshift_openstack_lb_base_secgroup_rules: []
+openshift_openstack_lb_console_secgroup_rules: []
+openshift_openstack_master_secgroup_rules: []
+openshift_openstack_node_secgroup_rules: []
+openshift_openstack_etcd_secgroup_rules: []
+openshift_openstack_etcd_flat_secgroup_rules: []
+openshift_openstack_common_secgroup_rules:
+  - direction: ingress
+    protocol: icmp
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 65535
+  - direction: ingress
+    protocol: udp
+    port_range_min: 22
+    port_range_max: 65535

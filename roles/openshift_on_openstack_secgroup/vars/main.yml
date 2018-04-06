@@ -1,9 +1,0 @@
----
-# The path to the OpenStack RC file on the openstack-server, may be named differently than other servers.
-openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
-# Allow permissive security group rules by calling openshift_on_openstack_secgroup role.
-permissive_secgroup_enable: "{{ openstack_permissive_secgroup_enable|default('true', true) }}"
-# Permissive common security group rules inbound TCP/UDP port range.
-permissive_secgroup_ports: "{{ openstack_permissive_secgroup_ports|default('1024:65535', true) }}"
-# OpenStack security group name to add permissive security group rules to.
-permissive_secgroup_name: "{{ openstack_permissive_secgroup_name|default('openshift-ansible-' ~ clusterid ~ '.' ~ dns_domain ~ '-common-secgrp', true) }}"

@@ -98,8 +98,6 @@
     - { find: "^#?ClientAliveCountMax.*", replace: "ClientAliveCountMax 3" }
     # ClientAliveInterval a timeout interval in seconds after which if no data has been received from the client, sshd server will send an alive message.
     - { find: "^#?ClientAliveInterval.*", replace: "ClientAliveInterval 20" }
-    # MaxSessions the maximum number of open shell, login or subsystem sessions permitted per network connection.
-    - { find: "^#?MaxSessions.*", replace: "MaxSessions 100" }
     # PermitRootLogin specifies whether root can log in using ssh.
     - { find: "^#?PermitRootLogin.*", replace: "PermitRootLogin yes"}
   become: true
