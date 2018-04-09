@@ -1,7 +1,7 @@
 ---
 # Get the DNS server addresses from OpenStack.
 - name: Getting the IP address for the DNS VM ns-master
-  shell: "{{ openstack }} server show ns-master.{{ clusterid}}.{{ dns_domain }} --format value -c addresses"
+  shell: "{{ openstack }} server show ns-master.{{ clusterid }}.{{ dns_domain }} --format value -c addresses"
   register: dns_addresses
   changed_when: false
 

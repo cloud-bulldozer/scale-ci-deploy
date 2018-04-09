@@ -67,19 +67,6 @@
   include_role:
     name: openshift_ansible_patch
 
-# Get the DNS server addresses from OpenStack.
-- name: Getting the IP address for the DNS VM ns-master
-  shell: "{{ openstack }} server show ns-master.{{ clusterid}}.{{ dns_domain }} --format value -c addresses"
-  # "ns-master-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
-  register: dns_addresses
-  changed_when: false
-
-# Parse the IP address from the addresses output.
-- name: Parsing the floating ip from the DNS VM addresses
-  set_fact:
-    cluster_dns_ip: "{{ dns_addresses['stdout'].split(', ')[1] }}"
-  failed_when: cluster_dns_ip == ""
-
 # Set the openshift-ansible openstack path.
 - name: Creating the openshift_openstack directory variable
   set_fact:
@@ -133,21 +120,43 @@
   changed_when: false
 
 # Add a block of configuration to the end of the all.yml file.
-- name: Adding DNS configuration to the end of inventory/group_vars/all.yml
+- name: Adding DNS configuration to the end of {{ all_yml_path }}
   blockinfile:
     backup: yes
     block: "{{ nsupdate_contents['stdout'] }}"
     insertafter: EOF
-    path: inventory/group_vars/all.yml
+    path: "{{ all_yml_path }}"
   when: nsupdate['stat']['exists']
 
-# For each item in the list, search for regular expressions and replace.
-- name: Replacing specific lines in inventory/group_vars/all.yml
-  lineinfile:
-    path: inventory/group_vars/all.yml
-    regexp: "{{ item['find'] }}"
-    line: "{{ item['replace'] }}"
-  with_items: "{{ all_yml }}"
+- name: Create the all.yml.cfg (all.yml override) file.
+  template:
+    dest: "{{ all_yml_cfg_path }}"
+    src: all.yml.cfg.j2
+
+- name: Reading the contents of {{ all_yml_path }}
+  command: "cat {{ all_yml_path }}"
+  register: l_all_yml
+  changed_when: false
+
+- name: Reading the contents of {{ all_yml_cfg_path }}
+  command: "cat {{ all_yml_cfg_path }}"
+  register: l_all_yml_cfg
+  changed_when: false
+
+- name: Setting facts from {{ all_yml_path }} and 'templates/all.yml.cfg.j2'
+  set_fact:
+    all_yml: "{{ l_all_yml.stdout | from_yaml }}"
+    all_yml_override: "{{ l_all_yml_cfg.stdout | from_yaml }}"
+
+- name: Override the settings in {{ all_yml_path }}
+  set_fact:
+    all_yml: "{{ all_yml|combine(all_yml_override, recursive=False) }}"
+
+- name: Write the updated {{ all_yml_path }}
+  copy:
+    content: "{{ all_yml | to_nice_yaml(width=80, indent=2) }}"
+    dest: "{{ all_yml_path }}"
+    backup: yes
 
 # Add a block of configuration to the end of the OSEv3 file.
 - name: Adding a block of configuration to the end of inventory/group_vars/OSEv3.yml
@@ -163,7 +172,7 @@
     path: inventory/group_vars/OSEv3.yml
     regexp: "{{ item['find'] }}"
     line: "{{ item['replace'] }}"
-  with_items: "{{ osev3_yml }}"
+  with_items: "{{ osev3_yml_sr }}"
 
 # Get some debug information that makes it easier to file bugs.
 - name: Running commands that create debug information needed to open issues
