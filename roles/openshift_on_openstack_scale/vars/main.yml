@@ -15,7 +15,5 @@ inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/inve
 openshift_cluster_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/openshift-cluster"
 # The path to the openshift-ansible openshift-node directory.
 openshift_node_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openshift-node"
-# Get the number of OpenShift nodes to scale to.
-openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default('5', true) }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"

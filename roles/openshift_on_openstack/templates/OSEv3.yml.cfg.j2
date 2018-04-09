@@ -8,7 +8,7 @@ openshift_disable_check: memory_availability
 # Configure usage of openshift_clock role.
 openshift_clock_enabled: true
 
-# Enable cluster metrics
+# Enable cluster metrics.
 use_cluster_metrics: true
 
 # Allow authentication using an Apache HTTP server authentication file.
@@ -25,10 +25,10 @@ openshift_storage_glusterfs_namespace: glusterfs
 openshift_storage_glusterfs_is_native: true
 openshift_storage_glusterfs_storageclass_default: true
 openshift_storage_glusterfs_block_storageclass: true
-openshift_storage_glusterfs_block_version: "v3.9"
-openshift_storage_glusterfs_version: "v3.9"
-openshift_storage_glusterfs_heketi_version: "v3.9"
-openshift_storage_glusterfs_s3_version: "v3.9"
+openshift_storage_glusterfs_block_version: v{{ ocp_major_minor }}
+openshift_storage_glusterfs_version: v{{ ocp_major_minor }}
+openshift_storage_glusterfs_heketi_version: v{{ ocp_major_minor }}
+openshift_storage_glusterfs_s3_version: v{{ ocp_major_minor }}
 openshift_storage_glusterfs_block_host_vol_size: 300
 
 # Prometheus variables.
@@ -49,4 +49,28 @@ openshift_prometheus_storage_volume_size: 40Gi
 osm_use_cockpit: false
 
 # Configure kubeletArguments on the nodes, such as maximum pods per node.
-openshift_node_kubelet_args: { 'pods-per-core': ['0'], 'max-pods':['510'] }
+openshift_node_kubelet_args: { 'pods-per-core': ['0'], 'max-pods': ['510'] }
+
+openshift_deployment_type: openshift-enterprise
+osm_cluster_network_cidr: 10.128.0.0/10
+openshift_release: v{{ ocp_major_minor }}
+oreg_url: {{ registries[0] }}/openshift3/ose-${component}:${version}
+openshift_docker_additional_registries: {{ registries|to_json }}
+openshift_docker_insecure_registries: {{ registries|to_json }}
+openshift_cockpit_deployer_prefix: {{ registries[0] }}/openshift3/
+openshift_service_catalog_image_prefix: {{ registries[0] }}/openshift3/ose-
+openshift_web_console_prefix: {{ registries[0] }}/openshift3/ose-
+cli_docker_additional_registries: {{ registries|to_json }}
+cli_docker_insecure_registries: {{ registries|to_json }}
+openshift_prometheus_image_prefix: {{ registries[0] }}/openshift3/
+openshift_prometheus_image_version: v{{ ocp_major_minor }}
+openshift_prometheus_proxy_image_prefix: {{ registries[0] }}/openshift3/
+openshift_prometheus_proxy_image_version: v{{ ocp_major_minor }}
+openshift_prometheus_alertmanager_image_prefix: {{ registries[0] }}/openshift3/
+openshift_prometheus_alertmanager_image_version: v{{ ocp_major_minor }}
+openshift_prometheus_alertbuffer_image_prefix: {{ registries[0] }}/openshift3/
+openshift_prometheus_alertbuffer_image_version: v{{ ocp_major_minor }}
+ansible_service_broker_image_prefix: {{ registries[0] }}/openshift3/ose-
+ansible_service_broker_image_tag: v{{ ocp_major_minor }}
+template_service_broker_prefix: {{ registries[0] }}/openshift3/ose-
+template_service_broker_version: v{{ ocp_major_minor }}

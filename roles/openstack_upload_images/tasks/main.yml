@@ -1,0 +1,51 @@
+---
+# The openstack variable includes the rc file and the path to the OpenStack client.
+- name: Setting openstack variable to source the rc file and contain path to client
+  set_fact:
+    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
+
+# Find the qcow2 images to convert.
+- name: Searching for qcow2 image files in {{ install_directory }}
+  find:
+    paths: "{{ install_directory }}"
+    patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+[.]qcow2$"
+    use_regex: yes
+    recurse: true
+  register: qcow2_images
+
+# Convert qcow2 images to raw format.
+- name: Converting qcow2 images to raw format
+  shell: "qemu-img convert -f qcow2 -O raw {{ item['path'] }} {{ (item['path']|splitext)[0] }}.raw"
+  with_items: "{{ qcow2_images['files'] }}"
+
+# Find the images to upload.
+- name: Searching for raw image files in {{ install_directory }}
+  find:
+    paths: "{{ install_directory }}"
+    patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
+    use_regex: yes
+    recurse: true
+  register: images
+
+# Delete any images with the same name as the one we are about to upload.
+- name: Deleting the existing images in OpenStack
+  shell: "{{ openstack }} image delete ocp-{{ ocp_major_minor }}-{{ item }}"
+  with_items: "{{ [ 'atomic', 'rhel' ] }}"
+  # Do not fail if here is no image to delete.
+  ignore_errors: true
+
+# Upload the images to Glance.
+- name: Uploading the images to OpenStack
+  shell: "{{ openstack }} image create --disk-format raw --container-format bare --file {{ item['path'] }} ocp-{{ ocp_major_minor }}-{{ ('atomic' in item['path'])|ternary('atomic','rhel') }} --format value -c id"
+  with_items: "{{ images['files'] }}"
+  register: create_result
+  # Wait for a successful return code.
+  until: create_result['rc'] == 0
+  # Retry up to 3 times.
+  retries: 3
+  delay: 5
+
+# Add metadata to the OpenStack about the image.
+- name: Adding metadata about the image
+  shell: "{{ openstack }} image set --property file_name={{ item['path']|basename }} --property directory={{ item['path']|dirname }} ocp-{{ ocp_major_minor }}-{{ ('atomic' in item['path'])|ternary('atomic','rhel') }}"
+  with_items: "{{ images['files'] }}"
