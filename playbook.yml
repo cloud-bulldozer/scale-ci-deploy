@@ -1,5 +1,7 @@
 ---
 - name: Find and prepare the virtual machine images
+  vars_files:
+    - vars/openstack.yml
   hosts: image-server
   roles:
     - { role: image_preparation, when: openstack_upload_images | default(True) | bool }
