@@ -1,0 +1,31 @@
+---
+# TODO: Use the ansible parted module when it can figure out the defaults by its own.
+#- name: Partition the device
+#  parted:
+#    device: /dev/vda
+#    number: "{{ pbench_storage_device_partition }}"
+#    state: present
+#  become: true
+
+- name: Adding primary partition 3 to {{ pbench_storage_device }}
+  shell: "echo -e 'n\np\n3\n\n\nw\n' | fdisk {{ pbench_storage_device }}"
+  args:
+    executable: /bin/bash
+  become: yes
+  ignore_errors: yes
+
+- name: partprobe
+  command: "partprobe {{ pbench_storage_device }}"
+  become: yes
+
+- name: Creating an xfs filesystem on {{ pbench_storage_device }}{{ pbench_storage_device_partition }}
+  command: "mkfs.xfs -f {{ pbench_storage_device }}{{ pbench_storage_device_partition }}"
+  become: yes
+
+- name: Creating an entry in fstab and mounting {{ pbench_storage_device }}{{ pbench_storage_device_partition }}
+  mount:
+    path: "{{ pbench_storage_mount_path }}"
+    src: "{{ pbench_storage_device }}{{ pbench_storage_device_partition }}"
+    fstype: xfs
+    state: mounted
+  become: yes

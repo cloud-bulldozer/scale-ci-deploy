@@ -31,5 +31,6 @@
     - vars/openstack.yml
     - vars/openshift.yml
   roles:
+    - pbench_storage
     - openshift_dns
     - openshift_on_openstack
