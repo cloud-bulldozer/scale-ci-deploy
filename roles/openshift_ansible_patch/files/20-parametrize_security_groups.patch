@@ -180,8 +180,8 @@
 +    remote_ip_prefix: "{{ openshift_openstack_lb_ingress_cidr }}"
 diff --git a/roles/openshift_openstack/templates/heat_stack.yaml.j2 b/roles/openshift_openstack/templates/heat_stack.yaml.j2
 index f2599305d..ab02e9f00 100644
---- a/roles/openshift_openstack/templates/heat_stack.yaml.j2
-+++ b/roles/openshift_openstack/templates/heat_stack.yaml.j2
+--- openshift-ansible.orig/roles/openshift_openstack/templates/heat_stack.yaml.j2
++++ openshift-ansible/roles/openshift_openstack/templates/heat_stack.yaml.j2
 @@ -145,15 +145,7 @@ resources:
            template: Basic ssh/icmp security group for cluster_id OpenShift cluster
            params:
