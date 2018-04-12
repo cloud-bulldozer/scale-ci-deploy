@@ -143,7 +143,7 @@
   register: l_all_yml_cfg
   changed_when: false
 
-- name: Setting facts from {{ all_yml_path }} and 'templates/all.yml.cfg.j2'
+- name: Setting facts from {{ all_yml_path }} and {{ all_yml_cfg_path }}
   set_fact:
     all_yml: "{{ l_all_yml.stdout | from_yaml }}"
     all_yml_override: "{{ l_all_yml_cfg.stdout | from_yaml }}"
@@ -158,21 +158,36 @@
     dest: "{{ all_yml_path }}"
     backup: yes
 
-# Add a block of configuration to the end of the OSEv3 file.
-- name: Adding a block of configuration to the end of inventory/group_vars/OSEv3.yml
-  blockinfile:
-    backup: yes
-    block: "{{ lookup('file', 'templates/add_block.yml') }}"
-    insertafter: EOF
-    path: inventory/group_vars/OSEv3.yml
+- name: Create the OSEv3.yml.cfg (OSEv3.yml override) file.
+  template:
+    dest: "{{ osev3_yml_cfg_path }}"
+    src: OSEv3.yml.cfg.j2
 
-# For each item in the list, search for regular expressions and replace.
-- name: Replacing specific lines in inventory/group_vars/OSEv3.yml
-  lineinfile:
-    path: inventory/group_vars/OSEv3.yml
-    regexp: "{{ item['find'] }}"
-    line: "{{ item['replace'] }}"
-  with_items: "{{ osev3_yml_sr }}"
+- name: Reading the contents of {{ osev3_yml_path }}
+  command: "cat {{ osev3_yml_path }}"
+  register: l_osev3_yml
+  changed_when: false
+
+- name: Reading the contents of {{ osev3_yml_cfg_path }}
+  command: "cat {{ osev3_yml_cfg_path }}"
+  register: l_osev3_yml_cfg
+  changed_when: false
+
+- name: Setting facts from {{ osev3_yml_path }} and {{ osev3_yml_cfg_path }}
+  set_fact:
+    osev3_yml: "{{ l_osev3_yml.stdout | from_yaml }}"
+    osev3_yml_override: "{{ l_osev3_yml_cfg.stdout | from_yaml }}"
+
+- name: Override the settings in {{ osev3_yml_path }}
+  set_fact:
+    osev3_yml: "{{ osev3_yml|combine(osev3_yml_override, recursive=False) }}"
+
+- name: Write the updated {{ osev3_yml_path }}
+  copy:
+    content: "{{ osev3_yml | to_nice_yaml(width=80, indent=2) }}"
+    dest: "{{ osev3_yml_path }}"
+    backup: yes
+
 
 # Get some debug information that makes it easier to file bugs.
 - name: Running commands that create debug information needed to open issues

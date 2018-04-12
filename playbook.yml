@@ -2,7 +2,14 @@
 - name: Find and prepare the virtual machine images
   hosts: image-server
   roles:
-    - image_preparation
+    - { role: image_preparation, when: openstack_upload_images | default(True) | bool }
+
+- name: Upload images to OpenStack
+  hosts: openstack-server
+  vars_files:
+    - vars/openstack.yml
+  roles:
+    - { role: openstack_upload_images, when: openstack_upload_images | default(True) | bool }
 
 - name: Set up one virtual machine server in a new OpenStack environment
   hosts: openstack-server
