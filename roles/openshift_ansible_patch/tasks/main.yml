@@ -1,8 +1,17 @@
 ---
-- name: Apply patches to openshift-ansible
+- name: Applying patches to files in {{ ansible_user_dir }} directory
   patch:
     src: "{{ item }}"
-    basedir: openshift-ansible
-    strip: 1
-  with_fileglob:
-    - "*.patch"
+    basedir: "{{ ansible_user_dir }}"
+    strip: 0
+  with_items:
+    - "{{ lookup('fileglob', '*.patch').split(',') | sort }}"
+
+- name: Applying patches to files across the filesystem with elevated privileges
+  patch:
+    src: "{{ item }}"
+    basedir: /
+    strip: 0
+  with_items:
+    - "{{ lookup('fileglob', 'root/*.patch').split(',') | sort }}"
+  become: true
