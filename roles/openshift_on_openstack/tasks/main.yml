@@ -295,7 +295,7 @@
   changed_when: false
 
 # Parse the second IP address from the addresses field.
-- name: Parsing the floaing ip address from the master addresses
+- name: Parsing the floating ip address from the master addresses
   set_fact:
     # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
     master_address: "{{ master_addresses['stdout'].split(', ')[1] }}"

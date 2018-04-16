@@ -36,3 +36,11 @@
     - pbench_storage
     - openshift_dns
     - openshift_on_openstack
+    - openshift_get_core_cluster
+
+- name: Add IP address of the core OCP cluster to /etc/hosts on target-server
+  hosts: target-server
+  vars_files:
+    - vars/openstack.yml
+  roles:
+    - openstack_etc_hosts

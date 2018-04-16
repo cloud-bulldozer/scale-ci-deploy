@@ -1,0 +1,15 @@
+---
+- name: Add IP address of the core OCP cluster to /etc/hosts
+  lineinfile:
+    backup: yes
+    dest: /etc/hosts
+    regexp: ".*{{ item }}.{{ clusterid }}.{{ dns_domain }}$"
+    line: "{{ hostvars[item].public_ip }} {{ item }} {{ item }}.{{ clusterid }}.{{ dns_domain }}"
+    state: present
+  with_items: 
+    - "{{ groups.masters | default([]) }}"
+    - "{{ groups.infras | default([]) }}"
+    - "{{ groups.lb | default([]) }}"
+    - "{{ groups.cns | default([]) }}"
+    - "{{ groups.app_nodes | default([]) }}"
+  become: true
