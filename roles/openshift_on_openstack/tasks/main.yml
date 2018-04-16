@@ -31,7 +31,7 @@
 
 # Copy the openshift-ansible files to the user's home directory.
 - name: "Copying the openshift-ansible files to {{ ansible_user_dir }}/openshift-ansible"
-  # Note: The copy module does not support recurisve copy of remote sources.
+  # Note: The copy module does not support recursive copy of remote sources.
   command: "cp -a /root/openshift-ansible/ {{ ansible_user_dir }}/openshift-ansible"
   become: true
   when: openshift_ansible['stat']['exists']
@@ -310,6 +310,11 @@
 # Copy the kubeconfig to the target host.
 - name: Copying the kubeconfig file from the master to the target host
   command: "scp openshift@{{ master_address }}:.kube/config {{ ansible_user_dir }}/.kube/config"
+
+- name: Copying {{ ansible_user_dir }}/.kube to /root
+  # Note: The copy module does not support recursive copy of remote sources.
+  command: "cp -a {{ ansible_user_dir }}/.kube /root"
+  become: true
 
 # Add the master host address to the properties file.
 - name: Adding the MASTER_HOSTNAME to the properties file
