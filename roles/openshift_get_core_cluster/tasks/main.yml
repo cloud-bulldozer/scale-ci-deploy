@@ -51,6 +51,7 @@
     name: "{{ item.name }}"
     groups: [ "{{ item.group }}" ]
     ansible_user: openshift
+    ansible_host: "{{ item.public_ip }}"
     ansible_ssh_common_args: "-o ProxyCommand='{{ proxy_command }}'"
     public_ip: "{{ item.public_ip }}"
     private_ip: "{{ item.private_ip }}"
