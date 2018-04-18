@@ -1,0 +1,32 @@
+--- openshift-ansible.orig/roles/openshift_openstack/templates/heat_stack.yaml.j2
++++ openshift-ansible/roles/openshift_openstack/templates/heat_stack.yaml.j2
+@@ -1,4 +1,4 @@
+-heat_template_version: 2016-10-14
++heat_template_version: {{ openshift_openstack_heat_template_version }}
+ 
+ description: OpenShift cluster
+ 
+--- openshift-ansible.orig/roles/openshift_openstack/templates/heat_stack_segmentation_ids.yaml.j2
++++ openshift-ansible/roles/openshift_openstack/templates/heat_stack_segmentation_ids.yaml.j2
+@@ -1,4 +1,4 @@
+-heat_template_version: pike
++heat_template_version: {{ openshift_openstack_heat_template_version }}
+ 
+ description: Simple template to generate the needed vlan ids
+ 
+--- openshift-ansible.orig/roles/openshift_openstack/templates/heat_stack_server.yaml.j2
++++ openshift-ansible/roles/openshift_openstack/templates/heat_stack_server.yaml.j2
+@@ -1,4 +1,4 @@
+-heat_template_version: pike
++heat_template_version: {{ openshift_openstack_heat_template_version }}
+ 
+ description: OpenShift cluster server
+ 
+--- openshift-ansible.orig/roles/openshift_openstack/templates/heat_stack_subports.yaml.j2
++++ openshift-ansible/roles/openshift_openstack/templates/heat_stack_subports.yaml.j2
+@@ -1,4 +1,4 @@
+-heat_template_version: pike
++heat_template_version: {{ openshift_openstack_heat_template_version }}
+ 
+ description: Template to create subports
+ 

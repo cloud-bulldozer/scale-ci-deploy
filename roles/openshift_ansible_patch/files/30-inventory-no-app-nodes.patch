@@ -1,13 +1,5 @@
 --- openshift-ansible.orig/playbooks/openstack/inventory.py
 +++ openshift-ansible/playbooks/openstack/inventory.py
-@@ -11,6 +11,7 @@
- 
- from collections import Mapping
- import json
-+import os
- 
- import shade
- 
 @@ -81,9 +82,12 @@
  
      # TODO(shadower): filter the servers based on the `OPENSHIFT_CLUSTER`
