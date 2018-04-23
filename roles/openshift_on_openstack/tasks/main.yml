@@ -34,7 +34,7 @@
   # Note: The copy module does not support recursive copy of remote sources.
   command: "cp -a /root/openshift-ansible/ {{ ansible_user_dir }}/openshift-ansible"
   become: true
-  when: openshift_ansible['stat']['exists']
+  when: (not openshift_ansible_clone | bool) and openshift_ansible['stat']['exists']
 
 # Change the permissions to be owned by the user.
 - name: Changing the permission of the openshift-ansible files
@@ -44,13 +44,13 @@
     group: "{{ ansible_user }}"
     recurse: yes
   become: true
-  when: openshift_ansible['stat']['exists']
+  when: (not openshift_ansible_clone | bool) and openshift_ansible['stat']['exists']
 
 # Print the values that will be used for the openshift-ansible repository.
 - name: Printing the values used to clone openshift-ansible
   debug:
     msg: "openshift-ansible repository: {{ openshift_ansible_repo }} {{ openshift_ansible_version }}"
-  when: openshift_ansible['stat']['exists'] == false
+  when: openshift_ansible_clone | bool
 
 # Get a fresh clone of the openshift-ansible GitHub project.
 - name: Cloning the openshift-ansible repository
@@ -60,7 +60,7 @@
     repo: "{{ openshift_ansible_repo }}"
     # Specify a version for a different branch, tag, or hash to verify PRs.
     version: "{{ openshift_ansible_version }}"
-  when: openshift_ansible['stat']['exists'] == false
+  when: openshift_ansible_clone | bool
 
 # Include the tasks from the openshift_ansible_patch role.
 - name: Include the tasks to patch files in the openshift-ansible directory
