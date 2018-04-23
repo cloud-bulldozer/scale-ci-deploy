@@ -15,3 +15,5 @@ openshift_registries: "{{ lookup('env', 'openshift_registries') }}"
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
 # Break up the space separate string into a list of image registries for the OSEv3.yml variables.
 registries: "{{ openshift_registries.split(' ') }}"
+# Clone openshift-ansible repository rather than copying /root/openshift-ansible
+openshift_ansible_clone: "{{ lookup('env', 'openshift_ansible_clone')|default(false, true) }}"
