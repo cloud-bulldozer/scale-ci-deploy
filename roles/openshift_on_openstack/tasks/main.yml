@@ -288,62 +288,6 @@
     # Use bash to get the posix style redirects.
     executable: /bin/bash
 
-# Get the addresses of a master virtual machine.
-- name: Getting the IP address of master-0 VM
-  shell: "{{ openstack }} server show master-0.{{ clusterid }}.{{ dns_domain }} --format value -c addresses"
-  register: master_addresses
-  changed_when: false
-
-# Parse the second IP address from the addresses field.
-- name: Parsing the floating ip address from the master addresses
-  set_fact:
-    # "openshift-ansible-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
-    master_address: "{{ master_addresses['stdout'].split(', ')[1] }}"
-  failed_when: master_address == ""
-
-# Create the Kubernetes configuration directory on the target host.
-- name: Creating the {{ ansible_user_dir }}/.kube directory on target host
-  file:
-    path: "{{ ansible_user_dir }}/.kube"
-    state: directory
-
-# Copy the kubeconfig to the target host.
-- name: Copying the kubeconfig file from the master to the target host
-  command: "scp openshift@{{ master_address }}:.kube/config {{ ansible_user_dir }}/.kube/config"
-
-- name: Copying {{ ansible_user_dir }}/.kube to /root
-  # Note: The copy module does not support recursive copy of remote sources.
-  command: "cp -a {{ ansible_user_dir }}/.kube /root"
-  become: true
-
-# Add the master host address to the properties file.
-- name: Adding the MASTER_HOSTNAME to the properties file
-  lineinfile:
-    line: "MASTER_HOSTNAME={{ master_address }}"
-    path: "{{ properties_file }}"
-  delegate_to: localhost
-
-# Add the master user to the properties file.
-- name: Adding the MASTER_USER to the properties file
-  lineinfile:
-    line: "MASTER_USER=openshift"
-    path: "{{ properties_file }}"
-  delegate_to: localhost
-
-# Enable pbench in the properties file.
-- name: Adding ENABLE_PBENCH to the properties file
-  lineinfile:
-    line: "ENABLE_PBENCH=True"
-    path: "{{ properties_file }}"
-  delegate_to: localhost
-
-# Get the properties file contents.
-- name: Reading the {{ properties_file }}
-  set_fact:
-    properties_contents: "{{ lookup('file', properties_file) }}"
-  delegate_to: localhost
-
-# Print the contents of the properties file.
-- name: Printing the contents {{ properties_file }}
-  debug:
-    msg: "{{ properties_contents }}"
+# Please do not add any more lines after the task above -- use another role.
+# This will allow a more pleasant completion of deployment after OpenShift
+# deployments failed because of a non-critical issue.
