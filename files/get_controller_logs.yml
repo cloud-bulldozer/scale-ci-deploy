@@ -7,6 +7,7 @@
     local_destination_directory: "{{ lookup('env', 'PWD')|default('.', true) }}"
     # The OpenStack controller services to capture the logs.
     openstack_controller_services:
+      - glance
       - heat
       - neutron
       - nova

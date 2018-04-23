@@ -24,9 +24,10 @@ openshift_flavors:
   - { name: load_balancer, vcpu: 4, memory: 16384, disk: 128 }
   - { name: infra_elastic, vcpu: 40, memory: 163840, disk: 128, property: '--property "pci_passthrough:alias"="nvme:1"' }
   - { name: master_etcd, vcpu: 16, memory: 124928, disk: 256, property: '--property "pci_passthrough:alias"="nvme:1"' }
-  - { name: node_small, vcpu: 1, memory: 2048, disk: 71 }
-  - { name: node_medium, vcpu: 4, memory: 16384, disk: 96 }
-  - { name: node_large, vcpu: 8, memory: 31744, disk: 128 }
+  - { name: node_minimum, vcpu: 1, memory: 2048, disk: 71 }
+  - { name: node_small, vcpu: 2, memory: 8192, disk: 96 }
+  - { name: node_medium, vcpu: 4, memory: 16384, disk: 128 }
+  - { name: node_large, vcpu: 8, memory: 31744, disk: 160 }
 # The path to the OpenStack RC file on the openstack-server, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
 # The path to the private key, put it the install directory for easy cleanup.

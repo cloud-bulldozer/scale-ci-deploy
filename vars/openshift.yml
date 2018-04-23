@@ -7,9 +7,17 @@ openshift_ansible_version: "{{ lookup('env', 'openshift_ansible_version')|defaul
 openshift_ansible_contrib_repo: "{{ lookup('env', 'openshift_ansible_contrib_repo')|default('https://github.com/openshift/openshift-ansible-contrib', true) }}"
 # This version can be a branch, tag, or hash for testing pull requests.
 openshift_ansible_contrib_version: "{{ lookup('env', 'openshift_ansible_contrib_version')|default('master', true) }}"
+# The flavor to use for OpenShift CNS VMs.
+openshift_cns_flavor: "{{ lookup('env', 'openshift_cns_flavor')|default('container_storage', true) }}"
 # The flavor to use as default for other OpenShift VMs.
 openshift_default_flavor: "{{ lookup('env', 'openshift_default_flavor')|default('m1.medium', true) }}"
-# The flavor to use for the OpenShift nodes.
+# The flavor to use for OpenShift infra VMs.
+openshift_infra_flavor: "{{ lookup('env', 'openshift_infra_flavor')|default('infra_elastic', true)}}"
+# The flavor to use for OpenShift load balancer VMs.
+openshift_lb_flavor: "{{ lookup('env', 'openshift_lb_flavor')|default('load_balancer', true) }}"
+# The flavor to use for OpenShift master VMs.
+openshift_master_flavor: "{{ lookup('env', 'openshift_master_flavor')|default('master_etcd', true) }}"
+# The flavor to use for OpenShift node VMs.
 openshift_node_flavor: "{{ lookup('env', 'openshift_node_flavor')|default('node_large', true) }}"
 # Get the number of OpenShift nodes to scale to.
 openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default(2, true) }}"
