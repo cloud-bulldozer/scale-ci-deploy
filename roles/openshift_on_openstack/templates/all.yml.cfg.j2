@@ -10,11 +10,11 @@ openshift_openstack_num_masters: 3
 openshift_openstack_num_infra: 3
 openshift_openstack_num_cns: 3
 openshift_openstack_num_nodes: "{{ openshift_node_target }}"
-openshift_openstack_master_flavor: "master_etcd"
-openshift_openstack_infra_flavor: "infra_elastic"
-openshift_openstack_cns_flavor: "container_storage"
+openshift_openstack_master_flavor: "{{ openshift_master_flavor }}"
+openshift_openstack_infra_flavor: "{{ openshift_infra_flavor }}"
+openshift_openstack_cns_flavor: "{{ openshift_cns_flavor }}"
 openshift_openstack_node_flavor: "{{ openshift_node_flavor }}"
-openshift_openstack_lb_flavor: "load_balancer"
+openshift_openstack_lb_flavor: "{{ openshift_lb_flavor }}"
 openshift_openstack_default_flavor: "{{ openshift_default_flavor }}"
 openshift_openstack_subnet_cidr: "192.168.96.0/20"
 openshift_openstack_pool_start: "192.168.96.3"
