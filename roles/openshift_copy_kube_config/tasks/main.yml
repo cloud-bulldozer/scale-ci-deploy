@@ -1,0 +1,23 @@
+---
+- name: Getting the floating ip address of the first master
+  set_fact:
+    master_address: "{{ hostvars[groups.masters[0]].public_ip }}"
+  when: groups["masters"] is defined and groups.masters | length > 0
+
+- name: Refuse to continue if master address is not defined
+  fail:
+    msg: "Master address is not defined."
+  when: master_address is not defined or master_address == ""
+
+- name: Creating the {{ ansible_user_dir }}/.kube directory on target host
+  file:
+    path: "{{ ansible_user_dir }}/.kube"
+    state: directory
+
+- name: Copying the kubeconfig file from the master to the target host
+  command: "scp openshift@{{ master_address }}:.kube/config {{ ansible_user_dir }}/.kube/config"
+
+- name: Copying {{ ansible_user_dir }}/.kube to /root
+  # Note: The copy module does not support recursive copy of remote sources.
+  command: "cp -a {{ ansible_user_dir }}/.kube /root"
+  become: true

@@ -51,9 +51,11 @@
   roles:
     - pbench_storage
 
-- name: Add IP address of the core OCP cluster to /etc/hosts on target-server
+- name: Run post OpenShift installation tasks
   hosts: target-server
   vars_files:
     - vars/openstack.yml
   roles:
+    - openshift_copy_kube_config
     - openstack_etc_hosts
+    - jenkins_pipeline
