@@ -34,16 +34,33 @@ openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ 
 remote_private_key_path: "{{ lookup('env', 'remote_private_key_path')|default(install_directory ~ '/key.private', true) }}"
 # The path to the public key, put it in the install directory for easy cleanup.
 remote_public_key_path: "{{ lookup('env', 'remote_public_key_path')|default(install_directory ~ '/key.public', true) }}"
-# The quota structure to set for this OpenStack installation.
+# The quota structure to set for this OpenStack project.
 quotas:
-  cores: 2432         # Number of instance cores (VCPUs) allowed per project.
-  gigabytes: 100000   # Volume gigabytes allowed for each project.
-  instances: 4096     # Number of instances (VMs) allowed per project.
-  ports: 10000
-  ram: 9961472        # Megabytes of instance ram allowed per project.
-  secgroups: 25
-  volumes: 50000      # Volumes allowed for each project.
-  floating-ips: 4096  # Number of floating IP addresses allowed per project.
+  backup-gigabytes: -1
+  backups: -1
+  cores: -1           # Number of instance cores (VCPUs) allowed per project.
+  fixed-ips: -1
+  floating-ips: -1    # Number of floating IP addresses allowed per project.
+  gigabytes: -1       # Volume gigabytes allowed for each project.
+  injected-file-size: -1
+  injected-files: -1
+  injected-path-size: -1
+  instances: -1       # Number of instances (VMs) allowed per project.
+  key-pairs: -1       # Number of key pairs allowed per project.
+  networks: -1
+  ports: -1
+  properties: -1
+  ram: -1             # Megabytes of instance ram allowed per project.
+  rbac-policies: -1
+  routers: -1
+  secgroup-rules: -1
+  secgroups: -1       # Security groups allowed for each project.
+  server-group-members: -1
+  server-groups: -1
+  snapshots: -1       # Volume snapshots allowed for each project.
+  subnets: -1
+  volumes: -1         # Volumes allowed for each project.
+
 # Rough equivalents of the Google cloud instance sizes.
 standard_flavors:
   # https://cloud.google.com/compute/docs/machine-types
