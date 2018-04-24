@@ -105,3 +105,19 @@
   copy:
     content: "{{ nsupdate_keys|to_nice_yaml }}"
     dest: "{{ nsupdate_file }}"
+
+- name: Adding target-server to DNS
+  nsupdate:
+    key_name: "{{ dns_key_name }}"
+    key_secret: "{{ dns_key_secret }}"
+    key_algorithm: "{{ dns_key_algorithm }}"
+    server: "{{ cluster_dns_ip }}"
+    zone: "{{ clusterid }}.{{ dns_domain }}"
+    record: "{{ openstack_server_name }}"
+    type: "A"
+    value: "{{ item }}"
+    state: present
+  with_items: "{{ groups['target-server'] }}"
+  register: nsupdate_add_result
+  until: nsupdate_add_result is succeeded
+  retries: 10
