@@ -151,18 +151,10 @@
     openstack_project: "{{ project_name.stdout }}"
   when: openstack_project == "" and project_name.stdout != ""
 
-# Raise the quotas from the defaults if possible.
+# Change the quotas from the defaults for the project.
 - name: Setting the quotas for {{ openstack_project }}
   shell: "{{ openstack }} quota set --{{ item }} {{ quotas[ item ] }} {{ openstack_project }}"
-  with_items:
-    - cores
-    - floating-ips
-    - gigabytes
-    - instances
-    - ports
-    - ram
-    - secgroups
-    - volumes
+  with_items: "{{ quotas }}"
   # Only set quotas when the project is defined.
   when: openstack_project != ""
 
