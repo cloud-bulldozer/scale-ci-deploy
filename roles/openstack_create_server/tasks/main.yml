@@ -131,10 +131,18 @@
 - name: Creating {{ openstack_keypair_name }} keypair to access this server
   shell: "{{ openstack }} keypair create --public-key {{ remote_public_key_path }} {{ openstack_keypair_name }} --format value -c fingerprint"
 
-# Create the flavors so the create server can specify a flavor.
-- name: Creating the flavors
-  shell: "{{ openstack }} flavor create --ram {{ item['memory'] }} --disk {{ item['disk'] }} --vcpus {{ item['vcpu'] }} {{ item['property']|default('') }} {{ item['name'] }} --format value -c id"
-  with_items: "{{ ec2_flavors }} + {{ standard_flavors }} + {{ openshift_flavors }}"
+# Create EC2 flavors so create server can specify a standard size.
+- name: Creating the EC2 flavors
+  shell: "{{ openstack }} flavor create --ram {{ item['memory'] }} --disk {{ item['disk'] }} --vcpus {{ item['vcpu'] }} {{ item['name'] }} --format value -c id"
+  with_items: "{{ ec2_flavors }}"
+  # Some OpenStack environments do not allow users to create public flavors.
+  ignore_errors: true
+  when: openstack_create_flavors | default(True) | bool
+
+# Create PCI flavors so create server can specify a pci passthrough size.
+- name: Creating the PCI passthrough flavors
+  shell: "{{ openstack }} flavor create --ram {{ item['memory'] }} --disk {{ item['disk'] }} --vcpus {{ item['vcpu'] }} --property {{ pci_passthrough_property }} {{ item['name'] }}-pci --format value -c id"
+  with_items: "{{ ec2_flavors }}"
   # Some OpenStack environments do not allow users to create public flavors.
   ignore_errors: true
   when: openstack_create_flavors | default(True) | bool
