@@ -14,7 +14,8 @@ use_cluster_metrics: true
 # Use the allow all identity provider for conformance tests.
 openshift_master_identity_providers: [{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
-# Set master cluster public hostname and default subdomain for exposed routes
+# Set master cluster (public) hostname and default subdomain for exposed routes
+openshift_master_cluster_hostname: lb-0.{{ clusterid }}.{{ dns_domain }}
 openshift_master_cluster_public_hostname: lb-0.{{ clusterid }}.{{ dns_domain }}
 openshift_master_default_subdomain: apps.{{ clusterid }}.{{ dns_domain }}
 
@@ -33,19 +34,9 @@ openshift_storage_glusterfs_heketi_version: v{{ ocp_major_minor }}
 openshift_storage_glusterfs_s3_version: v{{ ocp_major_minor }}
 openshift_storage_glusterfs_block_host_vol_size: 350
 
-# Prometheus variables.
-openshift_hosted_prometheus_deploy: true
-openshift_prometheus_alertbuffer_storage_class: "glusterfs-storage-block"
-openshift_prometheus_alertbuffer_storage_type: pvc
-openshift_prometheus_alertbuffer_storage_volume_size: 40Gi
-openshift_prometheus_alertmanager_storage_class: "glusterfs-storage-block"
-openshift_prometheus_alertmanager_storage_type: pvc
-openshift_prometheus_alertmanager_storage_volume_size: 40Gi
-openshift_prometheus_node_exporter_install: true
-openshift_prometheus_state: present
-openshift_prometheus_storage_class: "glusterfs-storage-block"
-openshift_prometheus_storage_type: pvc
-openshift_prometheus_storage_volume_size: 40Gi
+# Cluster Monitoring Operator
+openshift_monitoring_deploy: true
+openshift_cluster_monitoring_operator_install: true
 
 # EFK logging stack variables
 openshift_logging_install_logging: true
