@@ -43,7 +43,7 @@ openshift_logging_install_logging: true
 openshift_logging_es_cluster_size: 3
 openshift_logging_es_pvc_dynamic: true
 openshift_logging_es_pvc_size: 50Gi
-openshift_logging_es_pvc_storage_class_name: "gluster-storage-block"
+openshift_logging_es_pvc_storage_class_name: "glusterfs-storage-block"
 openshift_logging_fluentd_read_from_head: false
 openshift_logging_use_mux: false
 openshift_logging_curator_nodeselector: {"region": "infra"}
