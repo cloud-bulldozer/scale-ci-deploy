@@ -43,6 +43,7 @@
     - vars/openstack.yml
   roles:
     - openshift_get_core_cluster
+    - openstack_etc_hosts
 
 - name: Use the remaining disk space on the core cluster for Pbench
   hosts: masters infras lb cns app_nodes
