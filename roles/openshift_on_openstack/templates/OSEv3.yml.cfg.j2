@@ -2,6 +2,9 @@
 openshift_install_examples: true
 openshift_examples_modify_imagestreams: false
 
+# Disable all excluders
+openshift_enable_excluders: false
+
 # Disable some checks that are likely to fail (mem>=8GiB).
 openshift_disable_check: memory_availability
 
