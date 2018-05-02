@@ -3,6 +3,7 @@
   hosts: openstack-server
   vars_files:
     - "../vars/openstack.yml"
+    - "../group_vars/all.yml"
   vars:
     # Get the RC file from the environment, or the user's home directory by default.
     openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
@@ -170,3 +171,10 @@
       # Use each line by the previous command, the line will be "ID Name".
       with_items: "{{ images_id_name['stdout_lines'] }}"
       when: delete_images|bool == true
+
+    - name: Remove old hosts from /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^\s*\d.*({{ openstack_server_name }}|{{ clusterid }}.{{ dns_domain }})'
+        state: absent
