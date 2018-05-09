@@ -3,6 +3,8 @@
 ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
 # The path to the private key to access servers using the keypair.
 ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+# The path to the local directory to store log files or build artifacts.
+artifacts_directory: "{{ lookup('env', 'ARTIFACTS_DIR')|default('artifacts/openshift-' ~ ocp_major_minor, true) }}"
 # The name of the cluster to use on this install.
 clusterid: "{{ lookup('env', 'clusterid')|default('scale-ci', true) }}"
 # The public dns domain for this cluster.

@@ -2,3 +2,4 @@
 virtualenv
 openstackrc
 inventory
+artifacts/
