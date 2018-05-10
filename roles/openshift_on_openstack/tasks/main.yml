@@ -232,11 +232,14 @@
 
     # Get some debug information that makes it easier to file OpenShift bugs.
     - name: Running commands that create debug information needed to open issues
-      shell: |
-        printf $(uname -srm)\n$(cat /etc/os-release)\n > debug_information.txt
-        ansible --version >> debug_information.txt
-        rpm -q atomic-openshift-utils openshift-ansible >> debug_information.txt
-        cd openshift-ansible; git describe >> debug_information.txt
+      shell: "{{ item }} >> debug_information.txt"
+      with_items:
+        - "printf \"$(uname -srm)\n$(cat /etc/os-release)\n\""
+        - "ansible --version"
+        - "cd openshift-ansible ; git describe"
+        - "rpm -q atomic-openshift-utils openshift-ansible"
+      # Ignore errors because OpenShift is either installed via rpm or github.
+      ignore_errors: true
 
     # Write the debug information to the artifacts directory.
     - name: Copy the debug information to the artifacts directory
