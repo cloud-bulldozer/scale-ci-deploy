@@ -169,6 +169,7 @@
     src: "{{ all_yml_path }}"
     dest: "{{ artifacts_directory }}"
     mode: pull
+    use_ssh_args: yes
 
 - name: Create the OSEv3.yml.cfg (OSEv3.yml override) file.
   template:
@@ -205,6 +206,7 @@
     src: "{{ osev3_yml_path }}"
     dest: "{{ artifacts_directory }}"
     mode: pull
+    use_ssh_args: yes
 
 # Set the path for the prerequisite log file.
 - name: Creating a variable for the prerequisite log file
@@ -226,6 +228,7 @@
         src: "{{ prerequisite_log }}"
         dest: "{{ artifacts_directory }}"
         mode: pull
+        use_ssh_args: yes
 
     # Get some debug information that makes it easier to file OpenShift bugs.
     - name: Running commands that create debug information needed to open issues
@@ -241,6 +244,7 @@
         src: debug_information.txt
         dest: "{{ artifacts_directory }}"
         mode: pull
+        use_ssh_args: yes
 
 # Set the path for the OpenStack provision log file.
 - name: Creating a variable for the OpenStack provision log file
@@ -262,6 +266,7 @@
         src: "{{ openstack_provision_log }}"
         dest: "{{ artifacts_directory }}"
         mode: pull
+        use_ssh_args: yes
 
 # Render the time server configuration file and copy it to the target-host.
 - name: Rendering the time server configuration file to the target-host
@@ -294,6 +299,7 @@
         src: "{{ time_servers_log }}"
         dest: "{{ artifacts_directory }}"
         mode: pull
+        use_ssh_args: yes
 
 # Copy the prepare_block_devices.yml playbook to the target-host.
 - name: Copying the prepare_block_devices.yml playbook to the target-host
@@ -320,6 +326,7 @@
         src: "{{ block_devices_log }}"
         dest: "{{ artifacts_directory }}"
         mode: pull
+        use_ssh_args: yes
 
 # Set the path for the OpenShift install log file.
 - name: Creating the OpenShift install log file variable
@@ -341,6 +348,7 @@
         src: "{{ openshift_install_log }}"
         dest: "{{ artifacts_directory }}"
         mode: pull
+        use_ssh_args: yes
 
 # Please do not add any more lines after the task above -- use another role.
 # This will allow a more pleasant completion of deployment after OpenShift
