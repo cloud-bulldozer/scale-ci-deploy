@@ -17,6 +17,13 @@
   setup:
     filter: ansible_*
 
+# In some cases the yum cache could be invalid, clean cache before installing.
+- name: Cleaning the yum cache
+  become: true
+  # Using raw, because the Python yum package may not be installed.
+  raw: rm -fr /var/cache/yum/*; yum clean all;
+  when: clean_yum_cache
+
 # Install the common operating system packages on the host.
 - name: Installing the common operating system software packages
   become: true
