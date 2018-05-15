@@ -121,3 +121,26 @@
   register: nsupdate_add_result
   until: nsupdate_add_result is succeeded
   retries: 10
+
+- name: Change NetworkManager configuration to not update DNS
+  lineinfile:
+    backup: yes
+    dest: /etc/NetworkManager/NetworkManager.conf
+    line: "dns=no"
+    insertafter: "\\[main\\]"
+  become: true
+
+- name: Add the cluster DNS the resolv.conf
+  lineinfile:
+    backup: yes
+    dest: /etc/resolv.conf
+    line: "nameserver {{ cluster_dns_ip }}"
+    insertbefore: "^nameserver.*"
+  become: true
+
+- name: Replace the search string with the cluster zone in resolv.conf
+  lineinfile:
+    dest: /etc/resolv.conf
+    line: "search cluster.local {{ clusterid }}.{{ dns_domain }} openstacklocal"
+    regexp: "^search.*"
+  become: true
