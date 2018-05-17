@@ -34,7 +34,19 @@
       set_fact:
         openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
 
-    # Get the images.
+    # Get the all the servers by ID.
+    - name: Getting all the servers by ID
+      shell: "{{ openstack }} server list --format value -c ID --limit -1"
+      register: servers
+      changed_when: false
+
+    # Stop all the servers in an attempt to avoid PCI passthrough issues.
+    # https://bugzilla.redhat.com/show_bug.cgi?id=1542494
+    - name: Stopping all the servers
+      shell: "{{ openstack }} server stop {{ item }}"
+      with_items: "{{ servers.stdout_lines }}"
+
+    # Get the heat stacks in this OpenStack environment.
     - name: Getting all the heat stacks
       shell: "{{ openstack }} stack list --format value -c ID"
       register: stacks
