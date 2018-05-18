@@ -6,12 +6,3 @@
     strip: 0
   with_items:
     - "{{ lookup('fileglob', '*.patch').split(',') | sort }}"
-
-- name: Applying patches to files across the filesystem with elevated privileges
-  patch:
-    src: "{{ item }}"
-    basedir: /
-    strip: 0
-  with_items:
-    - "{{ lookup('fileglob', 'root/*.patch').split(',') | sort }}"
-  become: true
