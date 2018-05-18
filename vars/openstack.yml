@@ -23,8 +23,8 @@ openstack_server_image: "{{ lookup('env', 'server_image')|default(virtual_image_
 openstack_server_name: "{{ lookup('env', 'server_name')|default('ansible-host', true) }}"
 # The name of the private subnet for the OpenShift install server.
 openstack_subnet_name: "{{ lookup('env', 'subnet_name')|default('ci_subnet', true) }}"
-# The subnet range to use on the OpenStack private subnet (\23 == 510 addresses).
-openstack_subnet_range: "{{ lookup('env', 'subnet_range')|default('192.168.4.0/23', true) }}"
+# The subnet range to use on the OpenStack private subnet (\16 == 65534 addresses).
+openstack_subnet_range: "{{ lookup('env', 'subnet_range')|default('192.168.0.0/16', true) }}"
 # Create flavors in the openstack environment.
 openstack_create_flavors: "{{ lookup('env', 'create_flavors')|default(true, true) }}"
 # Prepare images and upload them to glance in the openstack environment.
