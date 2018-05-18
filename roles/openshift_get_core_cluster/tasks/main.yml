@@ -45,6 +45,11 @@
       - "{{ networks['stdout_lines'] }}"
       - "{{ floating_addresses['results'] }}"
 
+- name: Getting the list of hosts from OpenStack
+  shell: "{{ openstack }} server list --name .*-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks --limit -1"
+  register: networks
+  changed_when: false
+
 - name: Creating a list of hosts from the OpenStack networks output
   set_fact:
     ocp_core_cluster: "{{ ocp_core_cluster }} + [{ 'group': '{{ item.0.group }}', 'name': '{{ item.1.split(' ')[0].split('.')[0] }}', 'private_ip': '{{ item.1.split('=')[1].split(', ')[0] }}', 'public_ip': '{{ item.1.split(', ')[1] }}' }]"
