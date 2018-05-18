@@ -89,20 +89,15 @@
 - name: Replace the address of the DNS server for the subnet
   shell: "{{ openstack }} subnet set --no-dns-nameservers --dns-nameserver {{ cluster_dns_ip }} {{ openstack_subnet_name }}"
 
-# Set the information to update the public DNS records.
-- name: Setting the DNS public update information
-  set_fact:
-    dns_public_info: { key_algorithm: "{{ dns_key_algorithm }}", key_name: "{{ dns_key_name }}", key_secret: "{{ dns_key_secret }}", server: "{{ cluster_dns_ip }}" }
-
 # Set the information to update the private DNS records.
 - name: Setting the DNS private update information
   set_fact:
     dns_private_info: { key_algorithm: "{{ dns_key_algorithm }}", key_name: "{{ dns_key_name }}", key_secret: "{{ dns_key_secret }}", server: "{{ cluster_dns_ip }}" }
 
-# Set the OpenShift update keys with the public and private information.
+# Set the OpenShift update keys with the private update information.
 - name: Setting the OpenShift name server update keys
   set_fact:
-    nsupdate_keys: { openshift_openstack_dns_nameservers: ["{{ cluster_dns_ip }}"], openshift_openstack_external_nsupdate_keys: { public: "{{ dns_public_info }}", private: "{{ dns_private_info }}" } }
+    nsupdate_keys: { openshift_openstack_dns_nameservers: ["{{ cluster_dns_ip }}"], openshift_openstack_external_nsupdate_keys: { private: "{{ dns_private_info }}" } }
 
 # Write the OpenShift update keys to a YAML file.
 - name: Writing the OpenShift name server update keys to a file
