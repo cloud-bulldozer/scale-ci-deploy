@@ -41,8 +41,8 @@
 # Creating a list of new host information.
 - name: Creating a list of new hosts from the OpenStack networks output
   set_fact:
-    # Example: app-node-90.scale-ci.example.com openshift-ansible-scale-ci.example.com-net=192.168.96.36, 172.21.0.114
-    hosts_new: "{{ hosts_new }} + [{ 'name': '{{ item.split(' ')[0].split('.')[0] }}', 'private_ip': '{{ item.split('=')[1].split(', ')[0] }}', 'public_ip': '{{ item.split(', ')[1] }}' }]"
+    # Example: app-node-90.scale-ci.example.com ci_network=192.168.0.99
+    hosts_new: "{{ hosts_new }} + [{ 'name': '{{ item.split(' ')[0].split('.')[0] }}', 'private_ip': '{{ item.split('=')[1] }}' }]"
   with_items: "{{ networks_new.stdout_lines | difference(networks_old.stdout_lines) }}"
 
 # Create the new nodes inventory file name
@@ -60,7 +60,7 @@
 - name: Adding the addresses to the new nodes inventory file
   lineinfile:
     path: "{{ new_nodes_inventory }}"
-    line: "{{ item.public_ip }} openshift_node_labels=\"{'region': 'primary'}\""
+    line: "{{ item['private_ip'] }} openshift_node_labels=\"{'region': 'primary'}\""
   with_items: "{{ hosts_new }}"
 
 # Add the new nodes to DNS.
@@ -71,9 +71,9 @@
     key_algorithm: "{{ dns_key_algorithm }}"
     server: "{{ cluster_dns_ip }}"
     zone: "{{ clusterid }}.{{ dns_domain }}"
-    record: "{{ item.name }}"
+    record: "{{ item['name'] }}"
     type: "A"
-    value: "{{ item.private_ip }}"
+    value: "{{ item['private_ip'] }}"
     state: present
   with_items:
     - "{{ hosts_new | default([]) }}"
@@ -85,7 +85,7 @@
 - name: Waiting for the new nodes to respond to ssh
   wait_for:
     delay: 1
-    host: "{{ item.public_ip }}"
+    host: "{{ item['private_ip'] }}"
     port: 22
     state: started
     timeout: 120
