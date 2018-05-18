@@ -87,7 +87,7 @@
 
 # Specify both --dns-nameserver and --no-dns-nameservers to overwrite the current DNS server information.
 - name: Replace the address of the DNS server for the subnet
-  shell: "{{ openstack }} subnet set --no-dns-nameservers --dns-nameserver {{ item }} {{ openstack_subnet_name }}"
+  shell: "{{ openstack }} subnet set --no-dns-nameservers --dns-nameserver {{ cluster_dns_ip }} {{ openstack_subnet_name }}"
 
 # Set the information to update the public DNS records.
 - name: Setting the DNS public update information
