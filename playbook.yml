@@ -61,3 +61,9 @@
     - openstack_etc_hosts
     - jenkins_pipeline
     - openshift_label_nodes
+
+- name: Copy the certs to the location where golang looks for
+  hosts: masters
+  become: yes
+  roles:
+    - openshift_copy_certs
