@@ -3,17 +3,25 @@
 all_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/all.yml"
 # The path to the all.yml.cfg (all.yml override) file on the target-server.
 all_yml_cfg_path: "{{ ansible_user_dir }}/inventory/group_vars/all.yml.cfg"
-# The path to the OSEv3.yml file on the target-server.
-osev3_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/OSEv3.yml"
-# The path to the OSEv3.yml.cfg (OSEv3.yml override) file on the target-server.
-osev3_yml_cfg_path: "{{ ansible_user_dir }}/inventory/group_vars/OSEv3.yml.cfg"
+# The tag for the glusterfs_block_image (rhgs-gluster-block-prov-rhel7).
+glusterfs_block_tag: "{{ lookup('env', 'glusterfs_block_tag')|default('v' ~ ocp_major_minor, true) }}"
+# The container tag for the glusterfs_heketi_image (rhgs-volmanager-rhel7).
+glusterfs_heketi_tag: "{{ lookup('env', 'glusterfs_heketi_tag')|default('v' ~ ocp_major_minor, true) }}"
+# The container tag for the glusterfs_image (rhgs-server-rhel7).
+glusterfs_image_tag: "{{ lookup('env', 'glusterfs_image_tag')|default('v' ~ ocp_major_minor, true) }}"
+# The container tag for the glusterfs_s3_image (rhgs-s3-server-rhel7).
+glusterfs_s3_tag: "{{ lookup('env', 'glusterfs_s3_tag')|default('v' ~ ocp_major_minor, true) }}"
 # The path to the file that contains the name server update information.
 nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
+# Clone openshift-ansible repository rather than copying /root/openshift-ansible
+openshift_ansible_clone: "{{ lookup('env', 'openshift_ansible_clone')|default(false, true) }}"
 # Look up the environment variable with a space separated string of image registry servers to add to the container configuration.
 openshift_registries: "{{ lookup('env', 'openshift_registries') }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
+# The path to the OSEv3.yml file on the target-server.
+osev3_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/OSEv3.yml"
+# The path to the OSEv3.yml.cfg (OSEv3.yml override) file on the target-server.
+osev3_yml_cfg_path: "{{ ansible_user_dir }}/inventory/group_vars/OSEv3.yml.cfg"
 # Break up the space separate string into a list of image registries for the OSEv3.yml variables.
 registries: "{{ openshift_registries.split(' ') }}"
-# Clone openshift-ansible repository rather than copying /root/openshift-ansible
-openshift_ansible_clone: "{{ lookup('env', 'openshift_ansible_clone')|default(false, true) }}"
