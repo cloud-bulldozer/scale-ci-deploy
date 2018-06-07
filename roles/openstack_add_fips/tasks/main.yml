@@ -1,0 +1,36 @@
+---
+- name: Checking for the OpenStack client
+  stat:
+    path: "{{ openstack_location }}"
+  register: openstack_path
+
+- name: Aborting when the OpenStack client does not exist
+  fail:
+    msg: "The openstack client path '{{ openstack_location }}' is invalid."
+  when: openstack_path.stat.exists == false
+
+- name: Setting openstack variable to source the rc file and contain path to client
+  set_fact:
+    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
+
+- name: Getting the list of hosts from OpenStack
+  shell: "{{ openstack }} server list --name .*-[0-9]*.{{ clusterid }}.{{ dns_domain }} --format value -c Name -c Networks --limit -1"
+  register: networks
+  changed_when: false
+
+- name: Create floating ips for each core cluster VM
+  shell: "{{ openstack }} floating ip create {{ openstack_public_network_name }} --format value -c floating_ip_address"
+  register: floating_addresses
+  with_sequence: "{{ networks['stdout_lines']|length }}"
+
+- name: Adding a floating ip address to each core cluster VM
+  # This command can fail with: Instance network is not ready yet (HTTP 400)
+  shell: "{{ openstack }} server add floating ip {{ item[0].split(' ')[0] }} {{ item[1]['stdout'] }}"
+  register: add_result
+  until: add_result['rc'] == 0
+  # Retry 5 times until success.
+  retries: 5
+  delay: 5
+  with_together:
+      - "{{ networks['stdout_lines'] }}"
+      - "{{ floating_addresses['results'] }}"
