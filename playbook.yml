@@ -42,6 +42,7 @@
   vars_files:
     - vars/openstack.yml
   roles:
+    - openstack_add_fips
     - openshift_get_core_cluster
     - openstack_etc_hosts
 
