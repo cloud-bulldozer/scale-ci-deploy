@@ -25,3 +25,7 @@ osev3_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/OSEv3.yml"
 osev3_yml_cfg_path: "{{ ansible_user_dir }}/inventory/group_vars/OSEv3.yml.cfg"
 # Break up the space separate string into a list of image registries for the OSEv3.yml variables.
 registries: "{{ openshift_registries.split(' ') }}"
+# Enable service catalog
+service_catalog_enable: "{{ lookup('env', 'service_catalog_enable')|default(true, true) }}"
+# Enable template service broker (requires service catalog to be enabled)
+template_service_broker_enable: "{{ lookup('env', 'template_service_broker_enable')|default(true, true) }}"

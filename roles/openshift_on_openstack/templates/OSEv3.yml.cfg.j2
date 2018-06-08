@@ -14,6 +14,11 @@ openshift_clock_enabled: true
 # Enable cluster metrics.
 use_cluster_metrics: true
 
+# Enable or disable the service catalog.
+openshift_enable_service_catalog: {{ service_catalog_enable }}
+# Enable template service broker (requires service catalog to be enabled, above)
+template_service_broker_install: {{ template_service_broker_enable }}
+
 # Use the allow all identity provider for conformance tests.
 openshift_master_identity_providers: [{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 
