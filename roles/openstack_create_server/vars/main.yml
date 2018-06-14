@@ -9,7 +9,7 @@ ec2_flavors:
   # The RAM values are reduced by 256 MB to fit better on hosts.
   - { name: m4.large, vcpu: 2, memory: "{{ 8192 - 256 }}", disk: 96 }
   - { name: m4.xlarge, vcpu: 4, memory: "{{ 16384 - 256 }}", disk: 96 }
-  - { name: m4.2xlarge, vcpu: 8, memory: "{{ 32768 - 256 }}", disk: 128 }
+  - { name: m4.2xlarge, vcpu: 8, memory: "{{ 32768 - 1280 }}", disk: 128 }
   - { name: m4.4xlarge, vcpu: 16, memory: "{{ 65536 - 256 }}", disk: 200 }
   - { name: m4.10xlarge, vcpu: 40, memory: "{{ 163840 - 256 }}", disk: 256 }
   # https://aws.amazon.com/ec2/instance-types/#r4
