@@ -88,27 +88,6 @@
   # Note: The copy module does not support recurisve copy of remote sources.
   command: cp -a {{ openshift_openstack_dir }}/sample-inventory/ inventory
 
-# To set variables for different groups, create named files in group_vars.
-- name: Creating new files for app and glusterfs group variables
-  copy:
-    content: "openshift_node_group_name: node-config-compute"
-    dest: "inventory/group_vars/{{ item }}"
-  with_items:
-    - app.yml
-    - glusterfs.yml
-
-# To set variables for infra nodes create infra_hosts.yml in group_vars.
-- name: Creating new file for infra_host group variables
-  copy:
-    content: "openshift_node_group_name: node-config-infra"
-    dest: inventory/group_vars/infra_hosts.yml
-
-# To set variables for master nodes, create a masters.yml file in group_vars.
-- name: Creating new file for masters group variables
-  copy:
-    content: "openshift_node_group_name: node-config-master"
-    dest: inventory/group_vars/masters.yml
-
 # Copy the Ansible configuration file from the openshift-ansible repository.
 - name: Copying the Ansible configuration file from openshift-ansible
   copy:
