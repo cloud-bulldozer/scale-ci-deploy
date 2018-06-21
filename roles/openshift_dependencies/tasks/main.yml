@@ -57,6 +57,12 @@
     pip: "{{ virtualenv_directory }}/bin/pip"
   when: virtualenv_directory is defined
 
+# Upgrade setuptools to the latest level before installing modules.
+- name: Upgrade setuptools
+  command: "{{ pip }} install --upgrade setuptools"
+  # Only become root when the virtual environment directory is not defined.
+  become: "{{ virtualenv_directory is not defined }}"
+
 # Install the Python packages using pip with the command module.
 - name: Installing the Python packages
   # Only become root when the virtual environment directory is not defined.
