@@ -60,7 +60,7 @@
 - name: Adding the addresses to the new nodes inventory file
   lineinfile:
     path: "{{ new_nodes_inventory }}"
-    line: "{{ item['private_ip'] }} openshift_node_labels=\"{'region': 'primary'}\""
+    line: "{{ item['private_ip'] }} openshift_node_group_name=\"node-config-compute\""
   with_items: "{{ hosts_new }}"
 
 # Add the new nodes to DNS.
