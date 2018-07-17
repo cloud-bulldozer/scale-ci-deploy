@@ -1,0 +1,63 @@
+---
+- name: Install Apache httpd server and pbench-web-server packages.
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - httpd
+    - pbench-web-server
+  become: true
+
+- name: Set the httpd port to listen on.
+  lineinfile:
+    dest: "{{ httpd_conf }}"
+    state: present
+    regexp: '^\s*Listen\s*.*$'
+    line: "Listen {{ httpd_port }}"
+    backup: false
+  become: true
+
+- name: Do not restrict item name width in directory listing.
+  lineinfile:
+    dest: "{{ httpd_autoindex_conf }}"
+    state: present
+    regexp: '^(\s*IndexOptions.*)$'
+    line: '\1 NameWidth=*'
+    backup: false
+    backrefs: true
+  become: true
+
+- name: Start and enable Apache httpd server.
+  systemd:
+    name: httpd
+    enabled: yes
+    state: started
+  become: true
+
+- name: Ensure pbench-web-server static content is visible by the Apache web server.
+  file:
+    path: "{{ httpd_htdocs_dir }}/static"
+    src: "{{ pbench_web_server_static_dir }}"
+    state: link
+  become: true
+
+- name: Ensure {{ pbench_agent_dir }} is served by the Apache web server.
+  file:
+    dest: "{{ httpd_htdocs_dir }}/pbench-agent"
+    src: "{{ pbench_agent_dir }}"
+    state: link
+  become: true
+
+- name: Add an SELinux context for {{ pbench_agent_dir }}.
+  lineinfile:
+    dest: "{{ selinux_file_contexts }}"
+    state: present
+    regexp: '^{{ pbench_agent_dir }}.*$'
+    line: "{{ pbench_agent_dir }}(/.*)?     system_u:object_r:httpd_sys_content_t:s0"
+    backup: false
+    backrefs: true
+  become: true
+
+- name: Restore SELinux contexts on {{ pbench_agent_dir }}, so that it can be read by a web server.
+  command: "restorecon -RF {{ pbench_agent_dir }}"
+  become: true
