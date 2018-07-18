@@ -62,6 +62,7 @@
     - openstack_etc_hosts
     - jenkins_pipeline
     - openshift_label_nodes
+    - pbench_web_server
 
 - name: Copy the certs to the location where golang looks for
   hosts: masters

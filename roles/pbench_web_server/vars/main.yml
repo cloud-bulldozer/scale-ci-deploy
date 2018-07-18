@@ -1,0 +1,15 @@
+---
+# Web server document root directory.
+httpd_htdocs_dir: '/var/www/html'
+# Web server port to listen on.
+httpd_port: 80
+# Apache web server configuration file.
+httpd_conf: '/etc/httpd/conf/httpd.conf'
+# Apache web server autoindex configuration file.
+httpd_autoindex_conf: '/etc/httpd/conf.d/autoindex.conf'
+# Pbench agent default directory.
+pbench_agent_dir: '/var/lib/pbench-agent'
+# Pbench web server directory with static content.
+pbench_web_server_static_dir: '/opt/pbench-web-server/html/static'
+# SELinux file contexts file.
+selinux_file_contexts: '/etc/selinux/targeted/contexts/files/file_contexts'
