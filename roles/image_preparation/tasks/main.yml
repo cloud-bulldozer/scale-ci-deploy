@@ -1,8 +1,8 @@
 ---
 # Get all the atomic files matching the pattern.
-- name: Searching for the ocp-{{ ocp_major_minor }} files in {{ image_directory }}/atomic
+- name: Searching for the ocp-{{ ocp_major_minor }} files in {{ atomic_image_directory }}
   find:
-    paths: "{{ image_directory }}/atomic"
+    paths: "{{ atomic_image_directory }}"
     # Example: 2017-11-12-ocp-3.7.7-1-atomic-gold.raw
     patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
     use_regex: yes
@@ -17,9 +17,9 @@
   when: atomic_image == ""
 
 # Get all the rhel files matching the pattern.
-- name: Searching for the ocp-{{ ocp_major_minor }} files in {{ image_directory }}/rhel
+- name: Searching for the ocp-{{ ocp_major_minor }} files in {{ rhel_image_directory }}
   find:
-    paths: "{{ image_directory }}/rhel"
+    paths: "{{ rhel_image_directory }}"
     # Example: 2017-12-02-ocp-3.7.11-1-rhel-gold.raw
     patterns: "([0-9]+-[0-9]+-[0-9]+)-ocp-({{ ocp_major_minor }}.+)-.+raw$"
     use_regex: yes
@@ -69,15 +69,15 @@
   when: "percent_used | int >= 99"
 
 # Get all the atomic files in the web_root matching the pattern.
-- name: Searching for all files in {{ web_root }}/{{ image_directory }}/atomic
+- name: Searching for all files in {{ web_root }}/{{ atomic_image_directory }}
   find:
-    paths: "{{ web_root }}/{{ image_directory }}/atomic"
+    paths: "{{ web_root }}/{{ atomic_image_directory }}"
   register: atomic_qcow2_images
 
 # Get all the rhel files in the web_root matching the pattern.
-- name: Searching for all files in {{ web_root }}/{{ image_directory }}/rhel
+- name: Searching for all files in {{ web_root }}/{{ rhel_image_directory }}
   find:
-    paths: "{{ web_root }}/{{ image_directory }}/rhel"
+    paths: "{{ web_root }}/{{ rhel_image_directory }}"
   register: rhel_qcow2_images
 
 # Sort the images by mtime and take the first image.

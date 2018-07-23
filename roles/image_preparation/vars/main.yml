@@ -2,7 +2,8 @@
 # A string path relative to the user's home directory to the atomic image.
 atomic_image: "{{ lookup('env', 'atomic_image') }}"
 # A string path relative to the user's home directory.
-image_directory: image_builder/qcow_images
+rhel_image_directory: image_builder/qcow_images/verified_rhel_images
+atomic_image_directory: image_builder/qcow_images/verified_atomic_images
 # Copy the images to this remote host.
 remote_host: "{{ groups['openstack-server'][0] }}"
 # The remote host user.
