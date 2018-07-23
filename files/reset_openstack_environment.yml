@@ -35,8 +35,8 @@
         openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
 
     # Get the all the servers by ID.
-    - name: Getting all the servers by ID
-      shell: "{{ openstack }} server list --format value -c ID --limit -1"
+    - name: Getting all the ACTIVE servers by ID
+      shell: "{{ openstack }} server list --format value -c ID --limit -1 --status ACTIVE"
       register: servers
       changed_when: false
 
