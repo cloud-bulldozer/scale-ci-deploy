@@ -211,7 +211,7 @@
 # Set the path for the prerequisite log file.
 - name: Creating a variable for the prerequisite log file
   set_fact:
-    prerequisite_log: "{{ ansible_user_dir }}/openshift_prerequisites.log"
+    prerequisite_log: "{{ log_directory }}/openshift_prerequisites.log"
 
 - name: OpenShift prerequisite block
   block:
@@ -252,7 +252,7 @@
 # Set the path for the OpenStack provision log file.
 - name: Creating a variable for the OpenStack provision log file
   set_fact:
-    openstack_provision_log: "{{ ansible_user_dir }}/openstack_provision.log"
+    openstack_provision_log: "{{ log_directory }}/openstack_provision.log"
 
 - name: OpenStack provision block
   block:
@@ -286,7 +286,7 @@
 # Set the path for the time servers log file.
 - name: Creating a variable for the time servers log file
   set_fact:
-    time_servers_log: "{{ ansible_user_dir }}/time_servers.log"
+    time_servers_log: "{{ log_directory }}/time_servers.log"
 
 - name: Configure time servers block
   block:
@@ -313,7 +313,7 @@
 # Set the path for the block devices log file.
 - name: Creating a variable for the the block devices log file
   set_fact:
-    block_devices_log: "{{ ansible_user_dir }}/block_devices.log"
+    block_devices_log: "{{ log_directory }}/block_devices.log"
 
 - name: Configure block devices
   block:
@@ -334,7 +334,7 @@
 # Set the path for the OpenShift install log file.
 - name: Creating the OpenShift install log file variable
   set_fact:
-    openshift_install_log: "{{ ansible_user_dir }}/openshift_install.log"
+    openshift_install_log: "{{ log_directory }}/openshift_install.log"
 
 - name: Install OpenShift block
   block:

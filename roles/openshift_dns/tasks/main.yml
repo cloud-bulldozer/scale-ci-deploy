@@ -58,14 +58,22 @@
 # Set the path for the DNS install log file.
 - name: Creating the DNS install log file variable
   set_fact:
-    dns_install_log: "{{ ansible_user_dir }}/dns_install.log"
+    dns_install_log: "{{ log_directory }}/dns_install.log"
 
-# Run the Ansible playbook that creates the DNS server.
-- name: Creating the DNS server
-  shell: "{{ ansible_playbook }} -vvv --key-file {{ ansible_user_dir }}/.ssh/id_rsa -e @dns_vars.yml openshift-ansible-contrib/reference-architecture/osp-dns/deploy-dns.yaml 2>&1 > {{ dns_install_log }}"
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
+- block:
+    # Run the Ansible playbook that creates the DNS server.
+    - name: Creating the DNS server
+      shell: "{{ ansible_playbook }} -vvv --key-file {{ ansible_user_dir }}/.ssh/id_rsa -e @dns_vars.yml openshift-ansible-contrib/reference-architecture/osp-dns/deploy-dns.yaml 2>&1 > {{ dns_install_log }}"
+      args:
+        # Use bash to get the posix style redirects.
+        executable: /bin/bash
+  always:
+    - name: Copy the log file to the artifacts directory
+      synchronize:
+        src: "{{ dns_install_log }}"
+        dest: "{{ artifacts_directory }}"
+        mode: pull
+        use_ssh_args: yes
 
 # The openstack variable includes the rc file and the path to the OpenStack client.
 - name: Setting the openstack variable to source the rc file and contain path to client
