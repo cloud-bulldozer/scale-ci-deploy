@@ -232,7 +232,7 @@
 
     # Get some debug information that makes it easier to file OpenShift bugs.
     - name: Running commands that create debug information needed to open issues
-      shell: "{{ item }} >> debug_information.txt"
+      shell: "{{ item }} 2>&1 >> {{ ansible_user_dir }}/debug_information.txt"
       with_items:
         - "printf \"$(uname -srm)\n$(cat /etc/os-release)\n\""
         - "ansible --version"
@@ -244,7 +244,7 @@
     # Write the debug information to the artifacts directory.
     - name: Copy the debug information to the artifacts directory
       synchronize:
-        src: debug_information.txt
+        src: "{{ ansible_user_dir }}/debug_information.txt"
         dest: "{{ artifacts_directory }}"
         mode: pull
         use_ssh_args: yes

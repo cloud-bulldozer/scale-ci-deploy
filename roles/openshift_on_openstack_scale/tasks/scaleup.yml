@@ -128,8 +128,33 @@
         mode: pull
         use_ssh_args: yes
 
+- name: Creating the OpenShift configure new nodes log variable
+  set_fact:
+    scaleup_configure_log: "{{ log_directory }}/scaleup_configure_new_nodes_{{ block['end'] }}.log"
+
+- block:
+    # Run through the few OpenStack specific configuration.
+    - name: Configuring the new nodes
+      shell: >
+        {{ ansible_playbook }} -vv
+        --user openshift
+        -i {{ inventory_py }}
+        -i {{ new_nodes_inventory }}
+        -i inventory/
+        {{ openshift_cluster_directory }}/configure-new-nodes.yml 2>&1 >> {{ scaleup_configure_log }}
+      args:
+        # Use bash to get the posix style redirects.
+        executable: /bin/bash
+  always:
+    - name: Copy the log file to the artifacts directory
+      synchronize:
+        src: "{{ scaleup_configure_log }}"
+        dest: "{{ artifacts_directory }}"
+        mode: pull
+        use_ssh_args: yes
+
 # Set the path for the OpenShift scaleup log file.
-- name: Creating the time servers log variable
+- name: Creating the OpenShift scaleup log variable
   set_fact:
     scaleup_openshift_log: "{{ log_directory }}/scaleup_openshift_{{ block['end'] }}.log"
 
@@ -149,7 +174,7 @@
   always:
     - name: Copy the log file to the artifacts directory
       synchronize:
-        src: "{{ scaleup_time_servers_log }}"
+        src: "{{ scaleup_openshift_log }}"
         dest: "{{ artifacts_directory }}"
         mode: pull
         use_ssh_args: yes
