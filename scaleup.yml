@@ -3,6 +3,12 @@
   hosts: openstack-server
   vars_files:
     - vars/openstack.yml
+  pre_tasks:
+    - name: Ensure the local artifacts directory exists
+      file:
+        path: "{{ artifacts_directory }}"
+        state: directory
+      delegate_to: localhost
   roles:
     - openstack_get_server
 

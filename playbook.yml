@@ -1,8 +1,14 @@
 ---
 - name: Find and prepare the virtual machine images
+  hosts: image-server
   vars_files:
     - vars/openstack.yml
-  hosts: image-server
+  pre_tasks:
+    - name: Ensure the local artifacts directory exists
+      file:
+        path: "{{ artifacts_directory }}"
+        state: directory
+      delegate_to: localhost
   roles:
     - { role: image_preparation, when: openstack_upload_images | default(True) | bool }
 

@@ -1,10 +1,4 @@
 ---
-- name: Ensure the local artifacts directory exists
-  file:
-    path: "{{ artifacts_directory }}"
-    state: directory
-  delegate_to: localhost
-
 # Remove all old directories and files.
 - name: Removing any old directories or files from previous attempts
   file:
