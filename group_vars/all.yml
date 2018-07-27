@@ -11,6 +11,8 @@ clusterid: "{{ lookup('env', 'clusterid')|default('scale-ci', true) }}"
 dns_domain: "{{ lookup('env', 'dns_domain')|default('example.com', true) }}"
 # The remote directory to store any scale-ci files.
 install_directory: "{{ ansible_user_dir }}/{{ clusterid }}"
+# The remote directory to store the scale-ci log files.
+log_directory: "{{ ansible_user_dir }}/logs"
 # The version of OpenShift Container Platform to install and test.
 ocp_major_minor: "{{ lookup('env', 'ocp_major_minor')|default('3.10', true) }}"
 # The properties file contains the keys and values for the next job.

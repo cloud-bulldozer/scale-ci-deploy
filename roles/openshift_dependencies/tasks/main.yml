@@ -127,3 +127,9 @@
   copy:
     src: "{{ playbook_dir }}/openstackrc"
     dest: "{{ openstack_rc }}"
+
+# Create the log directory on the target host
+- name: Create the log directory on the target host
+  file:
+    path: "{{ log_directory }}"
+    state: directory

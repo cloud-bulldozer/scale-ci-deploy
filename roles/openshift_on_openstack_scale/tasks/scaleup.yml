@@ -14,17 +14,30 @@
   with_items:
     - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ block['end']|int + 1 }}" }
 
-# Run the Ansible playbook that creates the OpenStack resources.
-- name: Creating the OpenStack resources
-  shell: >
-    {{ ansible_playbook }} -vv
-    --user openshift
-    -i inventory
-    -i {{ inventory_py }}
-    {{ openshift_cluster_directory }}/provision_resources.yml 2>&1 >> openstack_provision_resources_{{ block['end'] }}.log
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
+# Set the path for the OpenShift provision log file.
+- name: Creating the OpenShift provision log file variable
+  set_fact:
+    scaleup_provision_log: "{{ log_directory }}/scaleup_provision_resources_{{ block['end'] }}.log"
+
+- block:
+    # Run the Ansible playbook that creates the OpenStack resources.
+    - name: Creating the OpenStack resources
+      shell: >
+        {{ ansible_playbook }} -vv
+        --user openshift
+        -i inventory
+        -i {{ inventory_py }}
+        {{ openshift_cluster_directory }}/provision_resources.yml 2>&1 >> {{ scaleup_provision_log }}
+      args:
+        # Use bash to get the posix style redirects.
+        executable: /bin/bash
+  always:
+    - name: Copy the log file to the artifacts directory
+      synchronize:
+        src: "{{ scaleup_provision_log }}"
+        dest: "{{ artifacts_directory }}"
+        mode: pull
+        use_ssh_args: yes
 
 # Get the post scale up OpenStack VMs by name.
 - name: Getting the post scale up list of app-nodes
@@ -91,26 +104,52 @@
     timeout: 120
   with_items: "{{ hosts_new }}"
 
-# Configure the time servers on all the new nodes.
-- name: Configuring the time servers on the new nodes
-  shell: >
-    {{ ansible_playbook }} -vv
-    --user openshift
-    -i {{ new_nodes_inventory }}
-    configure_time_servers.yml 2>&1 >> time_servers_{{ block['end'] }}.log
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
+# Set the path for the time servers log file.
+- name: Creating the time servers log variable
+  set_fact:
+    scaleup_time_servers_log: "{{ log_directory }}/scaleup_time_servers_{{ block['end'] }}.log"
 
-# Scale up the OpenShift cluster.
-- name: Scaling up the OpenShift resources
-  shell: >
-    {{ ansible_playbook_scaleup }} -vv
-    --user openshift
-    -i inventory/
-    -i {{ inventory_py }}
-    -i {{ new_nodes_inventory }}
-    {{ openshift_node_directory }}/scaleup.yml 2>&1 >> openshift_scaleup_{{ block['end'] }}.log
-  args:
-    # Use bash to get the posix style redirects.
-    executable: /bin/bash
+- block:
+    # Configure the time servers on all the new nodes.
+    - name: Configuring the time servers on the new nodes
+      shell: >
+        {{ ansible_playbook }} -vv
+        --user openshift
+        -i {{ new_nodes_inventory }}
+        configure_time_servers.yml 2>&1 >> {{ scaleup_time_servers_log }}
+      args:
+        # Use bash to get the posix style redirects.
+        executable: /bin/bash
+  always:
+    - name: Copy the log file to the artifacts directory
+      synchronize:
+        src: "{{ scaleup_time_servers_log }}"
+        dest: "{{ artifacts_directory }}"
+        mode: pull
+        use_ssh_args: yes
+
+# Set the path for the OpenShift scaleup log file.
+- name: Creating the time servers log variable
+  set_fact:
+    scaleup_openshift_log: "{{ log_directory }}/scaleup_openshift_{{ block['end'] }}.log"
+
+- block:
+    # Scale up the OpenShift cluster.
+    - name: Scaling up the OpenShift resources
+      shell: >
+        {{ ansible_playbook_scaleup }} -vv
+        --user openshift
+        -i inventory/
+        -i {{ inventory_py }}
+        -i {{ new_nodes_inventory }}
+        {{ openshift_node_directory }}/scaleup.yml 2>&1 >> {{ scaleup_openshift_log }}
+      args:
+        # Use bash to get the posix style redirects.
+        executable: /bin/bash
+  always:
+    - name: Copy the log file to the artifacts directory
+      synchronize:
+        src: "{{ scaleup_time_servers_log }}"
+        dest: "{{ artifacts_directory }}"
+        mode: pull
+        use_ssh_args: yes
