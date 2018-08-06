@@ -55,7 +55,7 @@
 - name: Creating a list of new hosts from the OpenStack networks output
   set_fact:
     # Example: app-node-90.scale-ci.example.com ci_network=192.168.0.99
-    hosts_new: "{{ hosts_new }} + [{ 'name': '{{ item.split(' ')[0].split('.')[0] }}', 'private_ip': '{{ item.split('=')[1] }}' }]"
+    hosts_new: "{{ hosts_new }} + [{ 'fqdn': '{{ item.split(' ')[0] }}', 'name': '{{ item.split(' ')[0].split('.')[0] }}', 'private_ip': '{{ item.split('=')[1] }}' }]"
   with_items: "{{ networks_new.stdout_lines | difference(networks_old.stdout_lines) }}"
 
 # Create the new nodes inventory file name
@@ -73,7 +73,7 @@
 - name: Adding the addresses to the new nodes inventory file
   lineinfile:
     path: "{{ new_nodes_inventory }}"
-    line: "{{ item['private_ip'] }} openshift_node_group_name=\"node-config-compute\""
+    line: "{{ item['fqdn'] }} ansible_host={{ item['private_ip'] }} openshift_node_group_name=\"node-config-compute\""
   with_items: "{{ hosts_new }}"
 
 # Add the new nodes to DNS.
