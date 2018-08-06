@@ -28,7 +28,7 @@ packages:
     - python-devel
     - python-virtualenv
   python:
-    - "ansible=={{ ansible_version }}""
+    - "ansible=={{ ansible_version }}"
     - dnspython==1.15.0
     - Jinja2==2.10
     - jmespath==0.9.3
