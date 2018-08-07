@@ -14,11 +14,11 @@ install_directory: "{{ ansible_user_dir }}/{{ clusterid }}"
 # The remote directory to store the scale-ci log files.
 log_directory: "{{ ansible_user_dir }}/logs"
 # The version of OpenShift Container Platform to install and test.
-ocp_major_minor: "{{ lookup('env', 'ocp_major_minor')|default('3.10', true) }}"
+ocp_major_minor: "{{ lookup('env', 'ocp_major_minor')|default('3.11', true) }}"
 # The properties file contains the keys and values for the next job.
 properties_file: "{{ lookup('env', 'properties_file')|default('./next.properties', true) }}"
 # Look up the environment variable with a space separated string of time servers.
-time_servers: "{{ lookup('env', 'time_servers')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true) }}"
+time_servers: "{{ lookup('env', 'time_servers')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true)|trim }}"
 # Break up the space separated string into a list of time servers.
 time_servers_list: "{{ time_servers.split(' ') }}"
 # The virtual image name to use in OpenStack when creating virtual servers.
