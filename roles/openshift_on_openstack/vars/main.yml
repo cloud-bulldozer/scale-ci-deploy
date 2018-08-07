@@ -16,7 +16,7 @@ nsupdate_file: "{{ lookup('env', 'nsupdate_file')|default(ansible_user_dir ~ '/n
 # Clone openshift-ansible repository rather than copying /root/openshift-ansible
 openshift_ansible_clone: "{{ lookup('env', 'openshift_ansible_clone')|default(false, true) }}"
 # Look up the environment variable with a space separated string of image registry servers to add to the container configuration.
-openshift_registries: "{{ lookup('env', 'openshift_registries') }}"
+openshift_registries: "{{ lookup('env', 'openshift_registries')|trim }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
 # The path to the OSEv3.yml file on the target-server.
