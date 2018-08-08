@@ -1,6 +1,6 @@
 ---
 - name: A playbook to prepare and mount block devices
-  hosts: masters
+  hosts: openstack_master_nodes
   become: true
   vars:
     device_path: "{{ block_device|default('/dev/nvme0n1') }}"
