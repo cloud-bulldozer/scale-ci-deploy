@@ -62,11 +62,6 @@
     version: "{{ openshift_ansible_version }}"
   when: openshift_ansible_clone | bool
 
-# Include the tasks from the openshift_ansible_patch role.
-- name: Include the tasks to patch files in the openshift-ansible directory
-  include_role:
-    name: openshift_ansible_patch
-
 # Set the openshift-ansible openstack path.
 - name: Creating the openshift_openstack directory variable
   set_fact:
