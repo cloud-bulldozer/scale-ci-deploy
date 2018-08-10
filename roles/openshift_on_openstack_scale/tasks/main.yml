@@ -21,10 +21,10 @@
   set_fact:
     ansible_playbook: ". {{ openstack_rc }}; ansible-playbook"
 
-# Create a variable that sources the rc file, sets INV_NO_APP_NODES=true and runs the ansible-playbook command.
-- name: Creating a variable that sources the OpenStack rc file, sets INV_NO_APP_NODES=true and runs the ansible-playbook command
+# Source the rc file, set the environment varaible and run the ansible-playbook command.
+- name: Creating a variable that sources the OpenStack rc file, sets OPENSTACK_SHOW_COMPUTE_NODES=false and runs the ansible-playbook command
   set_fact:
-    ansible_playbook_scaleup: ". {{ openstack_rc }}; INV_NO_APP_NODES=true ansible-playbook"
+    ansible_playbook_scaleup: ". {{ openstack_rc }}; OPENSTACK_SHOW_COMPUTE_NODES=false ansible-playbook"
 
 # Create a variable that sources the rc file and runs the OpenStack client command.
 - name: Creating a variable that sources the OpenStack rc file and runs the openstack client command
