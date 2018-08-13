@@ -1,0 +1,16 @@
+--- openshift-ansible.orig/roles/openshift_storage_glusterfs/tasks/glusterfs_deploy.yml
++++ openshift-ansible/roles/openshift_storage_glusterfs/tasks/glusterfs_deploy.yml
+@@ -3,6 +3,13 @@
+     that: "glusterfs_nodes | count >= 3"
+     msg: There must be at least three GlusterFS nodes specified
+
++- name: Wipe filesystem signatures from storage devices
++  command: "wipefs -a {% for device in hostvars[item].glusterfs_devices %}{{ device }} {% endfor %}"
++  delegate_to: "{{ item }}"
++  with_items: "{{ glusterfs_nodes | default([]) }}"
++  failed_when: False
++  when: glusterfs_wipe
++
+ - name: Copy GlusterFS DaemonSet template
+   copy:
+     src: "glusterfs-template.yml"
