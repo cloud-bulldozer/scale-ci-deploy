@@ -26,6 +26,8 @@ openshift_master_identity_providers: [{'name': 'allow_all', 'login': 'true', 'ch
 openshift_master_cluster_hostname: lb-0.{{ clusterid }}.{{ dns_domain }}
 openshift_master_cluster_public_hostname: lb-0.{{ clusterid }}.{{ dns_domain }}
 openshift_master_default_subdomain: apps.{{ clusterid }}.{{ dns_domain }}
+# Approve all the CSRs.
+openshift_master_bootstrap_auto_approve: true
 
 # Configure how often node iptables rules are refreshed.
 openshift_node_iptables_sync_period: 30s
