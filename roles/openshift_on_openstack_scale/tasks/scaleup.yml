@@ -167,7 +167,7 @@
         -i inventory/
         -i {{ inventory_py }}
         -i {{ new_nodes_inventory }}
-        {{ openshift_node_directory }}/scaleup.yml 2>&1 >> {{ scaleup_openshift_log }}
+        {{ openshift_cluster_directory }}/node-scaleup.yml 2>&1 >> {{ scaleup_openshift_log }}
       args:
         # Use bash to get the posix style redirects.
         executable: /bin/bash

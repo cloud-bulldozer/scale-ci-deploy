@@ -13,7 +13,5 @@ dns_key_name: "{{ lookup('env', 'dns_key_name')|default('update-key', true) }}"
 inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/inventory.py"
 # The path to the openshift-ansible openshift-cluster directory.
 openshift_cluster_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/openshift-cluster"
-# The path to the openshift-ansible openshift-node directory.
-openshift_node_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openshift-node"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
 openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
