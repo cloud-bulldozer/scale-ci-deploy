@@ -153,6 +153,11 @@
         mode: pull
         use_ssh_args: yes
 
+# Set the path to the scaleup_inventory.py file.
+- name: Creating the scaleup_inventory.py variable
+  set_fact:
+    scaleup_inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/scaleup_inventory.py"
+
 # Set the path for the OpenShift scaleup log file.
 - name: Creating the OpenShift scaleup log variable
   set_fact:
@@ -165,7 +170,7 @@
         {{ ansible_playbook_scaleup }} -vv
         --user openshift
         -i inventory/
-        -i {{ inventory_py }}
+        -i {{ scaleup_inventory_py }}
         -i {{ new_nodes_inventory }}
         {{ openshift_cluster_directory }}/node-scaleup.yml 2>&1 >> {{ scaleup_openshift_log }}
       args:
