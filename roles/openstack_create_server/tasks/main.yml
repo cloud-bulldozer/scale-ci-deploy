@@ -207,14 +207,6 @@
     line: "{{ floating_ip_address }} {{ openstack_server_name }}"
   become: true
 
-# Write out the proxy host information to a properties file for the next job.
-- name: Writing the proxy host information to the properties file
-  copy:
-    content: "PROXY_HOST={{ inventory_hostname }}\nPROXY_USER={{ ansible_user }}\nUSE_PROXY=True"
-    dest: "{{ properties_file }}"
-  delegate_to: localhost
-  ignore_errors: true
-
 # Use the wait_for module to wait until ssh access can be established.
 - name: Waiting for the server {{ openstack_server_name }} to start
   wait_for:
