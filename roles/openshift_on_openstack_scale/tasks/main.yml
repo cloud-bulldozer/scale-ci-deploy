@@ -1,7 +1,7 @@
 ---
 # Run the dynamic inventory to get the current app hosts.
 - name: Running the dynamic inventory file to get the current app hosts
-  shell: ". {{ openstack_rc }}; python {{ inventory_py }} | jq '.app.hosts|length'"
+  shell: ". {{ openstack_rc }}; {{ inventory_py }} --list | jq '.openstack_compute_nodes["hosts"] | length'"
   register: output
   changed_when: false
 
