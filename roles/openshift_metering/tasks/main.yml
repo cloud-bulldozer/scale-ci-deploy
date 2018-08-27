@@ -1,0 +1,18 @@
+---
+#
+# Installs OpenShift Metering
+#
+
+- name: Install OpenShift Metering block_device
+  block:
+    - name: Run OpenShift Metering install playbook
+      shell: |
+        set -o pipefail
+        . {{ansible_user_dir}}/keystonerc
+        { time ansible-playbook -vvv --user openshift -i inventory -i {{ansible_user_dir}}/openshift-ansible/playbooks/openstack/inventory.py {{ansible_user_dir}}/openshift-ansible/playbooks/openshift-metering/config.yml 2>&1 | tee -a {{log_directory}}/openshift_metering_install.log; } 2>> {{log_directory}}/openshift_metering_install.log
+  always:
+    - name: Collect OpenShift Metering Install artifacts
+      synchronize:
+        src: "{{log_directory}}/openshift_metering_install.log"
+        dest: "{{artifacts_directory}}"
+        mode: pull

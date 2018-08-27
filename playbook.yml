@@ -42,6 +42,8 @@
     - pbench_storage
     - openshift_dns
     - openshift_on_openstack
+    - role: openshift_metering
+      when: openshift_metering_install|bool
 
 - name: Find the core cluster and add it to the in-memory inventory
   hosts: openstack-server
