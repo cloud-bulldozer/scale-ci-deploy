@@ -1,0 +1,106 @@
+openshift_metering_install: true
+openshift_metering_config:
+  reporting-operator:
+    spec:
+      nodeSelector:
+        node-role.kubernetes.io/infra: "true"
+      resources:
+        requests:
+          memory: "500Mi"
+          cpu: "500m"
+        limits:
+          memory: "500Mi"
+          cpu: "500m"
+
+      route:
+        enabled: true
+
+      authProxy:
+        enabled: true
+        cookieSeed: "eiy3quaepohghie1uu7phuneeyah7ieC"
+
+  presto:
+    spec:
+      presto:
+        coordinator:
+          nodeSelector:
+            node-role.kubernetes.io/infra: "true"
+          config:
+            nodeSchedulerIncludeCoordinator: false
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: 2
+            limits:
+              memory: "4Gi"
+              cpu: 2
+
+        worker:
+          nodeSelector:
+            node-role.kubernetes.io/infra: "true"
+          replicas: 2
+          resources:
+            requests:
+              memory: "6Gi"
+              cpu: 4
+            limits:
+              memory: "6Gi"
+              cpu: 4
+
+      hive:
+        metastore:
+          nodeSelector:
+            node-role.kubernetes.io/infra: "true"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: 1
+            limits:
+              memory: "2Gi"
+              cpu: 1
+          storage:
+            create: true
+            class: "{{ocp_metering_hive_metastore_storage_class}}"
+            size: "{{ocp_metering_hive_metastore_storage_size}}"
+        server:
+          nodeSelector:
+            node-role.kubernetes.io/infra: "true"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: 0.5
+            limits:
+              memory: "1Gi"
+              cpu: 0.5
+
+  hdfs:
+    enabled: true
+    spec:
+      namenode:
+        nodeSelector:
+          node-role.kubernetes.io/infra: "true"
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: 1
+          limits:
+            memory: "2Gi"
+            cpu: 1
+        storage:
+          class: "{{ocp_metering_hdfs_namenode_storage_class}}"
+          size: "{{ocp_metering_hdfs_namenode_storage_size}}"
+
+      datanode:
+        nodeSelector:
+          node-role.kubernetes.io/infra: "true"
+        replicas: {{ocp_metering_hdfs_datanode_replica_count}}
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: 1
+          limits:
+            memory: "1Gi"
+            cpu: 1
+        storage:
+          class: "{{ocp_metering_hdfs_datanode_storage_class}}"
+          size: "{{ocp_metering_hdfs_datanode_storage_size}}"
