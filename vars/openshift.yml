@@ -24,4 +24,12 @@ openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default(2, t
 
 ocp_glusterfs_block_host_vsize: "{{ lookup('env', 'OCP_GLUSTER_BLOCK_HOST_VSIZE') | default(350, true) }}"
 
-openshift_metering_install: "{{ lookup('env', 'OPENSHIFT_METERING_INSTALL') | default(false, true) }}"
+# OpenShift Metering Parameters
+ocp_metering_install: "{{ lookup('env', 'OCP_METERING_INSTALL') | default(false, true) }}"
+ocp_metering_hive_metastore_storage_class: "{{ lookup('env', 'OCP_METERING_HIVE_META_SCLASS') | default('glusterfs-storage-block', true) }}"
+ocp_metering_hive_metastore_storage_size: "{{ lookup('env', 'OCP_METERING_HIVE_META_SSIZE') | default('30Gi', true) }}"
+ocp_metering_hdfs_namenode_storage_class: "{{ lookup('env', 'OCP_METERING_HDFS_NAME_SCLASS') | default('glusterfs-storage-block', true) }}"
+ocp_metering_hdfs_namenode_storage_size: "{{ lookup('env', 'OCP_METERING_HDFS_NAME_SSIZE') | default('30Gi', true) }}"
+ocp_metering_hdfs_datanode_storage_class: "{{ lookup('env', 'OCP_METERING_HDFS_DATA_SCLASS') | default('glusterfs-storage-block', true) }}"
+ocp_metering_hdfs_datanode_storage_size: "{{ lookup('env', 'OCP_METERING_HDFS_DATA_SSIZE') | default('30Gi', true) }}"
+ocp_metering_hdfs_datanode_replica_count: "{{ lookup('env', 'OCP_METERING_HDFS_DATA_REPLICAS') | default(3, true) }}"
