@@ -22,4 +22,6 @@ openshift_node_flavor: "{{ lookup('env', 'openshift_node_flavor')|default('m4.la
 # Get the number of OpenShift nodes to scale to.
 openshift_node_target: "{{ lookup('env', 'OPENSHIFT_NODE_TARGET') | default(2, true) }}"
 
+ocp_glusterfs_block_host_vsize: "{{ lookup('env', 'OCP_GLUSTER_BLOCK_HOST_VSIZE') | default(350, true) }}"
+
 openshift_metering_install: "{{ lookup('env', 'OPENSHIFT_METERING_INSTALL') | default(false, true) }}"
