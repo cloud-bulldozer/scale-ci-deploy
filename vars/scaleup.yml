@@ -1,0 +1,60 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+###############################################################################
+# OpenShift Container Platform (OCP) variables.
+###############################################################################
+artifacts_directory: "{{ lookup('env', 'OCP_ARTIFACTS_DIR')|default('artifacts/openshift-' ~ ocp_major_minor, true) }}"
+clusterid: "{{ lookup('env', 'OCP_CLUSTER_ID')|default('scale-ci', true) }}"
+dns_domain: "{{ lookup('env', 'OCP_DNS_DOMAIN')|default('example.com', true) }}"
+install_directory: "{{ ansible_user_dir }}/{{ clusterid }}"
+log_directory: "{{ ansible_user_dir }}/logs"
+ocp_major_minor: "{{ lookup('env', 'OCP_MAJOR_MINOR')|default('3.11', true) }}"
+time_servers: "{{ lookup('env', 'OCP_NTP_SERVERS')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true)|trim }}"
+time_servers_list: "{{ time_servers.split(' ') }}"
+
+dns_key_algorithm: "{{ lookup('env', 'OCP_DNS_KEY_ALGORITHM')|default('hmac-md5', true) }}"
+dns_key_file: "{{ lookup('env', 'OCP_DNS_UPDATE_FILE')|default('dns_update.key', true) }}"
+dns_key_name: "{{ lookup('env', 'OCP_DNS_KEY_NAME')|default('update-key', true) }}"
+nsupdate_file: "{{ lookup('env', 'OCP_NSUPDATE_FILE')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
+
+virtual_image_name: "{{ lookup('env', 'OCP_DEFAULT_IMAGE_NAME')|default('ocp-' ~ ocp_major_minor ~ '-rhel', true) }}"
+
+openshift_default_flavor: "{{ lookup('env', 'OCP_DEFAULT_FLAVOR')|default('m1.medium', true) }}"
+openshift_cns_flavor: "{{ lookup('env', 'OCP_CNS_FLAVOR')|default('m4.4xlarge-pci', true) }}"
+openshift_infra_flavor: "{{ lookup('env', 'OCP_INFRA_FLAVOR')|default('m4.10xlarge-pci', true)}}"
+openshift_lb_flavor: "{{ lookup('env', 'OCP_LB_FLAVOR')|default('m4.xlarge', true) }}"
+openshift_master_flavor: "{{ lookup('env', 'OCP_MASTER_FLAVOR')|default('r4.4xlarge-pci', true) }}"
+openshift_node_flavor: "{{ lookup('env', 'OCP_NODE_FLAVOR')|default('m4.large', true) }}"
+
+# The number of app-nodes that you want in the cluster.
+openshift_node_target: "{{ lookup('env', 'OCP_NODE_TARGET') | default(12, true) }}"
+
+block_size: "{{ lookup('env', 'OCP_SCALE_BLOCK_SIZE') | default('100', true) }}"
+
+###############################################################################
+# OpenStack Platorm (OSP) variables.
+###############################################################################
+openstack_location: "{{ lookup('env', 'OSP_CLIENT_PATH' )|default('/usr/bin/openstack', true) }}"
+
+openstack_project: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
+
+openstack_keypair_name: "{{ lookup('env', 'OSP_KEYPAIR_NAME')|default('ci_keypair', true) }}"
+openstack_security_group_name: "{{ lookup('env', 'OSP_SECURITY_GROUP_NAME')|default('ci_security_group', true) }}"
+
+openstack_public_network_name: "{{ lookup('env', 'OSP_PUBLIC_NETWORK_NAME')|default('public', true) }}"
+openstack_public_subnet_name: "{{ lookup('env', 'OSP_PUBLIC_SUBNET_NAME')|default('public_subnet', true) }}"
+
+openstack_network_name: "{{ lookup('env', 'OSP_PRIVATE_NETWORK_NAME')|default('ci_network', true) }}"
+openstack_router_name: "{{ lookup('env', 'OSP_PRIVATE_ROUTER_NAME')|default('ci_router', true) }}"
+openstack_subnet_name: "{{ lookup('env', 'OSP_PRIVATE_SUBNET_NAME')|default('ci_subnet', true) }}"
+# The subnet range to use on the OpenStack private subnet (\16 == 65534 addresses).
+openstack_subnet_range: "{{ lookup('env', 'OSP_PRIVATE_SUBNET_RANGE')|default('192.168.0.0/16', true) }}"
+
+openstack_server_name: "{{ lookup('env', 'OSP_SERVER_NAME')|default('ansible-host', true) }}"
+openstack_server_flavor: "{{ lookup('env', 'OSP_SERVER_FLAVOR')|default('m4.4xlarge', true) }}"
+openstack_server_image: "{{ lookup('env', 'OSP_SERVER_IMAGE')|default(virtual_image_name, true) }}"
