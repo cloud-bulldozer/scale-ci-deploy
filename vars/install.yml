@@ -1,0 +1,101 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+###############################################################################
+# OpenShift Container Platform (OCP) variables.
+###############################################################################
+ansible_required_version: "{{ lookup('env', 'OCP_REQUIRED_ANSIBLE_VERSION')|default('2.6.2', true) }}"
+clean_yum_cache: "{{ lookup('env', 'OCP_CLEAN_YUM_CACHE')|default(false, true) }}"
+
+artifacts_directory: "{{ lookup('env', 'OCP_ARTIFACTS_DIR')|default('artifacts/openshift-' ~ ocp_major_minor, true) }}"
+clusterid: "{{ lookup('env', 'OCP_CLUSTER_ID')|default('scale-ci', true) }}"
+install_directory: "{{ ansible_user_dir }}/{{ clusterid }}"
+log_directory: "{{ ansible_user_dir }}/logs"
+ocp_major_minor: "{{ lookup('env', 'OCP_MAJOR_MINOR')|default('3.11', true) }}"
+time_servers: "{{ lookup('env', 'OCP_NTP_SERVERS')|default('0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org', true)|trim }}"
+time_servers_list: "{{ time_servers.split(' ') }}"
+
+dns_domain: "{{ lookup('env', 'OCP_DNS_DOMAIN')|default('example.com', true) }}"
+dns_key_algorithm: "{{ lookup('env', 'OCP_DNS_KEY_ALGORITHM')|default('hmac-md5', true) }}"
+dns_key_file: "{{ lookup('env', 'OCP_DNS_UPDATE_FILE')|default('dns_update.key', true) }}"
+dns_key_name: "{{ lookup('env', 'OCP_DNS_KEY_NAME')|default('update-key', true) }}"
+nsupdate_file: "{{ lookup('env', 'OCP_NSUPDATE_FILE')|default(ansible_user_dir ~ '/nsupdate_keys.yml', true) }}"
+
+openshift_ansible_clone: "{{ lookup('env', 'OCP_CLONE_OPENSHIFT_ANSIBLE')|default(false, true) }}"
+openshift_ansible_repo: "{{ lookup('env', 'OCP_OPENSHIFT_ANSIBLE_REPOSITORY')|default('https://github.com/openshift/openshift-ansible', true) }}"
+openshift_ansible_version: "{{ lookup('env', 'OCP_OPENSHIFT_ANSIBLE_VERSION')|default('release-' ~ ocp_major_minor, true) }}"
+openshift_ansible_contrib_repo: "{{ lookup('env', 'OCP_OPENSHIFT_ANSIBLE_CONTRIB_REPOSITORY')|default('https://github.com/openshift/openshift-ansible-contrib', true) }}"
+openshift_ansible_contrib_version: "{{ lookup('env', 'OCP_OPENSHIFT_ANSIBLE_CONTRIB_VERSION')|default('master', true) }}"
+
+virtual_image_name: "{{ lookup('env', 'OCP_DEFAULT_IMAGE_NAME')|default('ocp-' ~ ocp_major_minor ~ '-rhel', true) }}"
+
+openshift_default_flavor: "{{ lookup('env', 'OCP_DEFAULT_FLAVOR')|default('m1.medium', true) }}"
+openshift_cns_flavor: "{{ lookup('env', 'OCP_CNS_FLAVOR')|default('m4.4xlarge-pci', true) }}"
+openshift_infra_flavor: "{{ lookup('env', 'OCP_INFRA_FLAVOR')|default('m4.10xlarge-pci', true)}}"
+openshift_lb_flavor: "{{ lookup('env', 'OCP_LB_FLAVOR')|default('m4.xlarge', true) }}"
+openshift_master_flavor: "{{ lookup('env', 'OCP_MASTER_FLAVOR')|default('r4.4xlarge-pci', true) }}"
+openshift_node_flavor: "{{ lookup('env', 'OCP_NODE_FLAVOR')|default('m4.large', true) }}"
+
+# The number of app-nodes that you want in the cluster.
+openshift_node_target: "{{ lookup('env', 'OCP_NODE_TARGET') | default(2, true) }}"
+
+ocp_glusterfs_block_host_vsize: "{{ lookup('env', 'OCP_GLUSTER_BLOCK_HOST_VSIZE') | default(350, true) }}"
+# The tag for the glusterfs_block_image (rhgs-gluster-block-prov-rhel7).
+glusterfs_block_tag: "{{ lookup('env', 'OCP_GLUSTERFS_BLOCK_TAG')|default('v' ~ ocp_major_minor, true) }}"
+# The container tag for the glusterfs_heketi_image (rhgs-volmanager-rhel7).
+glusterfs_heketi_tag: "{{ lookup('env', 'OCP_GLUSTERFS_HEKETI_TAG')|default('v' ~ ocp_major_minor, true) }}"
+# The container tag for the glusterfs_image (rhgs-server-rhel7).
+glusterfs_image_tag: "{{ lookup('env', 'OCP_GLUSTERFS_IMAGE_TAG')|default('v' ~ ocp_major_minor, true) }}"
+# The container tag for the glusterfs_s3_image (rhgs-s3-server-rhel7).
+glusterfs_s3_tag: "{{ lookup('env', 'OCP_GLUSTERFS_S3_TAG')|default('v' ~ ocp_major_minor, true) }}"
+
+# Look up the environment variable with a space separated string of image registry servers to add to the container configuration.
+openshift_registries: "{{ lookup('env', 'OCP_CONTAINER_REGISTRIES')|trim }}"
+# Break up the space separate string into a list of image registries for the OSEv3.yml variables.
+registries: "{{ openshift_registries.split(' ') }}"
+
+# OpenShift metering parameters.
+ocp_metering_install: "{{ lookup('env', 'OCP_METERING_INSTALL') | default(false, true) }}"
+ocp_metering_hive_metastore_storage_class: "{{ lookup('env', 'OCP_METERING_HIVE_META_SCLASS') | default('glusterfs-storage-block', true) }}"
+ocp_metering_hive_metastore_storage_size: "{{ lookup('env', 'OCP_METERING_HIVE_META_SSIZE') | default('30Gi', true) }}"
+ocp_metering_hdfs_namenode_storage_class: "{{ lookup('env', 'OCP_METERING_HDFS_NAME_SCLASS') | default('glusterfs-storage-block', true) }}"
+ocp_metering_hdfs_namenode_storage_size: "{{ lookup('env', 'OCP_METERING_HDFS_NAME_SSIZE') | default('30Gi', true) }}"
+ocp_metering_hdfs_datanode_storage_class: "{{ lookup('env', 'OCP_METERING_HDFS_DATA_SCLASS') | default('glusterfs-storage-block', true) }}"
+ocp_metering_hdfs_datanode_storage_size: "{{ lookup('env', 'OCP_METERING_HDFS_DATA_SSIZE') | default('30Gi', true) }}"
+ocp_metering_hdfs_datanode_replica_count: "{{ lookup('env', 'OCP_METERING_HDFS_DATA_REPLICAS') | default(3, true) }}"
+
+service_catalog_enable: "{{ lookup('env', 'OCP_SERVICE_CATALOG_ENABLE')|default(true, true) }}"
+template_service_broker_enable: "{{ lookup('env', 'OCP_TEMPLATE_SERVICE_BROKER_ENABLE')|default(true, true) }}"
+
+###############################################################################
+# OpenStack Platorm (OSP) variables.
+###############################################################################
+openstack_location: "{{ lookup('env', 'OSP_CLIENT_PATH' )|default('/usr/bin/openstack', true) }}"
+
+atomic_image: "{{ lookup('env', 'OSP_ATOMIC_IMAGE') }}"
+rhel_image: "{{ lookup('env', 'OSP_RHEL_IMAGE') }}"
+
+openstack_project: "{{ lookup('env', 'OS_PROJECT_NAME') }}"
+
+openstack_keypair_name: "{{ lookup('env', 'OSP_KEYPAIR_NAME')|default('ci_keypair', true) }}"
+openstack_security_group_name: "{{ lookup('env', 'OSP_SECURITY_GROUP_NAME')|default('ci_security_group', true) }}"
+
+openstack_public_network_name: "{{ lookup('env', 'OSP_PUBLIC_NETWORK_NAME')|default('public', true) }}"
+openstack_public_subnet_name: "{{ lookup('env', 'OSP_PUBLIC_SUBNET_NAME')|default('public_subnet', true) }}"
+
+openstack_network_name: "{{ lookup('env', 'OSP_PRIVATE_NETWORK_NAME')|default('ci_network', true) }}"
+openstack_router_name: "{{ lookup('env', 'OSP_PRIVATE_ROUTER_NAME')|default('ci_router', true) }}"
+openstack_subnet_name: "{{ lookup('env', 'OSP_PRIVATE_SUBNET_NAME')|default('ci_subnet', true) }}"
+# The subnet range to use on the OpenStack private subnet (\16 == 65534 addresses).
+openstack_subnet_range: "{{ lookup('env', 'OSP_PRIVATE_SUBNET_RANGE')|default('192.168.0.0/16', true) }}"
+
+openstack_server_name: "{{ lookup('env', 'OSP_SERVER_NAME')|default('ansible-host', true) }}"
+openstack_server_flavor: "{{ lookup('env', 'OSP_SERVER_FLAVOR')|default('m4.4xlarge', true) }}"
+openstack_server_image: "{{ lookup('env', 'OSP_SERVER_IMAGE')|default(virtual_image_name, true) }}"
+
+openstack_create_flavors: "{{ lookup('env', 'OSP_CREATE_FLAVORS')|default(true, true) }}"
+openstack_upload_images: "{{ lookup('env', 'OSP_UPLOAD_IMAGES')|default(true, true) }}"

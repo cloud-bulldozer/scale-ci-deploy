@@ -6,7 +6,7 @@
     - "../group_vars/all.yml"
   vars:
     # Get the RC file from the environment, or the user's home directory by default.
-    openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
+    openstack_rc: "{{ ansible_user_dir }}/overcloudrc"
   vars_prompt:
     - name: "delete_flavors"
       prompt: "Delete the flavors? "

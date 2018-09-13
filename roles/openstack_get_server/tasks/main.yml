@@ -41,8 +41,3 @@
     ansible_user: cloud-user
     # Adding a ProxyCommand allows servers to contact this IP using the openstack-server.
     ansible_ssh_common_args: "-o ProxyCommand='{{ proxy_command }}'"
-
-# Print out the ssh connection command to the server.
-- name: Printing the ssh command to connect with the server instance
-  debug:
-    msg: "ssh -i {{ remote_private_key_path }} cloud-user@{{ floating_ip_address }}"

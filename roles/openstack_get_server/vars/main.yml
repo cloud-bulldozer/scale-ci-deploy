@@ -1,7 +1,3 @@
 ---
 # The path to the OpenStack RC file on the openstack-server, may be named differently than other servers.
-openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/overcloudrc', true) }}"
-# The path to the private key, put it the install directory for easy cleanup.
-remote_private_key_path: "{{ lookup('env', 'remote_private_key_path')|default(install_directory ~ '/key.private', true) }}"
-# The path to the public key, put it in the install directory for easy cleanup.
-remote_public_key_path: "{{ lookup('env', 'remote_public_key_path')|default(install_directory ~ '/key.public', true) }}"
+openstack_rc: "{{ ansible_user_dir }}/overcloudrc"

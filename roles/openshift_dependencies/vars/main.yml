@@ -1,10 +1,6 @@
 ---
-# The version of ansible to install on the target server.
-ansible_required_version: "{{ lookup('env', 'ansible_required_version')|default('2.6.2', true) }}"
-# The boolean to control the cleaning of the yum cache.
-clean_yum_cache: "{{ lookup('env', 'clean_yum_cache')|default(false, true) }}"
 # The path to the OpenStack RC file on the server vm, may be named differently than other servers.
-openstack_rc: "{{ lookup('env', 'openstack_rc_path')|default(ansible_user_dir ~ '/keystonerc', true) }}"
+openstack_rc: "{{ ansible_user_dir }}/keystonerc"
 # A dictionary of packages to install for different families of operating systems.
 packages:
   common:

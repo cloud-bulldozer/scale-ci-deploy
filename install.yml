@@ -2,7 +2,7 @@
 - name: Find and prepare the virtual machine images
   hosts: image-server
   vars_files:
-    - vars/openstack.yml
+    - vars/install.yml
   pre_tasks:
     - name: Ensure the local artifacts directory exists
       file:
@@ -15,19 +15,21 @@
 - name: Upload images to OpenStack
   hosts: openstack-server
   vars_files:
-    - vars/openstack.yml
+    - vars/install.yml
   roles:
     - { role: openstack_upload_images, when: openstack_upload_images | default(True) | bool }
 
 - name: Set up one virtual machine server in a new OpenStack environment
   hosts: openstack-server
   vars_files:
-    - vars/openstack.yml
+    - vars/install.yml
   roles:
     - openstack_create_server
 
 - name: Install the prerequisite software on the virtual machine server
   hosts: target-server
+  vars_files:
+    - vars/install.yml
   # This host may not have Python installed, do not collect facts at this time.
   gather_facts: false
   roles:
@@ -36,8 +38,7 @@
 - name: Install OpenShift on OpenStack
   hosts: target-server
   vars_files:
-    - vars/openstack.yml
-    - vars/openshift.yml
+    - vars/install.yml
   roles:
     - pbench_storage
     - openshift_dns
@@ -48,7 +49,7 @@
 - name: Find the core cluster and add it to the in-memory inventory
   hosts: openstack-server
   vars_files:
-    - vars/openstack.yml
+    - vars/install.yml
   roles:
     - openstack_add_fips
     - openshift_get_core_cluster
@@ -57,14 +58,14 @@
 - name: Use the remaining disk space on the core cluster for Pbench
   hosts: masters infras lb cns app_nodes
   vars_files:
-    - vars/openstack.yml
+    - vars/install.yml
   roles:
     - pbench_storage
 
 - name: Run post OpenShift installation tasks
   hosts: target-server
   vars_files:
-    - vars/openstack.yml
+    - vars/install.yml
   roles:
     - openshift_copy_kube_config
     - openstack_etc_hosts
@@ -73,6 +74,8 @@
 
 - name: Copy the certs to the location where golang looks for
   hosts: masters
+  vars_files:
+    - vars/install.yml
   become: yes
   roles:
     - openshift_copy_certs

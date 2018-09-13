@@ -2,7 +2,7 @@
 - name: Find the target-server and add it to the in-memory inventory
   hosts: openstack-server
   vars_files:
-    - vars/openstack.yml
+    - vars/scaleup.yml
   pre_tasks:
     - name: Ensure the local artifacts directory exists
       file:
@@ -15,7 +15,6 @@
 - name: Create additional OpenStack VMs and add them to OpenShift
   hosts: target-server
   vars_files:
-    - vars/openstack.yml
-    - vars/openshift.yml
+    - vars/scaleup.yml
   roles:
     - openshift_on_openstack_scale

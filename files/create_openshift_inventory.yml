@@ -11,7 +11,7 @@
     # The names of users for the VMs in the OpenShift cluster.
     openshift_user: "{{ lookup('env', 'OPENSHIFT_USER') | default('openshift', true) }}"
     # The path to the OpenStack rc file that contains authentication.
-    rc_file: "{{ lookup('env', 'OPENSTACK_RC_FILE') | default(ansible_user_dir ~ '/overcloudrc', true) }}"
+    rc_file: "{{ ansible_user_dir }}/overcloudrc"
   tasks:
     # Ensure the remote install directory exists.
     - name: Creating the {{ install_directory }} directory on {{ inventory_hostname }}
