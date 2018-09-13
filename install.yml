@@ -69,6 +69,7 @@
   roles:
     - openshift_copy_kube_config
     - openstack_etc_hosts
+    - openshift_dns_wildcard
     - openshift_label_nodes
     - pbench_web_server
 

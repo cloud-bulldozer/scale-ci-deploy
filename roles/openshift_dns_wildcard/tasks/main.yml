@@ -1,0 +1,63 @@
+---
+# Read the DNS update key file.
+- name: Reading the remote {{ dns_key_file }} file
+  command: "grep secret {{ dns_key_file }}"
+  register: update_secret
+  changed_when: false
+
+# Create a regular expression to get the secret key.
+- name: Setting the regular expression to find the secret
+  set_fact:
+    # Example:        secret "8kjyy/xFvzapFwmcWwLzvA==";
+    secret_regex: 'secret "(.*)";'
+
+# Set the DNS secret value.
+- name: Creating a variable with the DNS secret value
+  set_fact:
+    dns_key_secret: "{{ update_secret['stdout']|regex_findall(secret_regex)|first }}"
+
+# The openstack variable includes the rc file and the path to the OpenStack client.
+- name: Setting the openstack variable to source the rc file and contain path to client
+  set_fact:
+    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
+
+- name: Getting the IP address for the DNS VM ns-master
+  shell: "{{ openstack }} server show ns-master.{{ clusterid }}.{{ dns_domain }} --format value -c addresses"
+  # "ns-master-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
+  register: dns_addresses
+  changed_when: false
+
+- name: Parsing the floating ip from the DNS VM addresses
+  set_fact:
+    cluster_dns_ip: "{{ dns_addresses['stdout'].split(', ')[1] }}"
+
+- name: Getting the IP address for the infrastructure node
+  shell: "{{ openstack }} server show infra-node-0.{{ clusterid }}.{{ dns_domain }} --format value -c addresses"
+  register: infra_addresses
+  changed_when: false
+
+- name: Parse the floating ip from the infrastrcture addresses
+  set_fact:
+    openshift_openstack_public_router_ip: "{{ infra_addresses['stdout'].split(', ')[1] }}"
+
+- name: Print the openshift router ip address
+  debug:
+    msg: "{{ openshift_openstack_public_router_ip }}"
+
+- name: Add public wildcard record to the infra node
+  nsupdate:
+    key_name: "{{ dns_key_name }}"
+    key_secret: "{{ dns_key_secret }}"
+    key_algorithm: "{{ dns_key_algorithm | lower }}"
+    server: "{{ cluster_dns_ip }}"
+    zone: "{{ clusterid }}.{{ dns_domain }}"
+    record: "*.apps.{{ clusterid }}.{{ dns_domain }}"
+    value: "{{ openshift_openstack_public_router_ip }}"
+    type: "A"
+    state: present
+  register: nsupdate_add_result
+  until: nsupdate_add_result is succeeded
+  retries: 10
+  delay: 1
+  when:
+    - openshift_openstack_public_router_ip != ""

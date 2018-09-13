@@ -1,0 +1,3 @@
+---
+# The path to the OpenStack RC file on the server vm, may be named differently than other servers.
+openstack_rc: "{{ ansible_user_dir }}/keystonerc"
