@@ -1,7 +1,7 @@
 # scale-ci-ansible
 
 This repository contains tasks to automate the install of OpenShift Container
-Platform(OCP) on an OpenStack Platform (OSP) environment using the
+Platform (OCP) on an OpenStack Platform (OSP) environment using the
 [openshift-ansible](https://github.com/openshift/openshift-ansible.git)
 repository.
 
@@ -26,9 +26,9 @@ files/create_inventory.sh
 ```
 
 2. Set environment variables for the runtime environment (such as Jenkins). See
-the [environment variables](#environment_variables)section for more details.
+the [environment variables](#environment_variables) section for more details.
 
-3. Run the Ansible install playbook:
+3. Run the Ansible playbook:
 ```sh
 ansible-playbook -vv -i inventory install.yml
 ```
@@ -37,12 +37,11 @@ or
 ansible-playbook -vv -i inventory scaleup.yml
 ```
 
-These playbook runs a series of commands on the "openstack-server" (some require
-super user authority so you may need to use the ask become password flag `-K`)
-to create a VM server in OpenStack. A floating IP address is created for a VM
-server and the address is added to the Ansible dynamic inventory. Other tasks
-are run in sequence at the end of the playbook to automate the different parts
-of the install.
+These playbook runs a series of commands on the "openstack-server" that create
+the necessary objects to create a VM server in OpenStack. The address is added
+to the dynamic Ansible dynamic while the install playbook runs. Other plays
+are run in sequence in their respective playbook to automate the different
+parts of the install or scale up process.
 
 # Environment variables
 
@@ -113,7 +112,7 @@ OCP_SERVICE_CATALOG_ENABLE
 OCP_TEMPLATE_SERVICE_BROKER_ENABLE
 
 ###############################################################################
-# OpenStack Platorm (OSP) variables.
+# OpenStack Platform (OSP) variables.
 ###############################################################################
 OSP_CLIENT_PATH
 
@@ -177,7 +176,7 @@ OCP_NODE_TARGET
 OCP_SCALE_BLOCK_SIZE
 
 ###############################################################################
-# OpenStack Platorm (OSP) variables.
+# OpenStack Platform (OSP) variables.
 ###############################################################################
 OSP_CLIENT_PATH
 
