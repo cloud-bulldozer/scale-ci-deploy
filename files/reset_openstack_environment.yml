@@ -2,8 +2,7 @@
 - name: Steps to clean up the OpenStack environment
   hosts: openstack-server
   vars_files:
-    - "../vars/openstack.yml"
-    - "../group_vars/all.yml"
+    - "../vars/install.yml"
   vars:
     # Get the RC file from the environment, or the user's home directory by default.
     openstack_rc: "{{ ansible_user_dir }}/overcloudrc"
