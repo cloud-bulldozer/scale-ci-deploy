@@ -51,7 +51,7 @@
     key_algorithm: "{{ dns_key_algorithm | lower }}"
     server: "{{ cluster_dns_ip }}"
     zone: "{{ clusterid }}.{{ dns_domain }}"
-    record: "*.apps.{{ clusterid }}.{{ dns_domain }}"
+    record: "*.apps"
     value: "{{ openshift_openstack_public_router_ip }}"
     type: "A"
     state: present
