@@ -12,7 +12,7 @@ OpenShift on OpenStack. To use Ansible you must first create an inventory file:
 
 1. Create an `inventory` file to suit your environment. The following groups
 must be defined in the inventory file:  
-* **openstack-server** - The group contains the host that runs OpenStack. Sometimes
+* **undercloud** - The group contains the host that runs OpenStack. Sometimes
 called the undercloud and usually contains the the OpenStack rc file.
 * **image-server** - This group contains the host that has the RAW images to use
 when building virtual machine servers in OpenStack.

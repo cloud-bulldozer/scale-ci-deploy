@@ -1,0 +1,9 @@
+---
+- name: copy the nested virt playbook
+  copy:
+    src: nested_virt.yml
+    dest: /tmp/nested_virt.yml
+  become: yes
+
+- name: run the playbook to enable nested virt on the hypervisors
+  shell: source "{{ ansible_user_dir }}/stackrc"; ansible-playbook -vv -i /usr/bin/tripleo-ansible-inventory /tmp/nested_virt.yml
