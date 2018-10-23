@@ -99,3 +99,6 @@ openstack_server_image: "{{ lookup('env', 'OSP_SERVER_IMAGE')|default(virtual_im
 
 openstack_create_flavors: "{{ lookup('env', 'OSP_CREATE_FLAVORS')|default(true, true) }}"
 openstack_upload_images: "{{ lookup('env', 'OSP_UPLOAD_IMAGES')|default(true, true) }}"
+
+# Nested virtualization
+openstack_nested_virtualization: "{{ lookup('env', 'OSP_NESTED_VIRT')|default(True) }}"

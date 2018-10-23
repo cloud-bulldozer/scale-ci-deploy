@@ -1,0 +1,29 @@
+---
+- hosts: Compute
+  user: heat-admin
+  become: yes
+  tasks:
+    - name: Unload the kvm_intel module
+      shell: modprobe -r kvm_intel
+
+    - name: Activate the nesting feature
+      shell: modprobe kvm_intel nested=1
+
+    - name: Permanently enable nested virt
+      lineinfile:
+        path: /etc/modprobe.d/kvm.conf
+        regexp: '^#options kvm_intel nested=1'
+        line: 'options kvm_intel nested=1'
+        state: present
+        backrefs: yes
+
+    - name: Enable cpu passthrough
+      lineinfile:
+        path: /var/lib/config-data/nova_libvirt/etc/nova/nova.conf
+        regexp: '^cpu_mode=host-model'
+        line: 'cpu_mode=host-passthrough'
+        state: present
+        backrefs: yes
+
+    - name: Restart nova containers
+      shell: docker ps | grep nova | awk '{print $1}' | xargs docker restart

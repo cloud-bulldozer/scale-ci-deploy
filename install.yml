@@ -1,4 +1,13 @@
 ---
+
+- name: Enable nested virt on the hypervisors
+  hosts: undercloud
+  user: stack
+  vars_files:
+    - vars/install.yml
+  roles:
+    - { role: openstack_nested_virtualization, when: openstack_nested_virtualization | default(True) | bool }
+
 - name: Find and prepare the virtual machine images
   hosts: image-server
   vars_files:
@@ -13,14 +22,14 @@
     - { role: image_preparation, when: openstack_upload_images | default(True) | bool }
 
 - name: Upload images to OpenStack
-  hosts: openstack-server
+  hosts: undercloud
   vars_files:
     - vars/install.yml
   roles:
     - { role: openstack_upload_images, when: openstack_upload_images | default(True) | bool }
 
 - name: Set up one virtual machine server in a new OpenStack environment
-  hosts: openstack-server
+  hosts: undercloud
   vars_files:
     - vars/install.yml
   roles:
@@ -47,7 +56,7 @@
       when: ocp_metering_install|bool
 
 - name: Find the core cluster and add it to the in-memory inventory
-  hosts: openstack-server
+  hosts: undercloud
   vars_files:
     - vars/install.yml
   roles:
