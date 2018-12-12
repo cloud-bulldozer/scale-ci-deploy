@@ -1,0 +1,15 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+###############################################################################
+# RHCOS Scaling variables.
+###############################################################################
+# Adjust the number of poll attempts based on the size of the cluster requested
+poll_attempts: "{{ lookup('env', 'POLL_ATTEMPTS')|default(600, true) }}"
+
+# Total desired count of nodes
+rhcos_worker_count: "{{ lookup('env', 'RHCOS_WORKER_COUNT')|default(5, true) }}"

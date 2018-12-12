@@ -1,11 +1,42 @@
 # scale-ci-ansible
 
 This repository contains tasks to automate the install of OpenShift Container
-Platform (OCP) on an OpenStack Platform (OSP) environment using the
-[openshift-ansible](https://github.com/openshift/openshift-ansible.git)
-repository.
+Platform (OCP) for use with the scale-ci environment.
 
-# Usage
+## RHCOS scaling Usage
+
+`rhcos-scale.yml` playbook is used to scaleup an existing RHCOS cluster.
+
+Prerequisites in order to use this playbook are to place the kubeconfig into the core
+user home directory and `export KUBECONFIG=~/kubeconfig` inside the core user's `.bashrc`
+file.
+
+From CLI
+
+```
+$ cp inventory.example inventory
+$ # Add rhcos master to inventory
+$ # Edit vars in vars/rhcos-scale.yml or define Environment vars (See below)
+$ time ansible-playbook -vv -i inventory rhcos-scale.yml
+```
+
+### Environment variables for RHCOS scaling
+
+```
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+PUBLIC_KEY
+PRIVATE_KEY
+
+###############################################################################
+# RHCOS Scaling variables.
+###############################################################################
+POLL_ATTEMPTS
+RHCOS_WORKER_COUNT
+```
+
+# OCP on OSP Usage
 
 The repository contains several Ansible playbooks and roles for installing
 OpenShift on OpenStack. To use Ansible you must first create an inventory file:  

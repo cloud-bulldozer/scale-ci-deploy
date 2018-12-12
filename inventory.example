@@ -3,3 +3,6 @@
 
 [image-server]
 # The server that contains the OpenStack compatible VM images.
+
+[rhcos-master]
+# RHCOS master server address

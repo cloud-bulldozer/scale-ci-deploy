@@ -1,0 +1,46 @@
+---
+#
+# Adjusts the scale of a RHCOS cluster by adjusting the replica count on the first item in a
+# machineset.  Can be used to scale up or scale down a cluster.  Note that scale up/down is limited
+# to the adjustment of the first replica.
+#
+
+- name: Adjust the scale of a RHCOS cluster
+  hosts: rhcos-master[0]
+  gather_facts: false
+  remote_user: core
+  vars_files:
+    - vars/rhcos-scale.yml
+  tasks:
+    - name: Get cluster name
+      shell: |
+        {%raw%}oc get machineset -n openshift-cluster-api -o=go-template='{{(index (index .items 0 ).metadata.labels "sigs.k8s.io/cluster-api-cluster") }}'{%endraw%}
+      register: rhcos_cluster_name
+
+    - name: Get cluster region
+      shell: |
+        {%raw%}oc get machineset -n openshift-cluster-api -o=go-template='{{(index .items 0 ).spec.template.spec.providerSpec.value.placement.region }}'{%endraw%}
+      register: rhcos_region
+
+    - name: Get current worker count
+      shell: |
+        oc get nodes | grep worker -c
+      register: rhcos_current_worker_count
+
+    - name: Set each machineset in each availability zone
+      shell: |
+        oc patch machineset {{rhcos_cluster_name.stdout}}-worker-{{rhcos_region.stdout}}{{item.ms}} --type=merge -n openshift-cluster-api -p '{"spec": {"replicas": {{item.count|int}} }}'
+      with_items:
+        - ms: a
+          count: "{{(rhcos_worker_count|int / 3) | round(0, 'floor')}}"
+        - ms: b
+          count: "{{(rhcos_worker_count|int / 3) | round(0, 'floor')}}"
+        - ms: c
+          count: "{{(rhcos_worker_count|int - ((rhcos_worker_count|int / 3) | round(0, 'floor') * 2)) | round(0,'ceil')}}"
+
+    - name: Poll node count to see if scaling finished
+      shell: oc get nodes | grep worker | grep " Ready" -c
+      register: scaled_worker_node_count
+      until: scaled_worker_node_count.stdout|int == rhcos_worker_count|int
+      delay: 1
+      retries: "{{poll_attempts|int}}"
