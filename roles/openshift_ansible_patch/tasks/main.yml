@@ -1,5 +1,6 @@
 ---
 - name: Applying patches to files in {{ ansible_user_dir }} directory
+  become: true
   patch:
     src: "{{ item }}"
     basedir: "{{ ansible_user_dir }}"

@@ -6,4 +6,7 @@
   become: yes
 
 - name: run the playbook to enable nested virt on the hypervisors
-  shell: source "{{ ansible_user_dir }}/stackrc"; ansible-playbook -vv -i /usr/bin/tripleo-ansible-inventory /tmp/nested_virt.yml
+  shell: |
+    set -o pipefail
+    source "{{ ansible_user_dir }}/stackrc"
+    { time ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook --forks 100 -vv -i /usr/bin/tripleo-ansible-inventory /tmp/nested_virt.yml 2>&1 | tee -a /home/stack/alderaan-deploy/log/nested_virt.log ; } 2>> /home/stack/alderaan-deploy/log/nested_virt.log

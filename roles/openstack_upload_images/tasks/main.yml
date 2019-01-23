@@ -16,6 +16,7 @@
 # Convert qcow2 images to raw format.
 - name: Converting qcow2 images to raw format
   shell: "qemu-img convert -f qcow2 -O raw {{ item['path'] }} {{ (item['path']|splitext)[0] }}.raw"
+  become: true
   with_items: "{{ qcow2_images['files'] }}"
 
 # Find the images to upload.

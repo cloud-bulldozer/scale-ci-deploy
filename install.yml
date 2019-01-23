@@ -10,6 +10,7 @@
 
 - name: Find and prepare the virtual machine images
   hosts: image-server
+  remote_user: root
   vars_files:
     - vars/install.yml
   pre_tasks:
@@ -23,6 +24,7 @@
 
 - name: Upload images to OpenStack
   hosts: undercloud
+  remote_user: stack
   vars_files:
     - vars/install.yml
   roles:
@@ -30,6 +32,7 @@
 
 - name: Set up one virtual machine server in a new OpenStack environment
   hosts: undercloud
+  remote_user: stack
   vars_files:
     - vars/install.yml
   roles:
@@ -37,6 +40,7 @@
 
 - name: Install the prerequisite software on the virtual machine server
   hosts: target-server
+  remote_user: cloud-user
   vars_files:
     - vars/install.yml
   # This host may not have Python installed, do not collect facts at this time.
@@ -46,6 +50,7 @@
 
 - name: Install OpenShift on OpenStack
   hosts: target-server
+  remote_user: cloud-user
   vars_files:
     - vars/install.yml
   roles:
@@ -57,6 +62,7 @@
 
 - name: Find the core cluster and add it to the in-memory inventory
   hosts: undercloud
+  remote_user: stack
   vars_files:
     - vars/install.yml
   roles:

@@ -54,7 +54,7 @@ glusterfs_image_tag: "{{ lookup('env', 'OCP_GLUSTERFS_IMAGE_TAG')|default('v' ~ 
 glusterfs_s3_tag: "{{ lookup('env', 'OCP_GLUSTERFS_S3_TAG')|default('v' ~ ocp_major_minor, true) }}"
 
 # Look up the environment variable with a space separated string of image registry servers to add to the container configuration.
-openshift_registries: "{{ lookup('env', 'OCP_CONTAINER_REGISTRIES')|trim }}"
+openshift_registries: "{{ lookup('env', 'OCP_CONTAINER_REGISTRIES')|regex_replace('\"', '')|trim }}"
 # Break up the space separate string into a list of image registries for the OSEv3.yml variables.
 registries: "{{ openshift_registries.split(' ') }}"
 

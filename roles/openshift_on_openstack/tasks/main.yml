@@ -44,6 +44,7 @@
     group: "{{ ansible_user }}"
     recurse: yes
   become: true
+  ignore_errors: true
   when: (not openshift_ansible_clone | bool) and openshift_ansible['stat']['exists']
 
 # Print the values that will be used for the openshift-ansible repository.

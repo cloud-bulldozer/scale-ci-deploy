@@ -9,10 +9,13 @@
 
 # Ensure the remote install directory exists.
 - name: Creating the {{ install_directory }} directory on {{ inventory_hostname }}
+  become: true
   file:
     path: "{{ install_directory }}"
     state: directory
     mode: 0700
+    owner: stack
+    group: stack
 
 # Copy the public key so it can be used to create the OpenStack keypair.
 - name: Copying the public key to {{ inventory_hostname }}

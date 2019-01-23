@@ -26,6 +26,7 @@ packages:
   python:
     - "ansible=={{ ansible_required_version }}"
     - dnspython==1.15.0
+    - decorator==4.3.0
     - Jinja2==2.10
     - jmespath==0.9.3
     - python-openstackclient==3.14.0

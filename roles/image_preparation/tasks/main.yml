@@ -137,6 +137,8 @@
   file:
     path: "{{ remote_image_directory }}/{{ item|dirname }}"
     state: directory
+    owner: stack
+    group: stack
   with_items: "{{ files }}"
   delegate_to: "{{ remote_host }}"
 
