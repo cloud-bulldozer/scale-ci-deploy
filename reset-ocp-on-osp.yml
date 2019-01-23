@@ -1,0 +1,166 @@
+---
+#
+# Playbook to uninstall OCP on OSP and reset OSP environment
+#
+# WARNING: Kuryr uninstall is not supported through this playbook at this moment
+#
+
+- name: Uninstall OCP on OSP and cleanup OSP resources
+  hosts: undercloud
+  remote_user: stack
+  vars_files:
+    - vars/reset-ocp-on-osp.yml
+  tasks:
+    - name: Get all instance IDs
+      shell: |
+        . /home/stack/overcloudrc
+        openstack server list --format value -c ID --limit -1 --status ACTIVE
+      register: servers
+      changed_when: false
+
+    - name: Stop all instances
+      shell:  |
+        . /home/stack/overcloudrc
+        openstack server stop {{ item }}
+      with_items: "{{ servers.stdout_lines }}"
+
+    - name: Get all heat stacks
+      shell:  |
+        . /home/stack/overcloudrc
+        openstack stack list --format value -c ID
+      register: stacks
+      changed_when: false
+
+    - name: Delete all heat stacks
+      shell:  |
+        . /home/stack/overcloudrc
+        openstack stack delete --yes --wait {{ item }}
+      with_items: "{{ stacks.stdout_lines }}"
+      ignore_errors: true
+      retries: 3
+      delay: 1
+
+    - name: Get floating ip address for {{ osp_bastion_name }}
+      shell:  |
+        . /home/stack/overcloudrc
+        openstack server show {{ osp_bastion_name }} --format value -c addresses
+      register: server_addresses
+      changed_when: false
+      ignore_errors: true
+
+    - name: Delete {{ osp_bastion_name }}
+      shell: |
+        . /home/stack/overcloudrc
+        openstack server delete {{ osp_bastion_name }}
+      ignore_errors: true
+
+    - name: Delete ci_keypair
+      shell: |
+        . /home/stack/overcloudrc
+        openstack keypair delete ci_keypair
+      ignore_errors: true
+
+    - name: Get all the flavor ids
+      shell: |
+        . /home/stack/overcloudrc
+        openstack flavor list --format value -c ID
+      register: flavors
+      when: delete_flavors|bool
+      changed_when: false
+
+    - name: Delete all the flavors
+      shell: |
+        . /home/stack/overcloudrc
+        openstack flavor delete {{ item }}
+      with_items: "{{ flavors.stdout_lines }}"
+      ignore_errors: true
+      when: delete_flavors|bool
+
+    - name: Get all the floating ip addresses
+      shell: |
+        . /home/stack/overcloudrc
+        openstack floating ip list --format value -c 'Floating IP Address'
+      register: floating_ips
+      changed_when: false
+
+    - name: Delete the {{ osp_bastion_name }} floating ip address
+      shell: |
+        . /home/stack/overcloudrc
+        openstack floating ip delete {{ item }}
+      when: item in server_addresses.stdout
+      with_items: "{{ floating_ips.stdout_lines }}"
+
+    - name: Delete ci_security_group
+      shell: |
+        . /home/stack/overcloudrc
+        openstack security group delete ci_security_group
+      ignore_errors: true
+
+    - name: Get ci_router
+      shell: |
+        . /home/stack/overcloudrc
+        openstack router list --name ci_router --format value -c ID
+      register: routers
+      changed_when: false
+
+    - name: Get ci_subnet
+      shell: |
+        . /home/stack/overcloudrc
+        openstack subnet list --name ci_subnet --format value -c ID
+      register: subnets
+      changed_when: false
+
+    - name: Remove ci_subnet from ci_router
+      shell: |
+        . /home/stack/overcloudrc
+        openstack router remove subnet {{ item.0 }} {{ item.1 }}
+      with_nested:
+        - "{{ routers.stdout_lines }}"
+        - "{{ subnets.stdout_lines }}"
+      ignore_errors: true
+
+    - name: Delete ci_subnet
+      shell: |
+        . /home/stack/overcloudrc
+        openstack subnet delete ci_subnet
+      ignore_errors: true
+
+    - name: Delete ci_network
+      shell: |
+        . /home/stack/overcloudrc
+        openstack network delete ci_network
+      ignore_errors: true
+
+    - name: Delete all the routers
+      shell: |
+        . /home/stack/overcloudrc
+        openstack router delete {{ item }}
+      with_items: "{{ routers.stdout_lines }}"
+
+    - name: Delete the ocp-on-osp image files
+      become: true
+      file:
+        path: /home/stack/scale-ci
+        state: absent
+      when: delete_images|bool
+
+    - name: List all the OCP images in OSP
+      shell: |
+        . /home/stack/overcloudrc
+        openstack image list --format value -c ID -c Name | grep -i ocp
+      register: images_id_name
+      ignore_errors: true
+
+    - name: Delete the existing OCP images in OSP
+      shell: |
+        . /home/stack/overcloudrc
+        openstack image delete {{ item.split(' ')[0] }}
+      with_items: "{{ images_id_name['stdout_lines'] }}"
+      when: delete_images|bool
+
+    - name: Remove old hosts from /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^\s*\d.*({{ osp_bastion_name }}|{{ clusterid }}.{{ dns_domain }})'
+        state: absent

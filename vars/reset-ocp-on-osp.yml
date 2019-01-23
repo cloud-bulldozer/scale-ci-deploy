@@ -1,0 +1,16 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+###############################################################################
+# Reset OCP on OSP variables.
+###############################################################################
+clusterid: "{{ lookup('env', 'OCP_CLUSTER_ID')|default('scale-ci', true) }}"
+dns_domain: "{{ lookup('env', 'OCP_DNS_DOMAIN')|default('example.com', true) }}"
+
+osp_bastion_name: "{{ lookup('env', 'OSP_SERVER_NAME')|default('ansible-host', true) }}"
+delete_flavors: "{{ lookup('env', 'OSP_DELETE_FLAVORS')|default(true, true) }}"
+delete_images: "{{ lookup('env', 'OSP_DELETE_IMAGES')|default(true, true) }}"

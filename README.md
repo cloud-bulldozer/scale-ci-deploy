@@ -1,19 +1,24 @@
 # scale-ci-ansible
 
 This repository contains tasks to automate the install of OpenShift Container
-Platform (OCP) for use with the scale-ci environment.
+Platform (OCP) for use with the scale-ci environment.  The environments under
+test include OCP on OSP and RHCOS installs.
 
-## RHCOS scaling Usage
+# RHCOS Usage
 
-`rhcos-scale.yml` playbook is used to scaleup an existing RHCOS cluster.
+The RHCOS playbooks focus on RHCOS on AWS at this time.
+
+## RHCOS scaleup
+
+The RHCOS scaleup playbook is `rhcos-scale.yml` and can scaleup an existing RHCOS cluster.
 
 Prerequisites in order to use this playbook are to place the kubeconfig into the core
-user home directory and `export KUBECONFIG=~/kubeconfig` inside the core user's `.bashrc`
-file.
+user .kube directory and `export KUBECONFIG=~/.kube/kubeconfig` inside the core user's
+`.bashrc` file.
 
-From CLI
+Running from CLI:
 
-```
+```sh
 $ cp inventory.example inventory
 $ # Add rhcos master to inventory
 $ # Edit vars in vars/rhcos-scale.yml or define Environment vars (See below)
@@ -39,47 +44,22 @@ RHCOS_WORKER_COUNT
 # OCP on OSP Usage
 
 The repository contains several Ansible playbooks and roles for installing
-OpenShift on OpenStack. To use Ansible you must first create an inventory file:  
+OpenShift on OpenStack. Usage is as follows:
 
-1. Create an `inventory` file to suit your environment. The following groups
-must be defined in the inventory file:  
-* **undercloud** - The group contains the host that runs OpenStack. Sometimes
-called the undercloud and usually contains the the OpenStack rc file.
-* **image-server** - This group contains the host that has the RAW images to use
-when building virtual machine servers in OpenStack.
+## OCP on OSP Install
 
-There is a shell script file that formats the values for an Ansible inventory
-file. The script uses the the following environment variables:  
-`OPENSTACK_SERVER`, `OPENSTACK_USER`, `IMAGE_SERVER`, and `IMAGE_SERVER_USER`
+The OCP on OSP install playbook is `install.yml`
+
+Running from CLI:
 
 ```sh
-files/create_inventory.sh
+$ cp inventory.example inventory
+$ # Add Undercloud and image server to inventory
+$ # Edit vars in vars/install.yml or define Environment vars (See below)
+$ ansible-playbook -i inventory install.yml
 ```
 
-2. Set environment variables for the runtime environment (such as Jenkins). See
-the [environment variables](#environment_variables) section for more details.
-
-3. Run the Ansible playbook:
-```sh
-ansible-playbook -vv -i inventory install.yml
-```
-or
-```sh
-ansible-playbook -vv -i inventory scaleup.yml
-```
-
-These playbook runs a series of commands on the "openstack-server" that create
-the necessary objects to create a VM server in OpenStack. The address is added
-to the dynamic Ansible dynamic while the install playbook runs. Other plays
-are run in sequence in their respective playbook to automate the different
-parts of the install or scale up process.
-
-# Environment variables
-
-## Install
-
-The install is configurable by setting environment variables before running the
-Ansible install playbook.
+If using environment variables (Ex Jenkins Job Parameters), define the following:
 
 ```
 ###############################################################################
@@ -171,7 +151,20 @@ OSP_CREATE_FLAVORS
 OSP_UPLOAD_IMAGES
 ```
 
-## Scale up
+## OCP on OSP scaleup
+
+The OCP on OSP scaleup playbook is `scaleup.yml`
+
+Running from CLI:
+
+```sh
+$ cp inventory.example inventory
+$ # Add Undercloud and image server to inventory
+$ # Edit vars in vars/scaleup.yml or define Environment vars (See below)
+$ ansible-playbook -i inventory scaleup.yml
+```
+
+If using environment variables (Ex Jenkins Job Parameters), define the following:
 
 ```
 ###############################################################################
@@ -227,4 +220,37 @@ OSP_PRIVATE_SUBNET_RANGE
 OSP_SERVER_NAME
 OSP_SERVER_FLAVOR
 OSP_SERVER_IMAGE
+```
+
+## OCP on OSP reset OSP environment
+
+The OCP on OSP reset playbook is `reset-ocp-on-osp.yml`
+
+Running from CLI:
+
+```sh
+$ cp inventory.example inventory
+$ # Add Undercloud and image server to inventory
+$ # Edit vars in vars/scaleup.yml or define Environment vars (See below)
+$ ansible-playbook -i inventory scaleup.yml
+```
+
+If using environment variables (Ex Jenkins Job Parameters), define the following:
+
+```
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+PUBLIC_KEY
+PRIVATE_KEY
+
+###############################################################################
+# Reset OCP on OSP variables.
+###############################################################################
+OCP_CLUSTER_ID
+OCP_DNS_DOMAIN
+
+OSP_SERVER_NAME
+OSP_DELETE_FLAVORS
+OSP_DELETE_IMAGES
 ```
