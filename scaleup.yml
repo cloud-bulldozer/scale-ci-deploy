@@ -1,6 +1,7 @@
 ---
 - name: Find the target-server and add it to the in-memory inventory
-  hosts: openstack-server
+  hosts: undercloud
+  remote_user: stack
   vars_files:
     - vars/scaleup.yml
   pre_tasks:
@@ -14,6 +15,7 @@
 
 - name: Create additional OpenStack VMs and add them to OpenShift
   hosts: target-server
+  remote_user: cloud-user
   vars_files:
     - vars/scaleup.yml
   roles:
