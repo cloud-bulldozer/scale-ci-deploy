@@ -14,12 +14,12 @@
   tasks:
     - name: Get cluster name
       shell: |
-        {%raw%}oc get machineset -n openshift-cluster-api -o=go-template='{{(index (index .items 0 ).metadata.labels "sigs.k8s.io/cluster-api-cluster") }}'{%endraw%}
+        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0 ).metadata.labels "sigs.k8s.io/cluster-api-cluster") }}'{%endraw%}
       register: rhcos_cluster_name
 
     - name: Get cluster region
       shell: |
-        {%raw%}oc get machineset -n openshift-cluster-api -o=go-template='{{(index .items 0 ).spec.template.spec.providerSpec.value.placement.region }}'{%endraw%}
+        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0 ).spec.template.spec.providerSpec.value.placement.region }}'{%endraw%}
       register: rhcos_region
 
     - name: Get current worker count
@@ -29,7 +29,7 @@
 
     - name: Set each machineset in each availability zone
       shell: |
-        oc patch machineset {{rhcos_cluster_name.stdout}}-worker-{{rhcos_region.stdout}}{{item.ms}} --type=merge -n openshift-cluster-api -p '{"spec": {"replicas": {{item.count|int}} }}'
+        oc patch machineset {{rhcos_cluster_name.stdout}}-worker-{{rhcos_region.stdout}}{{item.ms}} --type=merge -n openshift-machine-api -p '{"spec": {"replicas": {{item.count|int}} }}'
       with_items:
         - ms: a
           count: "{{(rhcos_worker_count|int / 3) | round(0, 'floor')}}"
