@@ -44,3 +44,7 @@
       until: scaled_worker_node_count.stdout|int == rhcos_worker_count|int
       delay: 1
       retries: "{{poll_attempts|int}}"
+
+    - name: Add additional label to worker nodes to provide ablity to isolate workloads on workers
+      shell: |
+        oc label nodes --overwrite -l 'node-role.kubernetes.io/worker=' computenode=true
