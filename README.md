@@ -8,19 +8,64 @@ test include OCP on OSP and RHCOS installs.
 
 The RHCOS playbooks focus on RHCOS on AWS at this time.
 
+The prerequisites are simple and simply an orchestration machine with kubeconfig and oc command.
+The orchestration host can be localhost if properly setup.
+
+## RHCOS Post Install
+
+`rhcos-post-install.yml` playbook is used to perform post RHCOS 4 cluster install operations.
+
+Running from CLI:
+
+```
+$ cp inventory.example inventory
+$ # Add orchestration host to inventory
+$ # Edit vars in vars/rhcos-post-install.yml or define Environment vars (See below)
+$ time ansible-playbook -vv -i inventory rhcos-post-install.yml
+```
+
+### Environment variables for RHCOS post install
+
+```
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+PUBLIC_KEY
+PRIVATE_KEY
+
+ORCHESTRATION_USER
+###############################################################################
+# RHCOS Post Install Parameters
+###############################################################################
+POLL_ATTEMPTS
+
+RHCOS_METADATA_LABEL_PREFIX
+
+RHCOS_INFRA_NODE_INSTANCE_TYPE
+RHCOS_PBENCH_NODE_INSTANCE_TYPE
+
+RHCOS_INFRA_NODE_VOLUME_IOPS
+RHCOS_INFRA_NODE_VOLUME_SIZE
+RHCOS_INFRA_NODE_VOLUME_TYPE
+
+RHCOS_PBENCH_NODE_VOLUME_IOPS
+RHCOS_PBENCH_NODE_VOLUME_SIZE
+RHCOS_PBENCH_NODE_VOLUME_TYPE
+
+PROMETHEUS_RETENTION_PERIOD
+PROMETHEUS_STORAGE_SIZE
+ALERTMANAGER_STORAGE_SIZE
+```
+
 ## RHCOS scaleup
 
 The RHCOS scaleup playbook is `rhcos-scale.yml` and can scaleup an existing RHCOS cluster.
-
-Prerequisites in order to use this playbook are to place the kubeconfig into the core
-user .kube directory and `export KUBECONFIG=~/.kube/kubeconfig` inside the core user's
-`.bashrc` file.
 
 Running from CLI:
 
 ```sh
 $ cp inventory.example inventory
-$ # Add rhcos master to inventory
+$ # Add orchestration host to inventory
 $ # Edit vars in vars/rhcos-scale.yml or define Environment vars (See below)
 $ time ansible-playbook -vv -i inventory rhcos-scale.yml
 ```
@@ -34,10 +79,14 @@ $ time ansible-playbook -vv -i inventory rhcos-scale.yml
 PUBLIC_KEY
 PRIVATE_KEY
 
+ORCHESTRATION_USER
 ###############################################################################
 # RHCOS Scaling variables.
 ###############################################################################
 POLL_ATTEMPTS
+
+RHCOS_METADATA_LABEL_PREFIX
+
 RHCOS_WORKER_COUNT
 ```
 

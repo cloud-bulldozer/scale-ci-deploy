@@ -1,20 +1,19 @@
 ---
 #
-# Adjusts the scale of a RHCOS cluster by adjusting the replica count on the first item in a
-# machineset.  Can be used to scale up or scale down a cluster.  Note that scale up/down is limited
-# to the adjustment of the first replica.
+# Adjusts the scale of a RHCOS cluster by spreading worker count across each availablity zone in a
+# typical default cluster (3 availablity zones).
 #
 
 - name: Adjust the scale of a RHCOS cluster
-  hosts: rhcos-master[0]
+  hosts: orchestration
   gather_facts: false
-  remote_user: core
+  remote_user: "{{orchestration_user}}"
   vars_files:
     - vars/rhcos-scale.yml
   tasks:
     - name: Get cluster name
       shell: |
-        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0 ).metadata.labels "sigs.k8s.io/cluster-api-cluster") }}'{%endraw%}
+        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{rhcos_metadata_label_prefix}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
       register: rhcos_cluster_name
 
     - name: Get cluster region
