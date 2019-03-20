@@ -13,7 +13,7 @@
   gather_facts: false
   remote_user: "{{orchestration_user}}"
   vars_files:
-    - vars/rhcos-post-install.yml
+    - vars/post-install.yml
   tasks:
     - name: Get cluster name
       shell: |
@@ -34,11 +34,14 @@
       template:
         src: "{{item.src}}"
         dest: "{{item.dest}}"
+      when: "{{item.toggle}}"
       with_items:
         - src: templates/infra-node-machineset.yml.j2
           dest: ~/infra-node-machineset.yml
+          toggle: "{{rhcos_toggle_infra_node}}"
         - src: templates/pbench-node-machineset.yml.j2
           dest: ~/pbench-node-machineset.yml
+          toggle: "{{rhcos_toggle_pbench_node}}"
 
     - name: Get current ready node count
       shell: oc get nodes | grep " Ready" -ic
@@ -46,67 +49,95 @@
 
     - name: Create machinesets
       shell: |
-        oc create -f infra-node-machineset.yml,pbench-node-machineset.yml
+        oc create -f {{item.ms}}
+      when: "{{item.toggle}}"
+      with_items:
+        - ms: infra-node-machineset.yml
+          toggle: "{{rhcos_toggle_infra_node}}"
+        - ms: pbench-node-machineset.yml
+          toggle: "{{rhcos_toggle_pbench_node}}"
+
+    - name: Set expected node count
+      set_fact:
+        expected_node_count: "{{rhcos_current_node_count.stdout|int}}"
+
+    - name: Increment expected node count with infra nodes
+      set_fact:
+        expected_node_count: "{{expected_node_count|int + 3}}"
+      when: rhcos_toggle_infra_node
+
+    - name: Increment expected node count with pbench node
+      set_fact:
+        expected_node_count: "{{expected_node_count|int + 1}}"
+      when: rhcos_toggle_pbench_node
 
     - name: Poll nodes to see if creating nodes finished
       shell: oc get nodes | grep " Ready" -ic
       register: current_node_count
-      # + 3 (infra nodes) + 1 (pbench controller node)
-      until: current_node_count.stdout|int == (rhcos_current_node_count.stdout|int + 3 + 1)
+      until: current_node_count.stdout|int >= (expected_node_count|int)
       delay: 1
       retries: "{{poll_attempts|int}}"
+      when: (rhcos_toggle_infra_node == true or rhcos_toggle_pbench_node == true)
 
     - name: Relabel the infra nodes
       shell: |
         oc label nodes --overwrite -l 'node-role.kubernetes.io/infra=' node-role.kubernetes.io/worker-
+      when: rhcos_toggle_infra_node
 
     - name: Relabel the pbench controller node
       shell: |
         oc label nodes --overwrite -l 'node-role.kubernetes.io/pbench=' node-role.kubernetes.io/worker-
+      when: rhcos_toggle_pbench_node
 
     - name: Add additional label to worker nodes to provide ablity to isolate workloads on workers
       shell: |
         oc label nodes --overwrite -l 'node-role.kubernetes.io/worker=' computenode=true
 
-    - name: Disable CVO to prevent squashed configuration changes to cluster operators
-      shell: |
-        oc scale --replicas 0 -n openshift-cluster-version deployments/cluster-version-operator
+    # Due to upgrade testing we will no longer disable the CVO
+    # - name: Disable CVO to prevent squashed configuration changes to cluster operators
+    #   shell: |
+    #     oc scale --replicas 0 -n openshift-cluster-version deployments/cluster-version-operator
 
     - name: Taint the pbench controller node
       shell: |
-        oc adm taint node -l node-role.kubernetes.io/pbench= dedicated=pbench:NoSchedule
+        oc adm taint node -l node-role.kubernetes.io/pbench= role=controller:NoSchedule
+      when: rhcos_toggle_pbench_node
 
     - name: Copy new cluster-monitoring-config
       template:
         src: templates/cluster-monitoring-config.yml.j2
         dest: ~/cluster-monitoring-config.yml
+      when: rhcos_toggle_infra_node
 
     - name: Replace the cluster-monitoring-config ConfigMap
       shell: |
         oc create -f cluster-monitoring-config.yml
       ignore_errors: yes
+      when: rhcos_toggle_infra_node
 
-    - name: Remove existing nodeSelector from ingress-operator
-      shell: |
-        oc patch deployment.apps/ingress-operator -n openshift-ingress-operator --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
+    # Attempting to migrate these operators seems to break upgrades
+    # - name: Remove existing nodeSelector from ingress-operator
+    #   shell: |
+    #     oc patch deployment.apps/ingress-operator -n openshift-ingress-operator --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
 
-    - name: Remove existing nodeSelector from monitoring-operator
-      shell: |
-        oc patch deployment.apps/cluster-monitoring-operator -n openshift-monitoring --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
+    # - name: Remove existing nodeSelector from monitoring-operator
+    #   shell: |
+    #     oc patch deployment.apps/cluster-monitoring-operator -n openshift-monitoring --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
 
-    - name: Remove existing nodeSelector from registry-operator
-      shell: |
-        oc patch deployment.apps/cluster-image-registry-operator -n openshift-image-registry --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
+    # - name: Remove existing nodeSelector from registry-operator
+    #   shell: |
+    #     oc patch deployment.apps/cluster-image-registry-operator -n openshift-image-registry --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
 
     - name: Apply new nodeSelector to infra workload components
       shell: |
         oc patch {{item.object}} {{item.type|default('',True)}} -n {{item.namespace}} -p {{item.patch}}
       with_items:
-        # Ingress/Router (Relocate from worker nodes) - Does require CVO Disable
-        - namespace: openshift-ingress-operator
-          object: deployment.apps/ingress-operator
-          patch: |
-            '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+        # Due to CVO remaining enabled for upgrades we can not migrate the cluster-ingress-operator
+        # # Ingress/Router (Relocate from worker nodes) - Does require CVO Disable
+        # - namespace: openshift-ingress-operator
+        #   object: deployment.apps/ingress-operator
+        #   patch: |
+        #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
         - namespace: openshift-ingress-operator
           object: ingresscontrollers/default
           patch: |
@@ -118,10 +149,10 @@
           patch: |
             '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
         # Registry (Relocate from master nodes) - Does not require CVO Disable
-        - namespace: openshift-image-registry
-          object: deployment.apps/cluster-image-registry-operator
-          patch: |
-            '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+        # - namespace: openshift-image-registry
+        #   object: deployment.apps/cluster-image-registry-operator
+        #   patch: |
+        #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
         - namespace: openshift-image-registry
           object: deployment.apps/image-registry
           patch: |
@@ -144,13 +175,4 @@
         #   object: deployment.apps/kibana
         #   patch: |
         #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
-
-    # Remove after Bug https://bugzilla.redhat.com/show_bug.cgi?id=1683761 fixed
-    - name: Remove existing nodeSelector from ingress
-      shell: |
-         oc patch deployment.apps/router-default -n openshift-ingress --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
-
-    # Remove after Bug https://bugzilla.redhat.com/show_bug.cgi?id=1683761 fixed
-    - name: Apply new NodeSelector to openshift routers
-      shell: |
-        oc patch deployment.apps/router-default -n openshift-ingress -p '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+      when: rhcos_toggle_infra_node

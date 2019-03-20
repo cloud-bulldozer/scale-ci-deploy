@@ -1,0 +1,2 @@
+[orchestration]
+# The server that contains the kubeconfig and oc command

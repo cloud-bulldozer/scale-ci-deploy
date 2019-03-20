@@ -1,31 +1,30 @@
 # scale-ci-ansible
 
-This repository contains tasks to automate the install of OpenShift Container
-Platform (OCP) for use with the scale-ci environment.  The environments under
-test include OCP on OSP and RHCOS installs.
+The repo contains playbooks for various scale-ci automation tasks.  Those include install,
+scaling, upgrade, and post install configuration. The environments under test include RHCOS and
+OCP on OSP installs.
 
 # RHCOS Usage
 
-The RHCOS playbooks focus on RHCOS on AWS at this time.
+The RHCOS playbooks focus on RHCOS on AWS at this time and are found in the `OCP-4.X` directory.
 
 The prerequisites are simple and simply an orchestration machine with kubeconfig and oc command.
 The orchestration host can be localhost if properly setup.
 
 ## RHCOS Post Install
 
-`rhcos-post-install.yml` playbook is used to perform post RHCOS 4 cluster install operations.
+`OCP-4.X/post-install.yml` playbook is used to perform post RHCOS 4 cluster install operations.
 
 Running from CLI:
 
 ```
-$ cd OCP-4.X
-$ cp inventory.example inventory
+$ cp OCP-4.X/inventory.example inventory
 $ # Add orchestration host to inventory
-$ # Edit vars in vars/rhcos-post-install.yml or define Environment vars (See below)
-$ time ansible-playbook -vv -i inventory rhcos-post-install.yml
+$ # Edit vars in OCP-4.X/vars/post-install.yml or define Environment vars (See below)
+$ time ansible-playbook -vv -i inventory OCP-4.X/post-install.yml
 ```
 
-### Environment variables for RHCOS post install
+### Environment variables for RHCOS post install playbook
 
 ```
 ###############################################################################
@@ -41,6 +40,9 @@ ORCHESTRATION_USER
 POLL_ATTEMPTS
 
 RHCOS_METADATA_LABEL_PREFIX
+
+RHCOS_TOGGLE_INFRA_NODE
+RHCOS_TOGGLE_PBENCH_NODE
 
 RHCOS_INFRA_NODE_INSTANCE_TYPE
 RHCOS_PBENCH_NODE_INSTANCE_TYPE
@@ -58,21 +60,20 @@ PROMETHEUS_STORAGE_SIZE
 ALERTMANAGER_STORAGE_SIZE
 ```
 
-## RHCOS scaleup
+## RHCOS scale
 
-The RHCOS scaleup playbook is `rhcos-scale.yml` and can scaleup an existing RHCOS cluster.
+The RHCOS scale playbook is `OCP-4.X/scale.yml` and can scale an existing RHCOS cluster.
 
 Running from CLI:
 
 ```sh
-$ cd OCP-3.X
-$ cp inventory.example inventory
+$ cp OCP-4.X/inventory.example inventory
 $ # Add orchestration host to inventory
-$ # Edit vars in vars/rhcos-scale.yml or define Environment vars (See below)
-$ time ansible-playbook -vv -i inventory rhcos-scale.yml
+$ # Edit vars in OCP-4.X/vars/scale.yml or define Environment vars (See below)
+$ time ansible-playbook -vv -i inventory OCP-4.X/scale.yml
 ```
 
-### Environment variables for RHCOS scaling
+### Environment variables for RHCOS scale playbook
 
 ```
 ###############################################################################
@@ -92,25 +93,58 @@ RHCOS_METADATA_LABEL_PREFIX
 RHCOS_WORKER_COUNT
 ```
 
-# OCP on OSP Usage
+## RHCOS Upgrade
 
-The repository contains several Ansible playbooks and roles for installing
-OpenShift on OpenStack. Usage is as follows:
-
-## OCP on OSP Install
-
-The OCP on OSP install playbook is `install.yml`
+The RHCOS upgrade playbook is `OCP-4.X/upgrade.yml` and can upgrade an existing RHCOS cluster (if it
+is upgrade-able).
 
 Running from CLI:
 
 ```sh
-$ cp inventory.example inventory
-$ # Add Undercloud and image server to inventory
-$ # Edit vars in vars/install.yml or define Environment vars (See below)
-$ ansible-playbook -i inventory install.yml
+$ cp OCP-4.X/inventory.example inventory
+$ # Add orchestration host to inventory
+$ # Edit vars in OCP-4.X/vars/upgrade.yml or define Environment vars (See below)
+$ time ansible-playbook -vv -i inventory OCP-4.X/upgrade.yml
 ```
 
-If using environment variables (Ex Jenkins Job Parameters), define the following:
+### Environment variables for RHCOS upgrade playbook
+
+```
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+PUBLIC_KEY
+PRIVATE_KEY
+
+ORCHESTRATION_USER
+###############################################################################
+# RHCOS upgrade variables.
+###############################################################################
+POLL_ATTEMPTS
+
+RHCOS_NEW_VERSION_URL
+RHCOS_NEW_VERSION
+```
+
+# OCP on OSP Usage
+
+The repository contains several Ansible playbooks and roles for installing
+OpenShift on OpenStack. Those playbooks are in the `OCP-3.X` directory. Usage is as follows:
+
+## OCP on OSP Install
+
+The OCP on OSP install playbook is `OCP-3.X/install.yml`
+
+Running from CLI:
+
+```sh
+$ cp OCP-3.X/inventory.example inventory
+$ # Add Undercloud and image server to inventory
+$ # Edit vars in OCP-3.X/vars/install.yml or define Environment vars (See below)
+$ time ansible-playbook -vv -i inventory OCP-3.X/install.yml
+```
+
+### Environment variables for OCP on OSP install playbook
 
 ```
 ###############################################################################
@@ -204,18 +238,18 @@ OSP_UPLOAD_IMAGES
 
 ## OCP on OSP scaleup
 
-The OCP on OSP scaleup playbook is `scaleup.yml`
+The OCP on OSP scaleup playbook is `OCP-3.X/scaleup.yml`
 
 Running from CLI:
 
 ```sh
-$ cp inventory.example inventory
+$ cp OCP-3.X/inventory.example inventory
 $ # Add Undercloud and image server to inventory
-$ # Edit vars in vars/scaleup.yml or define Environment vars (See below)
-$ ansible-playbook -i inventory scaleup.yml
+$ # Edit vars in OCP-3.X/vars/scaleup.yml or define EnvironmentOCP-3.X/ vars (See below)
+$ time ansible-playbook -i inventory OCP-3.X/scaleup.yml
 ```
 
-If using environment variables (Ex Jenkins Job Parameters), define the following:
+### Environment variables for OCP on OSP scaleup playbook
 
 ```
 ###############################################################################
@@ -275,19 +309,18 @@ OSP_SERVER_IMAGE
 
 ## OCP on OSP reset OSP environment
 
-The OCP on OSP reset playbook is `reset-ocp-on-osp.yml`
+The OCP on OSP reset playbook is `OCP-3.X/reset-ocp-on-osp.yml`
 
 Running from CLI:
 
 ```sh
-$ cd OCP-3.X
-$ cp inventory.example inventory
+$ cp OCP-3.X/inventory.example inventory
 $ # Add Undercloud and image server to inventory
-$ # Edit vars in vars/scaleup.yml or define Environment vars (See below)
-$ ansible-playbook -i inventory scaleup.yml
+$ # Edit vars in OCP-3.X/vars/reset-ocp-on-osp.yml or define Environment vars (See below)
+$ time ansible-playbook -i inventory OCP-3.X/reset-ocp-on-osp.yml
 ```
 
-If using environment variables (Ex Jenkins Job Parameters), define the following:
+### Environment variables for OCP on OSP reset playbook
 
 ```
 ###############################################################################

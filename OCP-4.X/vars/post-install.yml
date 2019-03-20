@@ -9,10 +9,14 @@ orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true
 ###############################################################################
 # RHCOS Post Install Parameters
 ###############################################################################
+# Used to determine amount of time spent waiting for infra nodes and pbench node creation
 poll_attempts: "{{ lookup('env', 'POLL_ATTEMPTS')|default(600, true) }}"
 
 # Either machine.openshift.io or sigs.k8s.io
 rhcos_metadata_label_prefix: "{{ lookup('env', 'RHCOS_METADATA_LABEL_PREFIX')|default('sigs.k8s.io', true) }}"
+
+rhcos_toggle_infra_node: "{{ lookup('env', 'RHCOS_TOGGLE_INFRA_NODE')|default(true, true)|bool }}"
+rhcos_toggle_pbench_node: "{{ lookup('env', 'RHCOS_TOGGLE_PBENCH_NODE')|default(true, true)|bool }}"
 
 rhcos_infra_node_instance_type: "{{ lookup('env', 'RHCOS_INFRA_NODE_INSTANCE_TYPE')|default('m5.10xlarge', true) }}"
 rhcos_pbench_node_instance_type: "{{ lookup('env', 'RHCOS_PBENCH_NODE_INSTANCE_TYPE')|default('m5.4xlarge', true) }}"

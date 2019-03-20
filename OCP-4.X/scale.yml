@@ -9,7 +9,7 @@
   gather_facts: false
   remote_user: "{{orchestration_user}}"
   vars_files:
-    - vars/rhcos-scale.yml
+    - vars/scale.yml
   tasks:
     - name: Get cluster name
       shell: |

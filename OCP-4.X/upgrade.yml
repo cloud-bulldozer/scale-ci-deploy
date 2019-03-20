@@ -1,0 +1,46 @@
+---
+#
+# Upgrades a RHCOS cluster
+#
+
+- name: Upgrade a RHCOS cluster
+  hosts: orchestration
+  gather_facts: false
+  remote_user: "{{orchestration_user}}"
+  vars_files:
+    - vars/upgrade.yml
+  tasks:
+    # # Unclear if needed or only needed in specific upgrade scenarios
+    # - name: Patch cluster upstream
+    #   shell: |
+    #     {%raw%}oc patch clusterversion/version --patch '{"spec":{"upstream":"{%endraw%}{{rhcos_upstream_url}}{%raw%}"}}' --type=merge{%endraw%}
+
+    - name: Initiate Upgrade
+      shell: |
+        oc adm upgrade --to-image={{rhcos_new_version_url}}:{{rhcos_new_version}}
+
+    # # Unclear if needed or only needed in specific upgrade scenarios
+    # - name: Initiate Upgrade via patching clusterversion/version
+    #  shell: |
+    #    {%raw%}oc patch clusterversion/version --patch '{"spec":{"desiredUpdate":{"version":"{%endraw%}{{rhcos_new_version}}{%raw%}"}}}' --type=merge{%endraw%}
+
+    - name: Poll version to see if upgrade started
+      shell: oc get clusterversion/version
+      register: clusterversion_upgrading
+      until: clusterversion_upgrading.stdout.find("Working towards ") != -1
+      failed_when: false
+      delay: 1
+      retries: 120
+
+    - name: Poll version to see if upgrade completed
+      shell: oc get clusterversion/version
+      register: clusterversion_upgrading
+      until: clusterversion_upgrading.stdout.find("Cluster version is ") != -1
+      failed_when: false
+      delay: 1
+      retries: "{{poll_attempts|int}}"
+
+    - name: Fail on upgrade timeout
+      fail:
+        msg: "Upgrade exceeded polling"
+      when: clusterversion_upgrading.stdout.find("Cluster version is ") == -1

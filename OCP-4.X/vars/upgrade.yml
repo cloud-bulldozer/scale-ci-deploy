@@ -1,0 +1,19 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true) }}"
+###############################################################################
+# RHCOS upgrade variables.
+###############################################################################
+# Adjust the number of poll attempts for greater than expect upgrade length
+poll_attempts: "{{ lookup('env', 'POLL_ATTEMPTS')|default(1800, true) }}"
+
+# clusterversion upstream url
+# rhcos_upstream_url: "{{ lookup('env', 'RHCOS_UPSTREAM_URL')|default('https://openshift-release.svc.ci.openshift.org/graph', true) }}"
+
+rhcos_new_version_url: "{{ lookup('env', 'RHCOS_NEW_VERSION_URL')|default('quay.io/openshift-release-dev/ocp-release', true) }}"
+rhcos_new_version: "{{ lookup('env', 'RHCOS_NEW_VERSION')|default('4.0.0-0.10', true) }}"
