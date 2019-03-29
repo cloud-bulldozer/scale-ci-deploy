@@ -18,6 +18,7 @@ The orchestration host can be localhost if properly setup.
 Running from CLI:
 
 ```
+$ cd OCP-4.X
 $ cp inventory.example inventory
 $ # Add orchestration host to inventory
 $ # Edit vars in vars/rhcos-post-install.yml or define Environment vars (See below)
@@ -64,6 +65,7 @@ The RHCOS scaleup playbook is `rhcos-scale.yml` and can scaleup an existing RHCO
 Running from CLI:
 
 ```sh
+$ cd OCP-3.X
 $ cp inventory.example inventory
 $ # Add orchestration host to inventory
 $ # Edit vars in vars/rhcos-scale.yml or define Environment vars (See below)
@@ -278,6 +280,7 @@ The OCP on OSP reset playbook is `reset-ocp-on-osp.yml`
 Running from CLI:
 
 ```sh
+$ cd OCP-3.X
 $ cp inventory.example inventory
 $ # Add Undercloud and image server to inventory
 $ # Edit vars in vars/scaleup.yml or define Environment vars (See below)
