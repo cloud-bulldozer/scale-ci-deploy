@@ -1,0 +1,53 @@
+---
+- name: set workdir
+  set_fact:
+    workdir: "{{ GOPATH }}/src/github.com/openshift/installer"
+
+- name: ensure that .kube dir exists
+  file:
+    path: /root/.kube
+    state: directory
+
+    #- name: masters
+    #shell: oc get nodes | grep master | awk '{print $1}'
+    #register: ocp_masters
+
+- name: copy the kubeconfig
+  copy:
+    src: "{{ workdir }}/auth/kubeconfig"
+    dest: /root/.kube/config
+  ignore_errors: yes
+
+- name: stat svt repo
+  stat:
+    path: /root/svt
+  register: svt
+
+- name: delete svt repo if exists
+  file:
+    path: /root/svt
+    state: absent
+  when: svt.stat.exists == True
+
+- name: clone svt repo
+  git:
+    repo: https://github.com/chaitanyaenr/svt
+    dest: /root/svt
+    update: yes
+    version: containerozed_tooling
+
+- name: create clusterloader dir
+  file:
+    path: /usr/libexec/atomic-openshift/
+    state: directory
+
+    #- name: pull down clusterloader binary
+    #get_url:
+    #url: "{{ CLUSTERLOADER_URL }}"
+    #dest: /usr/libexec/atomic-openshift/
+    #mode: 0755
+    #- name: copy clusterloader binary
+    #copy:
+    #src: /usr/bin/openshift-tests
+    #dest: /usr/libexec/atomic-openshift/extended.test
+    #mode: 0755

@@ -1,0 +1,170 @@
+---
+#
+# Applies configuration to a RHCOS cluster post install.
+#
+# Performs:
+#  * Creates infra node machineset
+#  * Creates pbench node machineset
+#  * Moves infra node pods/workload to infra nodes
+#
+- name: Get cluster name
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ RHCOS_METADATA_LABEL_PREFIX }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
+  register: rhcos_cluster_name
+
+- name: Get AMI ID
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.ami.id}}'{%endraw%}
+  register: rhcos_ami_id
+
+- name: Get cluster region
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.placement.region}}'{%endraw%}
+  register: rhcos_region
+
+- name: Place machineset yamls on master
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+  when: "{{item.toggle}}"
+  with_items:
+    - src: templates/infra-node-machineset.yml.j2
+      dest: ~/infra-node-machineset.yml
+      toggle: "{{ RHCOS_TOGGLE_INFRA_NODE }}"
+    - src: templates/pbench-node-machineset.yml.j2
+      dest: ~/pbench-node-machineset.yml
+      toggle: "{{ RHCOS_TOGGLE_PBENCH_NODE }}"
+
+- name: Get current ready node count
+  shell: oc get nodes | grep " Ready" -ic
+  register: rhcos_current_node_count
+
+- name: Create machinesets
+  shell: |
+    oc create -f {{item.ms}}
+  when: "{{item.toggle}}"
+  with_items:
+    - ms: infra-node-machineset.yml
+      toggle: "{{ RHCOS_TOGGLE_INFRA_NODE }}"
+    - ms: pbench-node-machineset.yml
+      toggle: "{{ RHCOS_TOGGLE_PBENCH_NODE }}"
+
+- name: Set expected node count
+  set_fact:
+    expected_node_count: "{{rhcos_current_node_count.stdout|int}}"
+
+- name: Increment expected node count with infra nodes
+  set_fact:
+    expected_node_count: "{{expected_node_count|int + 3}}"
+  when: RHCOS_TOGGLE_INFRA_NODE
+
+- name: Increment expected node count with pbench node
+  set_fact:
+    expected_node_count: "{{expected_node_count|int + 1}}"
+  when: RHCOS_TOGGLE_PBENCH_NODE
+
+- name: Poll nodes to see if creating nodes finished
+  shell: oc get nodes | grep " Ready" -ic
+  register: current_node_count
+  until: current_node_count.stdout|int >= (expected_node_count|int)
+  delay: 1
+  retries: "{{POLL_ATTEMPTS|int}}"
+  when: (RHCOS_TOGGLE_INFRA_NODE == true or RHCOS_TOGGLE_PBENCH_NODE == true)
+
+- name: Relabel the infra nodes
+  shell: |
+    oc label nodes --overwrite -l 'node-role.kubernetes.io/infra=' node-role.kubernetes.io/worker-
+  when: RHCOS_TOGGLE_INFRA_NODE
+
+- name: Relabel the pbench controller node
+  shell: |
+    oc label nodes --overwrite -l 'node-role.kubernetes.io/pbench=' node-role.kubernetes.io/worker-
+  when: RHCOS_TOGGLE_PBENCH_NODE
+
+- name: Add additional label to worker nodes to provide ablity to isolate workloads on workers
+  shell: |
+    oc label nodes --overwrite -l 'node-role.kubernetes.io/worker=' computenode=true
+
+# Due to upgrade testing we will no longer disable the CVO
+# - name: Disable CVO to prevent squashed configuration changes to cluster operators
+# # shell: |
+  #  oc scale --replicas 0 -n openshift-cluster-version deployments/cluster-version-operator
+
+- name: Taint the pbench controller node
+  shell: |
+    oc adm taint node -l node-role.kubernetes.io/pbench= role=controller:NoSchedule --overwrite=true
+  when: RHCOS_TOGGLE_PBENCH_NODE
+
+- name: Copy new cluster-monitoring-config
+  template:
+    src: templates/cluster-monitoring-config.yml.j2
+    dest: ~/cluster-monitoring-config.yml
+  when: RHCOS_TOGGLE_INFRA_NODE
+
+- name: Replace the cluster-monitoring-config ConfigMap
+  shell: |
+    oc create -f cluster-monitoring-config.yml
+  ignore_errors: yes
+  when: RHCOS_TOGGLE_INFRA_NODE
+
+# Attempting to migrate these operators seems to break upgrades
+# - name: Remove existing nodeSelector from ingress-operator
+#   shell: |
+#     oc patch deployment.apps/ingress-operator -n openshift-ingress-operator --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
+
+# - name: Remove existing nodeSelector from monitoring-operator
+#   shell: |
+#     oc patch deployment.apps/cluster-monitoring-operator -n openshift-monitoring --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
+
+# - name: Remove existing nodeSelector from registry-operator
+#   shell: |
+#     oc patch deployment.apps/cluster-image-registry-operator -n openshift-image-registry --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
+
+- name: Apply new nodeSelector to infra workload components
+  shell: |
+    oc patch {{item.object}} {{item.type|default('',True)}} -n {{item.namespace}} -p {{item.patch}}
+  with_items:
+    # Due to CVO remaining enabled for upgrades we can not migrate the cluster-ingress-operator
+    # # Ingress/Router (Relocate from worker nodes) - Does require CVO Disable
+    # - namespace: openshift-ingress-operator
+    #   object: deployment.apps/ingress-operator
+    #   patch: |
+    #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+    - namespace: openshift-ingress-operator
+      object: ingresscontrollers/default
+      patch: |
+        '{"spec": {"nodePlacement": {"nodeSelector": {"matchLabels": {"node-role.kubernetes.io/infra": ""}}}}}'
+      type: "--type merge"
+        # Monitoring (Relocate from worker nodes) - Does not require CVO Disable
+    - namespace: openshift-monitoring
+      object: deployment.apps/cluster-monitoring-operator
+      patch: |
+        '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+      # Registry (Relocate from master nodes) - Does not require CVO Disable
+      # - namespace: openshift-image-registry
+      #   object: deployment.apps/cluster-image-registry-operator
+      #   patch: |
+      #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+    - namespace: openshift-image-registry
+      object: deployment.apps/image-registry
+      patch: |
+         '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+
+     ## Logging (If it is installed)
+     # - namespace: openshift-logging
+     #   object: deployment.apps/cluster-logging-operator
+     #   patch: |
+     #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+     # - namespace: openshift-logging
+     #   object: deployment.apps/elasticsearch-clientdatamaster-0-1
+     #   patch: |
+     #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+     # - namespace: openshift-logging
+     #   object: deployment.apps/elasticsearch-operator
+     #   patch: |
+     #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+     # - namespace: openshift-logging
+     #   object: deployment.apps/kibana
+     #   patch: |
+     #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+  when: RHCOS_TOGGLE_INFRA_NODE

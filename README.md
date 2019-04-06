@@ -1,63 +1,40 @@
 # scale-ci-ansible
 
 The repo contains playbooks for various scale-ci automation tasks.  Those include install,
-scaling, upgrade, and post install configuration. The environments under test include RHCOS and
-OCP on OSP installs.
+scaling, upgrade, and post install configuration. The environments under test include RHCOS 
+based OCP on AWS and OCP on OSP installs.
 
-# RHCOS Usage
+# RHCOS based OCP 4.X Usage
 
-The RHCOS playbooks focus on RHCOS on AWS at this time and are found in the `OCP-4.X` directory.
+The playbooks focus on RHCOS based OCP on AWS at this time and are found in the `OCP-4.X` directory.
 
 The prerequisites are simple and simply an orchestration machine with kubeconfig and oc command.
 The orchestration host can be localhost if properly setup.
 
-## RHCOS Post Install
+### Prepare the Jump host
+- The jump host is the node which orchestrates the ocp install and configures the nodes to support the Scale-CI pipeline.
+- Jump host needs to be a RHEL box and preferred if it is based out of the AMI built by the image provisioner.
 
-`OCP-4.X/post-install.yml` playbook is used to perform post RHCOS 4 cluster install operations.
-
-Running from CLI:
-
+### Run
+Clone the github repo:
 ```
+$ git clone https://github.com/redhat-performance/scale-ci-ansible.git
+$ cd scale-ci-ansible
 $ cp OCP-4.X/inventory.example inventory
-$ # Add orchestration host to inventory
-$ # Edit vars in OCP-4.X/vars/post-install.yml or define Environment vars (See below)
-$ time ansible-playbook -vv -i inventory OCP-4.X/post-install.yml
+```
+Set the variables including AWS credentials, Install config, post-install and kick off the playbook:
+```
+$ ansible-playbook -vvv -i inventory OCP-4.X/install.yml
 ```
 
-### Environment variables for RHCOS post install playbook
+Set OPENSHIFT_POST_INSTALL and OPENSHIFT_TOOLING to true to run the post-install and post-config options to configure
+the cluster to be able to run perf and scale tests using Scale-CI pipeline. The varibles under the post-install section
+of the inventory can be modified to override the default values.
 
+### Cleanup
+Set OPENSHIFT_INSTALL, OPENSHIFT_POST_INSTALL, OPENSHIFT_TOOLING to False and OPENSHIFT_AWS_INSTALL_CLEANUP to True in the inventory and run the playbook:
 ```
-###############################################################################
-# Ansible SSH variables.
-###############################################################################
-PUBLIC_KEY
-PRIVATE_KEY
-
-ORCHESTRATION_USER
-###############################################################################
-# RHCOS Post Install Parameters
-###############################################################################
-POLL_ATTEMPTS
-
-RHCOS_METADATA_LABEL_PREFIX
-
-RHCOS_TOGGLE_INFRA_NODE
-RHCOS_TOGGLE_PBENCH_NODE
-
-RHCOS_INFRA_NODE_INSTANCE_TYPE
-RHCOS_PBENCH_NODE_INSTANCE_TYPE
-
-RHCOS_INFRA_NODE_VOLUME_IOPS
-RHCOS_INFRA_NODE_VOLUME_SIZE
-RHCOS_INFRA_NODE_VOLUME_TYPE
-
-RHCOS_PBENCH_NODE_VOLUME_IOPS
-RHCOS_PBENCH_NODE_VOLUME_SIZE
-RHCOS_PBENCH_NODE_VOLUME_TYPE
-
-PROMETHEUS_RETENTION_PERIOD
-PROMETHEUS_STORAGE_SIZE
-ALERTMANAGER_STORAGE_SIZE
+$ ansible-playbook -vv -i inventory OCP-4.X/install.yml
 ```
 
 ## RHCOS scale

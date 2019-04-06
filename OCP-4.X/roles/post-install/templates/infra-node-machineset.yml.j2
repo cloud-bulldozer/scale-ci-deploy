@@ -5,25 +5,25 @@ items:
   metadata:
     creationTimestamp: null
     labels:
-      {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-      {{rhcos_metadata_label_prefix}}/cluster-api-machine-role: infra
-      {{rhcos_metadata_label_prefix}}/cluster-api-machine-type: infra
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: infra
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: infra
     name: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}a
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
-        {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-        {{rhcos_metadata_label_prefix}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}a
+        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}a
     template:
       metadata:
         creationTimestamp: null
         labels:
-          {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-          {{rhcos_metadata_label_prefix}}/cluster-api-machine-role: infra
-          {{rhcos_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{rhcos_metadata_label_prefix}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}a
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: infra
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: infra
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}a
       spec:
         metadata:
           creationTimestamp: null
@@ -36,13 +36,13 @@ items:
             apiVersion: awsproviderconfig.openshift.io/v1beta1
             blockDevices:
             - ebs:
-                iops: {{rhcos_infra_node_volume_iops}}
-                volumeSize: {{rhcos_infra_node_volume_size}}
-                volumeType: {{rhcos_infra_node_volume_type}}
+                iops: {{RHCOS_INFRA_NODE_VOLUME_IOPS}}
+                volumeSize: {{RHCOS_INFRA_NODE_VOLUME_SIZE}}
+                volumeType: {{RHCOS_INFRA_NODE_VOLUME_TYPE}}
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile
-            instanceType: {{rhcos_infra_node_instance_type}}
+            instanceType: {{RHCOS_INFRA_NODE_INSTANCE_TYPE}}
             kind: AWSMachineProviderConfig
             metadata:
               creationTimestamp: null
@@ -74,25 +74,25 @@ items:
   metadata:
     creationTimestamp: null
     labels:
-      {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-      {{rhcos_metadata_label_prefix}}/cluster-api-machine-role: infra
-      {{rhcos_metadata_label_prefix}}/cluster-api-machine-type: infra
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: infra
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: infra
     name: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}b
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
-        {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-        {{rhcos_metadata_label_prefix}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}b
+        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}b
     template:
       metadata:
         creationTimestamp: null
         labels:
-          {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-          {{rhcos_metadata_label_prefix}}/cluster-api-machine-role: infra
-          {{rhcos_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{rhcos_metadata_label_prefix}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}b
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: infra
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: infra
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}b
       spec:
         metadata:
           creationTimestamp: null
@@ -105,13 +105,13 @@ items:
             apiVersion: awsproviderconfig.openshift.io/v1beta1
             blockDevices:
             - ebs:
-                iops: {{rhcos_infra_node_volume_iops}}
-                volumeSize: {{rhcos_infra_node_volume_size}}
-                volumeType: {{rhcos_infra_node_volume_type}}
+                iops: {{RHCOS_INFRA_NODE_VOLUME_IOPS}}
+                volumeSize: {{RHCOS_INFRA_NODE_VOLUME_SIZE}}
+                volumeType: {{RHCOS_INFRA_NODE_VOLUME_TYPE}}
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile
-            instanceType: {{rhcos_infra_node_instance_type}}
+            instanceType: {{RHCOS_INFRA_NODE_INSTANCE_TYPE}}
             kind: AWSMachineProviderConfig
             metadata:
               creationTimestamp: null
@@ -143,25 +143,25 @@ items:
   metadata:
     creationTimestamp: null
     labels:
-      {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-      {{rhcos_metadata_label_prefix}}/cluster-api-machine-role: infra
-      {{rhcos_metadata_label_prefix}}/cluster-api-machine-type: infra
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: infra
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: infra
     name: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}c
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
-        {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-        {{rhcos_metadata_label_prefix}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}c
+        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}c
     template:
       metadata:
         creationTimestamp: null
         labels:
-          {{rhcos_metadata_label_prefix}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-          {{rhcos_metadata_label_prefix}}/cluster-api-machine-role: infra
-          {{rhcos_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{rhcos_metadata_label_prefix}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}c
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: infra
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: infra
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-infra-{{rhcos_region.stdout}}c
       spec:
         metadata:
           creationTimestamp: null
@@ -174,13 +174,13 @@ items:
             apiVersion: awsproviderconfig.openshift.io/v1beta1
             blockDevices:
             - ebs:
-                iops: {{rhcos_infra_node_volume_iops}}
-                volumeSize: {{rhcos_infra_node_volume_size}}
-                volumeType: {{rhcos_infra_node_volume_type}}
+                iops: {{RHCOS_INFRA_NODE_VOLUME_IOPS}}
+                volumeSize: {{RHCOS_INFRA_NODE_VOLUME_SIZE}}
+                volumeType: {{RHCOS_INFRA_NODE_VOLUME_TYPE}}
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile
-            instanceType: {{rhcos_infra_node_instance_type}}
+            instanceType: {{RHCOS_INFRA_NODE_INSTANCE_TYPE}}
             kind: AWSMachineProviderConfig
             metadata:
               creationTimestamp: null
