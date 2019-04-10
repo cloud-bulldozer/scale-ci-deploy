@@ -1,0 +1,10 @@
+Host ip*
+   StrictHostKeyChecking no
+   ProxyCommand ssh -W %h:%p {{ controller_public_ip.stdout }}
+   UserKnownHostsFile=/dev/null
+   User core
+
+Host *
+   UserKnownHostsFile=/dev/null
+   StrictHostKeyChecking no
+   User core

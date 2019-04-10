@@ -1,0 +1,36 @@
+---
+- hosts: orchestration
+  user: "{{ ORCHESTRATION_USER | default('root') }}"
+  roles:
+    - role: cleanup
+      when: (OPENSHIFT_AWS_INSTALL_CLEANUP | default(False) | bool) or (OPENSHIFT_LIBVIRT_INSTALL_CLEANUP | default(False) | bool)
+    - role: install
+      when: OPENSHIFT_INSTALL | default(True) | bool
+    - role: quickstart
+      when: OPENSHIFT_INSTALL | default(True) | bool
+    - role: post-install
+      when: OPENSHIFT_POST_INSTALL | default(False) | bool
+    - role: post-config
+      when: OPENSHIFT_TOOLING | default(False) | bool
+
+- hosts: controller
+  remote_user: "{{ OPENSHIFT_INSTALL_USER | default('core') }}"
+  become: yes
+  roles:
+    - role: controller-kickstart
+      when: OPENSHIFT_TOOLING | default(False) | bool
+    - role: disable-selinux
+      when: (OPENSHIFT_TOOLING | default(False) | bool) and (DISABLE_SELINUX | default(False) | bool)
+    - role: node-config
+      when: OPENSHIFT_TOOLING | default(True) | bool
+
+- hosts: nodes
+  remote_user: "{{ OPENSHIFT_INSTALL_USER | default('core') }}"
+  become: yes
+  roles:
+    - role: node-config
+      when: OPENSHIFT_TOOLING | default(True) | bool
+    - role: selinux
+      when: OPENSHIFT_TOOLING | default(True) | bool
+    - role: disable-selinux
+      when: (OPENSHIFT_TOOLING | default(False) | bool) and (DISABLE_SELINUX | default(False) | bool)

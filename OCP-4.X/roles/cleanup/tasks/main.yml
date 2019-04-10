@@ -1,0 +1,27 @@
+- block:
+    - name: copy the cleanup script
+      copy:
+        src: cleanup.sh
+        dest: "{{ ansible_env.HOME }}/cleanup.sh"
+        mode: 0755
+
+    - name: cleanup libvirt cluster
+      shell: "printf 'y' | {{ ansible_env.HOME }}/cleanup.sh"
+  when: OPENSHIFT_INSTALL_PLATFORM == "libvirt"
+
+- name: set workdir
+  set_fact:
+    workdir: "{{ GOPATH }}/src/github.com/openshift/installer"
+
+- name: vars path
+  set_fact:
+     openshift_vars_file: "{{ansible_env.HOME}}/ocp-env.sh"
+
+- name: cleanup aws cluster
+  shell: "cd {{ workdir }}; bin/openshift-install destroy cluster --log-level=debug"
+  when: OPENSHIFT_INSTALL_PLATFORM == "aws"
+
+- name: cleanup workdir
+  file:
+    path: "{{ workdir }}"
+    state: absent

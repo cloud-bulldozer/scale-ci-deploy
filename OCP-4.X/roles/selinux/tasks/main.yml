@@ -1,0 +1,22 @@
+---
+- name: modify ssh config to priveleged separation to no 
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#UsePrivilegeSeparation'
+    line: 'UsePrivilegeSeparation no'
+
+- name: selinux modules
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/
+  with_items:
+    - selinux_patch1.pp
+    - selinux_patch2.pp
+    - selinux_patch3.pp
+
+- name: load selinux modules
+  shell: semodule -i "{{ item }}"
+  with_items:
+    - /tmp/selinux_patch1.pp
+    - /tmp/selinux_patch2.pp
+    - /tmp/selinux_patch3.pp

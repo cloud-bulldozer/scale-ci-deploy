@@ -1,0 +1,105 @@
+---
+- name: Get cluster name
+  shell: |
+        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
+  register: rhcos_cluster_name
+
+- name: get the controller node
+  shell: oc get nodes -l node-role.kubernetes.io/pbench="" | awk 'NR>1 {print $1}' | tail -n1
+  register: controller_node
+
+- name: add the controller label
+  shell: oc label node {{ controller_node.stdout }} {{ item }} --overwrite=true
+  with_items:
+    - "role=controller"
+
+- name: add a taint to the controller
+  shell: oc adm taint node {{ controller_node.stdout }} role=controller:NoSchedule --overwrite=true
+
+- block:
+    - name: get the public ip of the pbench controller
+      shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | grep {{ controller_node.stdout }} | awk '{print $5}'
+      register: controller_public_ip
+
+    - name: get the private ip of the controller
+      shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | grep {{ controller_node.stdout }} | awk '{print $6}'
+      register: controller_private_ip
+
+    - name: add controller to group
+      add_host: name={{ controller_private_ip.stdout }} groups=controller
+
+    - name: set controller host as fact
+      set_fact:
+        controller: "{{ controller_private_ip.stdout }}"
+
+    - name: get VpcId
+      shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName, VpcId]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | awk '{print $7}' | grep -v '^$' | sort -u
+      register: vpc_id
+
+    - name: get security groups
+      shell: aws ec2 describe-security-groups --filters "Name=vpc-id,Values={{ vpc_id.stdout }}" --output json | jq .SecurityGroups[].GroupId
+      register: security_groups
+
+    - name: add inbound rule to allow traffic on 2022
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 2022 --cidr 0.0.0.0/0
+      with_items:
+        - "{{ security_groups.stdout_lines }}"
+      ignore_errors: yes
+
+    - name: add inbound rule to allow traffic on 22
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 22 --cidr 0.0.0.0/0
+      with_items:
+        - "{{ security_groups.stdout_lines }}"
+      ignore_errors: yes
+
+    - name: add inbound rule to allow traffic on 9090
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 9090 --cidr 0.0.0.0/0
+      with_items:
+        - "{{ security_groups.stdout_lines }}"
+      ignore_errors: yes
+
+    - name: add inbound rule to allow tcp traffic on port range 20000 to 20100
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 20000-20100 --cidr 0.0.0.0/0
+      with_items:
+        - "{{ security_groups.stdout_lines }}"
+      ignore_errors: yes
+
+    - name: add inbound rule to allow udp traffic on port range 20000 to 20100
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 20000-20100 --cidr 0.0.0.0/0
+      with_items:
+        - "{{ security_groups.stdout_lines }}"
+      ignore_errors: yes
+
+    # uperf needs more ports for its control port which is choosen at random thus, open a very large range to facilitate this test
+    - name: add inbound rule to allow tcp traffic on port range 40000 to 65535
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 40000-65535 --cidr 0.0.0.0/0
+      with_items:
+        - "{{ security_groups.stdout_lines }}"
+      ignore_errors: yes
+
+    - name: add inbound rule to allow udp traffic on port range 40000 to 65535
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 40000-65535 --cidr 0.0.0.0/0
+      with_items:
+        - "{{ security_groups.stdout_lines }}"
+      ignore_errors: yes
+
+    - name: ssh config for nodes
+      template:
+        src: ssh-config.j2
+        dest: /root/.ssh/config
+      delegate_to: localhost
+
+    - name: get the ocp nodes
+      shell: oc get nodes | awk 'NR>1 {print $1}'
+      register: ocp_nodes
+
+    - name: start sshd on the core nodes
+      shell: oc debug node/{{ item }} -- chroot /host /usr/bin/systemctl start sshd
+      with_items:
+        - "{{ ocp_nodes.stdout_lines }}"
+
+    - name: enable sshd on core cluster
+      shell: oc debug node/{{ item }} -- chroot /host /usr/bin/systemctl enable sshd
+      with_items:
+        - "{{ ocp_nodes.stdout_lines }}"
+  when: OPENSHIFT_INSTALL_PLATFORM == "aws"

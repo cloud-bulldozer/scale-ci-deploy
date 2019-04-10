@@ -1,0 +1,20 @@
+---
+- name: disable selinux in crio config
+  lineinfile:
+    path: /etc/crio/crio.conf
+    regexp: '^selinux'
+    line: 'selinux = false'
+
+- name: restart crio
+  service:
+    name: crio
+    state: restarted
+
+- name: disable selinux
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: 'selinux'
+    line: 'selinux=disabled'
+
+- name: temporarily disable selinux
+  shell: setenforce 0
