@@ -20,26 +20,6 @@
     path: "{{ GOPATH | default('/root/.go') }}"
     state: directory
 
-- name: set workdir
-  set_fact:
-    workdir: "{{ GOPATH }}/src/github.com/openshift/installer"
-
-- name: cleanup installer code if it exists
-  file:
-    path: "{{ workdir }}"
-    state: absent
-
-- name: cleanup vars file
-  file:
-    path: /tmp/ocp-env.sh
-    state: absent
-
-- name: get the installer bits
-  git:
-    repo: 'https://github.com/openshift/installer.git'
-    dest: "{{ workdir }}"
-    version: "{{ OPENSHIFT_INSTALL_INSTALLER_VERSION }}"
-
 - name: create .aws dir
   file:
     path: "{{ ansible_env.HOME }}/.aws"
@@ -55,33 +35,43 @@
      src: credentials.j2
      dest: "{{ ansible_env.HOME }}/.aws/credentials"
 
-- name: build installer binary
-  shell: cd {{ workdir }}; hack/build.sh
-  environment:
-     GOPATH: "{{ GOPATH }}"
+- name: set workdir
+  set_fact:
+    workdir: "{{ GOPATH }}/src/github.com/openshift/installer"
 
-- name: setup install-config
-  template:
-     src: install-config.yaml.j2
-     dest: "{{ workdir }}/install-config.yaml"
+- block:
+    - name: cleanup installer code if it exists
+      file:
+        path: "{{ workdir }}"
+        state: absent
+ 
+    - name: get the installer bits
+      git:
+        repo: 'https://github.com/openshift/installer.git'
+        dest: "{{ workdir }}"
+        version: "{{ OPENSHIFT_INSTALL_INSTALLER_VERSION }}"
 
-- name: ignition configs
-  shell: "cd {{ workdir }}; OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }} _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }} bin/openshift-install create ignition-configs"
-  when: (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE is defined) and (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE != "")
+    - name: build installer binary
+      shell: cd {{ workdir }}; hack/build.sh
+      environment:
+        GOPATH: "{{ GOPATH }}"
+  when: OPENSHIFT_INSTALL_USE_GIT_INSTALLER | default(False)
 
-- name: ignition configs
-  shell: "cd {{ workdir }}; bin/openshift-install create ignition-configs"
-  when: (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE is undefined) or (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE == "")
+- block:
+    - name: create workdir
+      file:
+        path: "{{ workdir }}/bin"
+        state: directory
 
-- name: set the user in ignition configs
-  replace:
-    path: "{{ item }}"
-    regexp: "core"
-    replace: "{{ OPENSHIFT_INSTALL_USER }}"
-  with_items:
-     - "{{ workdir }}/bootstrap.ign"
-     - "{{ workdir }}/master.ign"
-     - "{{ workdir }}/worker.ign"
+    - name: setup config to talk to registry
+      template:
+        src: registry_auth.j2
+        dest: "{{ workdir }}/bin/config.json"
+
+    - name: extract openshift-install binary from the payload
+      #shell: "cd {{ workdir }}/bin; oc image extract {{ OPENSHIFT_INSTALL_BINARY_IMAGE }} --file=/usr/bin/openshift-install; chmod +x openshift-install"
+      shell: "cd {{ workdir }}/bin; oc adm release extract --tools {{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }}; ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'; chmod +x openshift-install"
+  when: not OPENSHIFT_INSTALL_USE_GIT_INSTALLER | default(False)
 
 - name: create openshift install log dir
   file:
@@ -104,6 +94,28 @@
   when: OPENSHIFT_INSTALL_PLATFORM == "libvirt"
 
 - block:
+    - name: setup install-config
+      template:
+        src: install-config.yaml.j2
+        dest: "{{ workdir }}/install-config.yaml" 
+    - name: ignition configs
+      shell: "cd {{ workdir }}; OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }} _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }} bin/openshift-install create ignition-configs"
+      when: (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE is defined) and (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE != "")
+
+    - name: ignition configs
+      shell: "cd {{ workdir }}; bin/openshift-install create ignition-configs"
+      when: (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE is undefined) or (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE == "")
+
+    - name: set the user in ignition configs
+      replace:
+        path: "{{ item }}"
+        regexp: "core"
+        replace: "{{ OPENSHIFT_INSTALL_USER }}"
+      with_items:
+        - "{{ workdir }}/bootstrap.ign"
+        - "{{ workdir }}/master.ign"
+        - "{{ workdir }}/worker.ign"
+
     - name: run openshift installer on aws using the image override
       shell: |
         set -o pipefail
