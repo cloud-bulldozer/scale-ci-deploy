@@ -164,11 +164,11 @@
     openstack_project: "{{ project_name.stdout }}"
   when: openstack_project == "" and project_name.stdout != ""
 
-# Change the quotas from the defaults for the project.
-- name: Setting the quotas for {{ openstack_project }}
-  shell: "{{ openstack }} quota set --{{ item }} {{ quotas[ item ] }} {{ openstack_project }}"
-  with_items: "{{ quotas }}"
-  # Only set quotas when the project is defined.
+- name: Disable quotas on OpenStack project
+  shell: "{{ openstack }}  quota set --properties -1 --server-groups -1 --ram -1 --key-pairs -1 --instances -1 --fixed-ips -1 --injected-file-size -1 --server-group-members -1
+    --injected-files -1 --cores -1 --injected-path-size -1 --per-volume-gigabytes -1 --gigabytes -1 --backup-gigabytes -1 --snapshots -1 --volumes -1
+    --backups -1 --subnetpools -1 --vips -1 --ports -1 --subnets -1 --networks -1 --floating-ips -1 --secgroup-rules -1 --secgroups -1 --routers -1
+    --rbac-policies -1 {{ openstack_project }}"
   when: openstack_project != ""
 
 # Create a VM instance with the flavor, image, group, keypair and network.

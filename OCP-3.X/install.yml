@@ -6,7 +6,8 @@
   vars_files:
     - vars/install.yml
   roles:
-    - { role: openstack_nested_virtualization, when: openstack_nested_virtualization | default(True) | bool }
+    - role: openstack_nested_virtualization
+      when: openstack_nested_virtualization | default(True) | bool
 
 - name: Find and prepare the virtual machine images
   hosts: image-server
@@ -20,7 +21,8 @@
         state: directory
       delegate_to: localhost
   roles:
-    - { role: image_preparation, when: openstack_upload_images | default(True) | bool }
+    - role: image_preparation
+      when: openstack_upload_images | default(True) | bool
 
 - name: Upload images to OpenStack
   hosts: undercloud
@@ -28,7 +30,8 @@
   vars_files:
     - vars/install.yml
   roles:
-    - { role: openstack_upload_images, when: openstack_upload_images | default(True) | bool }
+    - role: openstack_upload_images
+      when: openstack_upload_images | default(True) | bool
 
 - name: Set up one virtual machine server in a new OpenStack environment
   hosts: undercloud
