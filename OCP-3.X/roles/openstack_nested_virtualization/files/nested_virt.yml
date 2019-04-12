@@ -17,13 +17,9 @@
         state: present
         backrefs: yes
 
-    - name: Enable cpu passthrough
-      lineinfile:
-        path: /var/lib/config-data/nova_libvirt/etc/nova/nova.conf
-        regexp: '^cpu_mode=host-model'
-        line: 'cpu_mode=host-passthrough'
-        state: present
-        backrefs: yes
+    - name: Set cpu passthrough
+      shell: |
+         crudini --set /var/lib/config-data/puppet-generated/nova_libvirt/etc/nova/nova.conf libvirt cpu_mode host-passthrough
 
     - name: Restart nova containers
       shell: docker ps | grep nova | awk '{print $1}' | xargs docker restart
