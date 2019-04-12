@@ -24,29 +24,3 @@ ec2_flavors:
 openstack_rc: "{{ ansible_user_dir }}/overcloudrc"
 # The flavor property name and value to indicate the device for PCI passthrough.
 pci_passthrough_property: '"pci_passthrough:alias"="nvme:1"'
-# The quota structure to set for this OpenStack project.
-quotas:
-  backup-gigabytes: -1
-  backups: -1
-  cores: -1           # Number of instance cores (VCPUs) allowed per project.
-  fixed-ips: -1
-  floating-ips: -1    # Number of floating IP addresses allowed per project.
-  gigabytes: -1       # Volume gigabytes allowed for each project.
-  injected-file-size: -1
-  injected-files: -1
-  injected-path-size: -1
-  instances: -1       # Number of instances (VMs) allowed per project.
-  key-pairs: -1       # Number of key pairs allowed per project.
-  networks: -1
-  ports: -1
-  properties: -1
-  ram: -1             # Megabytes of instance ram allowed per project.
-  rbac-policies: -1
-  routers: -1
-  secgroup-rules: -1
-  secgroups: -1       # Security groups allowed for each project.
-  server-group-members: -1
-  server-groups: -1
-  snapshots: -1       # Volume snapshots allowed for each project.
-  subnets: -1
-  volumes: -1         # Volumes allowed for each project.
