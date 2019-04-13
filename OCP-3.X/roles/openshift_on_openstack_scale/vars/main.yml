@@ -1,9 +1,0 @@
----
-# The path to the all.yml file on the target-server.
-all_yml_path: "{{ ansible_user_dir }}/inventory/group_vars/all.yml"
-# The path to the inventory.py file on the target-server.
-inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/inventory.py"
-# The path to the openshift-ansible openshift-cluster directory.
-openshift_cluster_directory: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/openshift-cluster"
-# The path to the OpenStack RC file on the server vm, may be named differently than other servers.
-openstack_rc: "{{ ansible_user_dir }}/keystonerc"

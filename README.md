@@ -1,15 +1,15 @@
 # scale-ci-ansible
 
-The repo contains playbooks for various scale-ci automation tasks.  Those include install,
-scaling, upgrade, and post install configuration. The environments under test include RHCOS 
-based OCP on AWS and OCP on OSP installs.
+The repo contains playbooks for scale-ci automation tasks.  Those include install, scaling, upgrade,
+and post install configuration. The environments under test include RHCOS based OCP on AWS and OCP3
+on OSP installs.
 
 # RHCOS based OCP 4.X Usage
 
 The playbooks focus on RHCOS based OCP on AWS at this time and are found in the `OCP-4.X` directory.
 
-The prerequisites are simple and simply an orchestration machine with kubeconfig and oc command.
-The orchestration host can be localhost if properly setup.
+The prerequisites are simply an orchestration machine with kubeconfig and oc command. The
+orchestration host can be localhost if properly setup.
 
 ### Prepare the Jump host
 - The jump host is the node which orchestrates the ocp install and configures the nodes to support the Scale-CI pipeline.
@@ -24,7 +24,7 @@ $ cp OCP-4.X/inventory.example inventory
 ```
 Set the variables including AWS credentials, Install config, post-install and kick off the playbook:
 ```
-$ ansible-playbook -vvv -i inventory OCP-4.X/install.yml
+$ ansible-playbook -vv -i inventory OCP-4.X/install.yml
 ```
 
 Set OPENSHIFT_POST_INSTALL and OPENSHIFT_TOOLING to true to run the post-install and post-config options to configure
@@ -103,7 +103,7 @@ RHCOS_NEW_VERSION_URL
 RHCOS_NEW_VERSION
 ```
 
-# OCP on OSP Usage
+# OCP3.X on OpenStack (OSP)
 
 The repository contains several Ansible playbooks and roles for installing
 OpenShift on OpenStack. Those playbooks are in the `OCP-3.X` directory. Usage is as follows:
@@ -222,8 +222,8 @@ Running from CLI:
 ```sh
 $ cp OCP-3.X/inventory.example inventory
 $ # Add Undercloud and image server to inventory
-$ # Edit vars in OCP-3.X/vars/scaleup.yml or define EnvironmentOCP-3.X/ vars (See below)
-$ time ansible-playbook -i inventory OCP-3.X/scaleup.yml
+$ # Edit vars in OCP-3.X/vars/scaleup.yml or define Environment vars (See below)
+$ time ansible-playbook -vv -i inventory OCP-3.X/scaleup.yml
 ```
 
 ### Environment variables for OCP on OSP scaleup playbook
@@ -236,52 +236,16 @@ PUBLIC_KEY
 PRIVATE_KEY
 
 ###############################################################################
-# OpenShift Container Platform (OCP) variables.
+# OCP 3.X Scaleup variables.
 ###############################################################################
-OCP_ARTIFACTS_DIR
+OCP_BASTION_NAME
+
 OCP_CLUSTER_ID
-OCP_MAJOR_MINOR
-OCP_NTP_SERVERS
-
 OCP_DNS_DOMAIN
-OCP_DNS_KEY_ALGORITHM
-OCP_DNS_UPDATE_FILE
-OCP_DNS_KEY_NAME
-OCP_NSUPDATE_FILE
-
-OCP_DEFAULT_IMAGE_NAME
-
-OCP_DEFAULT_FLAVOR
-OCP_CNS_FLAVOR
-OCP_INFRA_FLAVOR
-OCP_LB_FLAVOR
-OCP_MASTER_FLAVOR
-OCP_NODE_FLAVOR
 
 OCP_NODE_TARGET
+
 OCP_SCALE_BLOCK_SIZE
-
-###############################################################################
-# OpenStack Platform (OSP) variables.
-###############################################################################
-OSP_CLIENT_PATH
-
-OS_PROJECT_NAME
-
-OSP_KEYPAIR_NAME
-OSP_SECURITY_GROUP_NAME
-
-OSP_PUBLIC_NETWORK_NAME
-OSP_PUBLIC_SUBNET_NAME
-
-OSP_PRIVATE_NETWORK_NAME
-OSP_PRIVATE_ROUTER_NAME
-OSP_PRIVATE_SUBNET_NAME
-OSP_PRIVATE_SUBNET_RANGE
-
-OSP_SERVER_NAME
-OSP_SERVER_FLAVOR
-OSP_SERVER_IMAGE
 ```
 
 ## OCP on OSP reset OSP environment
@@ -294,7 +258,7 @@ Running from CLI:
 $ cp OCP-3.X/inventory.example inventory
 $ # Add Undercloud and image server to inventory
 $ # Edit vars in OCP-3.X/vars/reset-ocp-on-osp.yml or define Environment vars (See below)
-$ time ansible-playbook -i inventory OCP-3.X/reset-ocp-on-osp.yml
+$ time ansible-playbook -vv -i inventory OCP-3.X/reset-ocp-on-osp.yml
 ```
 
 ### Environment variables for OCP on OSP reset playbook
@@ -312,7 +276,8 @@ PRIVATE_KEY
 OCP_CLUSTER_ID
 OCP_DNS_DOMAIN
 
-OSP_SERVER_NAME
+OCP_BASTION_NAME
+
 OSP_DELETE_FLAVORS
 OSP_DELETE_IMAGES
 ```

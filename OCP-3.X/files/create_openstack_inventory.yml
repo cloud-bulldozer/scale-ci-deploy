@@ -1,9 +1,10 @@
 ---
 - name: Tasks to create an inventory of servers from openstack commands
-  hosts: openstack-server
+  hosts: undercloud
+  remote_user: stack
   vars:
     # The remote directory to store any scale-ci files.
-    install_directory: "{{ ansible_user_dir }}/scale-ci"
+    install_directory: "/home/stack/scale-ci"
     # The name of the user for the OpenStack servers.
     openstack_user: "{{ lookup('env', 'OPENSTACK_USER') | default('heat-admin', true) }}"
     # The path of the new inventory file to create.

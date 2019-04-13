@@ -19,5 +19,5 @@
     - name: Collect OpenShift Metering Install artifacts
       synchronize:
         src: "{{log_directory}}/openshift_metering_install.log"
-        dest: "{{artifacts_directory}}"
+        dest: "{{artifacts_dir}}"
         mode: pull
