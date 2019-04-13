@@ -1,0 +1,36 @@
+---
+# Update the motd with the latest status of the cluster
+
+- name: Get timestamp
+  command: date -u '+%Y-%m-%d %H:%M:%S'
+  delegate_to: localhost
+  register: motd_ts
+
+- name: Append to the motd history
+  become: true
+  lineinfile:
+    create: true
+    path: /etc/motd.history
+    insertafter: EOF
+    line: |-
+      {{motd_ts.stdout}} - {{clusterid}} - {{update_motd}}
+
+- name: Update motd with last 4 lines
+  become: true
+  shell: cat /etc/motd.history | tail -n 4 > /etc/motd
+
+- name: Make sure the motd is displayed when using ssh
+  become: true
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "^PrintMotd.*"
+    line: "PrintMotd yes"
+  when: not skip_reload|default(true)
+
+# Reload since installers may overwrite sshd_config and reload service
+- name: Reload sshd config
+  become: true
+  systemd:
+    name: sshd
+    state: reloaded
+  when: not skip_reload|default(true)

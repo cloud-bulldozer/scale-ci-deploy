@@ -11,6 +11,7 @@ ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rs
 clusterid: "{{ lookup('env', 'OCP_CLUSTER_ID')|default('scale-ci', true) }}"
 dns_domain: "{{ lookup('env', 'OCP_DNS_DOMAIN')|default('example.com', true) }}"
 
-osp_bastion_name: "{{ lookup('env', 'OSP_SERVER_NAME')|default('ansible-host', true) }}"
+ocp_bastion_name: "{{ lookup('env', 'OCP_BASTION_NAME')|default('ansible-host', true) }}"
+
 delete_flavors: "{{ lookup('env', 'OSP_DELETE_FLAVORS')|default(true, true) }}"
 delete_images: "{{ lookup('env', 'OSP_DELETE_IMAGES')|default(true, true) }}"

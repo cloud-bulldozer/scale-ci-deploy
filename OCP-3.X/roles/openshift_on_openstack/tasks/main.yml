@@ -162,7 +162,7 @@
 - name: Copy {{ all_yml_path }} to the artifacts directory
   synchronize:
     src: "{{ all_yml_path }}"
-    dest: "{{ artifacts_directory }}"
+    dest: "{{ artifacts_dir }}"
     mode: pull
     use_ssh_args: yes
 
@@ -199,7 +199,7 @@
 - name: Copy {{ osev3_yml_path }} to the artifacts directory
   synchronize:
     src: "{{ osev3_yml_path }}"
-    dest: "{{ artifacts_directory }}"
+    dest: "{{ artifacts_dir }}"
     mode: pull
     use_ssh_args: yes
 
@@ -221,7 +221,7 @@
     - name: Copy the log file to the artifacts directory
       synchronize:
         src: "{{ prerequisite_log }}"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifacts_dir }}"
         mode: pull
         use_ssh_args: yes
 
@@ -240,7 +240,7 @@
     - name: Copy the debug information to the artifacts directory
       synchronize:
         src: "{{ ansible_user_dir }}/debug_information.txt"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifacts_dir }}"
         mode: pull
         use_ssh_args: yes
 
@@ -262,7 +262,7 @@
     - name: Copy the log file to the artifacts directory
       synchronize:
         src: "{{ openstack_provision_log }}"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifacts_dir }}"
         mode: pull
         use_ssh_args: yes
 
@@ -295,7 +295,7 @@
     - name: Copy the log file to the artifacts directory
       synchronize:
         src: "{{ time_servers_log }}"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifacts_dir }}"
         mode: pull
         use_ssh_args: yes
 
@@ -322,7 +322,7 @@
     - name: Copy the log file to the artifacts directory
       synchronize:
         src: "{{ block_devices_log }}"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifacts_dir }}"
         mode: pull
         use_ssh_args: yes
 
@@ -344,7 +344,7 @@
     - name: Copy the log file to the artifacts directory
       synchronize:
         src: "{{ openshift_install_log }}"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifacts_dir }}"
         mode: pull
         use_ssh_args: yes
 

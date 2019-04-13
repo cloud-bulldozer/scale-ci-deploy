@@ -1,11 +1,12 @@
 ---
 - name: Tasks to create an inventory of OpenShift VMs running on OpenStack
-  hosts: openstack-server
+  hosts: undercloud
+  remote_user: stack
   vars:
     # The name of users for the VMs that are not part of OpenShift.
     cloud_user: "{{ lookup('env', 'CLOUD_USER') | default('cloud-user', true) }}"
     # The remote directory to store any scale-ci files.
-    install_directory: "{{ ansible_user_dir }}/scale-ci"
+    install_directory: "/home/stack/scale-ci"
     # The path of the new inventory file to create.
     new_inventory_file: "{{ install_directory }}/openshift_inventory"
     # The names of users for the VMs in the OpenShift cluster.

@@ -2,31 +2,28 @@
 # Search for regular expressions and replace in file.
 - name: Replacing specific lines in {{ all_yml_path }}
   lineinfile:
-    path: "{{ all_yml_path }}"
+    path: /home/cloud-user/inventory/group_vars/all.yml
     regexp: "{{ item['find'] }}"
     line: "{{ item['replace'] }}"
   with_items:
-    - { find: "^#?openshift_openstack_num_nodes.*", replace: "openshift_openstack_num_nodes: {{ block['end']|int + 1 }}" }
+    - find: "^#?openshift_openstack_num_nodes.*"
+      replace: "openshift_openstack_num_nodes: {{ block['end']|int + 1 }}"
 
-# Set the path to the scaleup_inventory.py file.
-- name: Creating the scaleup_inventory.py variable
-  set_fact:
-    scaleup_inventory_py: "{{ ansible_user_dir }}/openshift-ansible/playbooks/openstack/scaleup_inventory.py"
-
-# Set the path for the OpenShift scaleup log file.
 - name: Creating the OpenShift scaleup log variable
   set_fact:
-    scaleup_openshift_log: "{{ log_directory }}/scaleup_openshift_{{ block['end'] }}.log"
+    scaleup_openshift_log: "{{ log_dir }}/scaleup_openshift_{{ block['end']|int + 1 }}.log"
 
 - block:
+    - name: Update Motd with the scale up block
+      import_role:
+        name: update-motd
+      vars:
+        update_motd: OCP Cluster scaling to {{block['end']|int + 1}}
     # Scale up the OpenShift cluster.
     - name: Scaling up the OpenShift resources
-      shell: >
-        {{ ansible_playbook }} -vv
-        --user openshift
-        -i inventory/
-        -i {{ scaleup_inventory_py }}
-        {{ openshift_cluster_directory }}/node-scaleup.yml 2>&1 >> {{ scaleup_openshift_log }}
+      shell: |
+        . /home/cloud-user/keystonerc
+        ansible-playbook -vv --user openshift -i inventory/ -i /home/cloud-user/openshift-ansible/playbooks/openstack/scaleup_inventory.py /home/cloud-user/openshift-ansible/playbooks/openstack/openshift-cluster/node-scaleup.yml 2>&1 >> {{ scaleup_openshift_log }}
       args:
         # Use bash to get the posix style redirects.
         executable: /bin/bash
@@ -34,6 +31,6 @@
     - name: Copy the log file to the artifacts directory
       synchronize:
         src: "{{ scaleup_openshift_log }}"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifact_dir }}"
         mode: pull
         use_ssh_args: yes

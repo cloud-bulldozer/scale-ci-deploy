@@ -11,7 +11,7 @@ ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rs
 ansible_required_version: "{{ lookup('env', 'OCP_REQUIRED_ANSIBLE_VERSION')|default('2.6.2', true) }}"
 clean_yum_cache: "{{ lookup('env', 'OCP_CLEAN_YUM_CACHE')|default(false, true) }}"
 
-artifacts_directory: "{{ lookup('env', 'OCP_ARTIFACTS_DIR')|default('artifacts/openshift-' ~ ocp_major_minor, true) }}"
+artifacts_dir: "{{ lookup('env', 'OCP_ARTIFACTS_DIR')|default('artifacts/openshift-' ~ ocp_major_minor, true) }}"
 clusterid: "{{ lookup('env', 'OCP_CLUSTER_ID')|default('scale-ci', true) }}"
 install_directory: "{{ ansible_user_dir }}/{{ clusterid }}"
 log_directory: "{{ ansible_user_dir }}/logs"

@@ -71,7 +71,7 @@
     - name: Copy the log file to the artifacts directory
       synchronize:
         src: "{{ dns_install_log }}"
-        dest: "{{ artifacts_directory }}"
+        dest: "{{ artifacts_dir }}"
         mode: pull
         use_ssh_args: yes
 

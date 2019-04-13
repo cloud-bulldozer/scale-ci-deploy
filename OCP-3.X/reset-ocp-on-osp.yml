@@ -40,18 +40,18 @@
       retries: 3
       delay: 1
 
-    - name: Get floating ip address for {{ osp_bastion_name }}
+    - name: Get floating ip address for bastion machine named {{ ocp_bastion_name }}
       shell:  |
         . /home/stack/overcloudrc
-        openstack server show {{ osp_bastion_name }} --format value -c addresses
+        openstack server show {{ ocp_bastion_name }} --format value -c addresses
       register: server_addresses
       changed_when: false
       ignore_errors: true
 
-    - name: Delete {{ osp_bastion_name }}
+    - name: Delete {{ ocp_bastion_name }}
       shell: |
         . /home/stack/overcloudrc
-        openstack server delete {{ osp_bastion_name }}
+        openstack server delete {{ ocp_bastion_name }}
       ignore_errors: true
 
     - name: Delete ci_keypair
@@ -83,7 +83,7 @@
       register: floating_ips
       changed_when: false
 
-    - name: Delete the {{ osp_bastion_name }} floating ip address
+    - name: Delete the {{ ocp_bastion_name }} floating ip address
       shell: |
         . /home/stack/overcloudrc
         openstack floating ip delete {{ item }}
@@ -162,5 +162,5 @@
       become: true
       lineinfile:
         path: /etc/hosts
-        regexp: '^\s*\d.*({{ osp_bastion_name }}|{{ clusterid }}.{{ dns_domain }})'
+        regexp: '^\s*\d.*({{ ocp_bastion_name }}|{{ clusterid }}.{{ dns_domain }})'
         state: absent

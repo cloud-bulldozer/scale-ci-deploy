@@ -1,22 +1,82 @@
 ---
-- name: Find the target-server and add it to the in-memory inventory
+#
+# Scales up a 3.X OpenShift Cluster on OpenStack
+#
+
+- name: Get bastion machine
   hosts: undercloud
+  gather_facts: false
   remote_user: stack
   vars_files:
     - vars/scaleup.yml
   pre_tasks:
+    - name: Get bastion FIP
+      shell: |
+        . /home/stack/overcloudrc
+        openstack server show {{ocp_bastion_name}} --format value -c addresses | awk '{print $2}'
+      register: ansible_host_fip
+      changed_when: false
+
+    - name: Add bastion to the inventory
+      add_host:
+        name: "{{ansible_host_fip.stdout}}"
+        groups: ["bastion"]
+        ansible_user: cloud-user
+        ansible_ssh_common_args: |-
+          -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p stack@{{inventory_hostname}}'
+      changed_when: false
+  roles:
+    - name: update-motd
+      vars:
+        update_motd: OCP Cluster starting scaleup
+
+- name: Scaleup OCP on OSP
+  hosts: bastion
+  gather_facts: false
+  vars_files:
+    - vars/scaleup.yml
+  pre_tasks:
+    - name: Get timestamp
+      command: date -u +%Y%m%d-%H%M%S
+      delegate_to: localhost
+      register: current_ts
+
+    - name: Set remote log directory
+      set_fact:
+        log_dir: /home/cloud-user/scale-ci/log/{{current_ts.stdout}}
+
+    - name: Set local Artifact Directory
+      set_fact:
+        artifact_dir: artifacts/scaleup-{{current_ts.stdout}}
+
     - name: Ensure the local artifacts directory exists
       file:
-        path: "{{ artifacts_directory }}"
+        path: "{{ artifact_dir }}"
         state: directory
       delegate_to: localhost
-  roles:
-    - openstack_get_server
 
-- name: Create additional OpenStack VMs and add them to OpenShift
-  hosts: target-server
-  remote_user: cloud-user
+    - name: Ensure the remote log directory exists
+      file:
+        path: "{{ log_dir }}"
+        state: directory
+  roles:
+    - name: update-motd
+      vars:
+        update_motd: OCP Cluster starting scaleup
+        skip_reload: false
+    - openshift_on_openstack_scale
+    - name: update-motd
+      vars:
+        update_motd: "OCP Cluster Completed Scaleup to {{openshift_node_target}}"
+
+- name: Finish updating motd on OpenStack Undercloud
+  hosts: undercloud
+  gather_facts: false
+  remote_user: stack
   vars_files:
     - vars/scaleup.yml
   roles:
-    - openshift_on_openstack_scale
+    - name: update-motd
+      vars:
+        update_motd: "OCP Cluster Completed Scaleup to {{openshift_node_target}}"
+        skip_reload: false

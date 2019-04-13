@@ -1,11 +1,13 @@
 ---
-# Run the dynamic inventory to get the current app hosts.
+# Tasks to orchestrate scaleup for OpenShift 3.X on OpenStack
+
 - name: Running the dynamic inventory file to get the current app hosts
-  shell: ". {{ openstack_rc }}; {{ inventory_py }} --list | jq '.openstack_compute_nodes[\"hosts\"] | length'"
+  shell: |
+    . /home/cloud-user/keystonerc
+    /home/cloud-user/openshift-ansible/playbooks/openstack/inventory.py --list | jq '.openstack_compute_nodes["hosts"] | length'
   register: output
   changed_when: false
 
-# Get the number of nodes in the app.hosts group.
 - name: Setting the current node count
   set_fact:
     current_node_count: "{{ output['stdout'] }}"
@@ -16,38 +18,43 @@
     msg: "The OpenShift node target {{ openshift_node_target }} is less than or equal to than the current node count {{ current_node_count }}"
   when: openshift_node_target|int <= current_node_count|int
 
-# Create a variable that sources the rc file and runs the ansible-playbook command.
-- name: Creating a variable that sources the OpenStack rc file and runs the ansible-playbook command
+- name: Getting the IP address for the DNS VM ns-master
+  shell: |
+    . /home/cloud-user/keystonerc
+    openstack server show ns-master.{{ clusterid }}.{{ dns_domain }} --format value -c addresses
+  register: dns_addresses
+  changed_when: false
+
+- name: Parsing the floating ip from the DNS VM addresses
   set_fact:
-    ansible_playbook: ". {{ openstack_rc }}; ansible-playbook"
+    # Example: dns-network=192.168.0.7, 172.21.0.112
+    cluster_dns_ip: "{{ dns_addresses['stdout'].split(', ')[1] }}"
+  failed_when: cluster_dns_ip == ""
 
-# Source the rc file, set the environment varaible and run the ansible-playbook command.
-- name: Creating a variable that sources the OpenStack rc file, sets OPENSTACK_SHOW_COMPUTE_NODES=false and runs the ansible-playbook command
+- name: Reading the remote /home/cloud-user/dns_update.key file
+  command: "grep secret /home/cloud-user/dns_update.key "
+  register: update_secret
+  changed_when: false
+
+- name: Setting the regular expression to find the secret
   set_fact:
-    ansible_playbook_scaleup: ". {{ openstack_rc }}; OPENSTACK_SHOW_COMPUTE_NODES=false ansible-playbook"
+    # Example:        secret "8kjyy/xFvzapFwmcWwLzvA==";
+    secret_regex: 'secret "(.*)";'
 
-# Create a variable that sources the rc file and runs the OpenStack client command.
-- name: Creating a variable that sources the OpenStack rc file and runs the openstack client command
+- name: Creating a variable with the DNS secret value
   set_fact:
-    openstack: ". {{ openstack_rc }}; openstack"
+    dns_key_secret: "{{ update_secret['stdout']|regex_findall(secret_regex)|first }}"
 
-# Get the DNS information once before the loop.
-- name: Getting the DNS information
-  include_tasks: dns.yml
-
-# Create an empty list.
 - name: Creating an empty list of blocks
   set_fact:
     blocks: []
 
-#  Create the blocks for scaling up.
 - name: Creating begin and end blocks for scaling
   set_fact:
     blocks: "{{ blocks }} + [{'begin': {{ item }}, 'end': {{ (item|int + block_size|int < openshift_node_target|int)|ternary(item|int + block_size|int - 1, openshift_node_target|int - 1) }} }]"
   with_sequence: "start={{ current_node_count }} end={{ openshift_node_target|int - 1 }} stride={{ block_size }}"
 
-# Call the scale up tasks for each block in blocks.
-- name: Scaling up
+- name: Run scale up for each block of hosts
   include_tasks: scaleup.yml
   with_items: "{{ blocks }}"
   loop_control:

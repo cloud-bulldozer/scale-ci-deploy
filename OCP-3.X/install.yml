@@ -17,7 +17,7 @@
   pre_tasks:
     - name: Ensure the local artifacts directory exists
       file:
-        path: "{{ artifacts_directory }}"
+        path: "{{ artifacts_dir }}"
         state: directory
       delegate_to: localhost
   roles:
