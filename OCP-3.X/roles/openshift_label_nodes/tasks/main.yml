@@ -1,5 +1,0 @@
----
-- name: label the application nodes in the core cluster
-  shell: oc label node {{ item }}.{{ clusterid }}.{{ dns_domain }} {{ label }}
-  with_items:
-    - "{{ groups['app_nodes'] }}"

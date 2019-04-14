@@ -22,13 +22,13 @@
     # The key path must be from the remote host not the openstack-server.
     proxy_command: "ssh -i {{ ansible_private_key_file }} -W %h:%p {{ ansible_user }}@{{ inventory_hostname }}"
 
-- name: Getting the floating ip address for {{ openstack_server_name }}
-  shell: "{{ openstack }} server show {{ openstack_server_name }} --format value -c addresses | awk '{print $2}'"
+- name: Getting the floating ip address for {{ ocp_bastion_name }}
+  shell: "{{ openstack }} server show {{ ocp_bastion_name }} --format value -c addresses | awk '{print $2}'"
   register: floating_ips
   changed_when: false
 
 # Set the server floating ip variable.
-- name: Setting the {{ openstack_server_name }} floating ip address
+- name: Setting the {{ ocp_bastion_name }} floating ip address
   set_fact:
     floating_ip_address: "{{ item }}"
   with_items: "{{ floating_ips.stdout_lines }}"
@@ -37,7 +37,7 @@
 - name: Adding the server floating IP address to the inventory
   add_host:
     name: "{{ floating_ip_address }}"
-    groups: [ 'target-server' ]
+    groups: [ 'bastion' ]
     ansible_user: cloud-user
     # Adding a ProxyCommand allows servers to contact this IP using the openstack-server.
     ansible_ssh_common_args: "-o ProxyCommand='{{ proxy_command }}'"

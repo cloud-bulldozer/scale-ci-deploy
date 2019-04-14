@@ -1,0 +1,49 @@
+---
+# Tasks to create Bastion machine for OpenShift Install
+
+- name: Creating FIP for bastion machine
+  shell: |
+    . /home/stack/overcloudrc
+    openstack floating ip create public --format value -c floating_ip_address
+  register: public_fip
+
+- name: Creating bastion machine
+  shell: |
+    . /home/stack/overcloudrc
+    openstack server create --wait --flavor {{ocp_bastion_flavor}} --image {{ocp_bastion_image}} --security-group ci_security_group --key-name ci_keypair {{ocp_bastion_name}} --nic net-id=ci_network --format value -c id
+  register: instance_uuid
+
+- name: Add FIP to Bastion Machine
+  shell: |
+    . /home/stack/overcloudrc
+    openstack server add floating ip {{ocp_bastion_name}} {{ public_fip.stdout }}
+  register: add_result
+  until: add_result['rc'] == 0
+  retries: 5
+  delay: 5
+
+- name: Adding the bastion machine to the inventory
+  add_host:
+    name: "{{public_fip.stdout}}"
+    groups: ["bastion"]
+    ansible_user: cloud-user
+    ansible_ssh_common_args: |-
+      -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p stack@{{inventory_hostname}}'
+    # Adding the DNS nameserver list that was pulled from an OpenStack subnet command.
+    public_dns_nameservers: "{{ dns_nameservers['stdout'] }}"
+
+- name: Adding the bastion to the hosts file
+  lineinfile:
+    backup: yes
+    dest: /etc/hosts
+    regexp: ".*{{ ocp_bastion_name }}$"
+    line: "{{public_fip.stdout}} {{ ocp_bastion_name }}"
+  become: true
+
+- name: Waiting for ssh to be available on bastion machine
+  wait_for:
+    host: "{{public_fip.stdout}}"
+    port: 22
+    state: started
+    delay: 5
+    timeout: 300

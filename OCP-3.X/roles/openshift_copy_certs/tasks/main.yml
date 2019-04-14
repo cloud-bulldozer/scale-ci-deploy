@@ -1,6 +1,0 @@
----
-- name: copy the certs on masters
-  copy:
-    src: /etc/origin/master/ca.crt
-    dest: /etc/ssl/certs/
-    remote_src: true

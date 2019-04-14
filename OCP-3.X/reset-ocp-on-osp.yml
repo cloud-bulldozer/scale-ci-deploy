@@ -10,7 +10,11 @@
   remote_user: stack
   vars_files:
     - vars/reset-ocp-on-osp.yml
-  tasks:
+  roles:
+    - name: update-motd
+      vars:
+        update_motd: OCP Cluster uninstalled and OSP environment reset
+  pre_tasks:
     - name: Get all instance IDs
       shell: |
         . /home/stack/overcloudrc

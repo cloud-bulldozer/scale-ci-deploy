@@ -1,130 +1,81 @@
 ---
-# Remove all old directories and files.
-- name: Removing any old directories or files from previous attempts
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - "dns_vars.yml"
-    - "openshift-ansible-contrib"
+# Install/Setup OCP DNS
 
-# Set a variable for the ansible-playbook.
-- name: Setting the ansible-playbook variable
-  set_fact:
-    ansible_playbook: "source {{ openstack_rc }}; ansible-playbook"
-
-# Print the values that will be used for openshift-ansible-contrib.
-- name: Printing the values used to clone openshift-ansible-contrib
-  debug:
-    msg: "openshift-ansible-contrib repository: {{ openshift_ansible_contrib_repo }} {{ openshift_ansible_contrib_version }}"
-
-# Get a fresh clone of the openshift-ansible-contrib GitHub project.
 - name: Cloning the openshift-ansible-contrib repository
   git:
-    dest: "{{ ansible_user_dir }}/openshift-ansible-contrib"
-    # Specify the repo as a variable to test other people's repositories.
+    dest: /home/cloud-user/openshift-ansible-contrib
     repo: "{{ openshift_ansible_contrib_repo }}"
-    # Specify a version for a different branch, tag, or hash to verify PRs.
     version: "{{ openshift_ansible_contrib_version }}"
 
-# Generate the DNS update key with rndc-confgen.
 - name: Generating the DNS update key
-  # The key name (-k) is important here and must match the key_name in all.yml.
-  command: "/usr/sbin/rndc-confgen -a -A {{ dns_key_algorithm }} -c {{ dns_key_file }} -k {{ dns_key_name }} -r /dev/urandom"
+  command: /usr/sbin/rndc-confgen -a -A hmac-md5 -c /home/cloud-user/scale-ci/dns_update.key -k update-key -r /dev/urandom
 
-# Read the DNS update key file.
-- name: Reading the remote {{ dns_key_file }} file
-  command: "grep secret {{ dns_key_file }}"
-  register: update_secret
+- name: Reading the remote dns key file
+  shell: grep secret /home/cloud-user/scale-ci/dns_update.key | awk '{print $2}' | sed 's/"//g;s/;//'
+  register: dns_key_secret
   changed_when: false
 
-# Create a regular expression to get the secret key.
-- name: Setting the regular expression to find the secret
-  set_fact:
-    # Example:        secret "8kjyy/xFvzapFwmcWwLzvA==";
-    secret_regex: 'secret "(.*)";'
-
-# Set the DNS secret value.
-- name: Creating a variable with the DNS secret value
-  set_fact:
-    dns_key_secret: "{{ update_secret['stdout']|regex_findall(secret_regex)|first }}"
-
-# Render the dns variable file and copy it to the target-host.
-- name: Rendering the DNS variable file to the target-host
+- name: Setting the DNS vars
   template:
     src: dns_vars.yml.j2
-    dest: "{{ ansible_user_dir }}/dns_vars.yml"
-
-# Set the path for the DNS install log file.
-- name: Creating the DNS install log file variable
-  set_fact:
-    dns_install_log: "{{ log_directory }}/dns_install.log"
+    dest: /home/cloud-user/scale-ci/dns_vars.yml
 
 - block:
-    # Run the Ansible playbook that creates the DNS server.
     - name: Creating the DNS server
-      shell: "{{ ansible_playbook }} -vvv --key-file {{ ansible_user_dir }}/.ssh/id_rsa -e @dns_vars.yml openshift-ansible-contrib/reference-architecture/osp-dns/deploy-dns.yaml 2>&1 > {{ dns_install_log }}"
-      args:
-        # Use bash to get the posix style redirects.
-        executable: /bin/bash
+      shell: |
+        . /home/cloud-user/overcloudrc
+        ansible-playbook -vvv --key-file /home/cloud-user/.ssh/id_rsa -e @/home/cloud-user/scale-ci/dns_vars.yml /home/cloud-user/openshift-ansible-contrib/reference-architecture/osp-dns/deploy-dns.yaml 2>&1 > /home/cloud-user/scale-ci/log/dns_install.log
   always:
     - name: Copy the log file to the artifacts directory
       synchronize:
-        src: "{{ dns_install_log }}"
-        dest: "{{ artifacts_dir }}"
+        src: /home/cloud-user/scale-ci/log/
+        dest: "{{artifacts_dir}}"
         mode: pull
         use_ssh_args: yes
 
-# The openstack variable includes the rc file and the path to the OpenStack client.
-- name: Setting the openstack variable to source the rc file and contain path to client
-  set_fact:
-    openstack: "source {{ openstack_rc }}; {{ openstack_location }}"
-
-# Get the DNS server addresses from OpenStack.
-- name: Getting the IP address for the DNS VM ns-master
-  shell: "{{ openstack }} server show ns-master.{{ clusterid }}.{{ dns_domain }} --format value -c addresses"
-  # "ns-master-scale-ci.example.com-net=192.168.99.17, 172.21.0.129"
-  register: dns_addresses
+- name: Get DNS ns-master FIP
+  shell: |
+    . /home/cloud-user/overcloudrc
+    openstack server show ns-master.{{ clusterid }}.{{ dns_domain }} --format value -c addresses | awk '{print $2}'
+  register: dns_fip
   changed_when: false
 
-# Parse the IP address from the addresses output.
-- name: Parsing the floating ip from the DNS VM addresses
-  set_fact:
-    cluster_dns_ip: "{{ dns_addresses['stdout'].split(', ')[1] }}"
-  failed_when: cluster_dns_ip == ""
-
-# Specify both --dns-nameserver and --no-dns-nameservers to overwrite the current DNS server information.
 - name: Replace the address of the DNS server for the subnet
-  shell: "{{ openstack }} subnet set --no-dns-nameservers --dns-nameserver {{ cluster_dns_ip }} {{ openstack_subnet_name }}"
+  shell: |
+    . /home/cloud-user/overcloudrc
+    openstack subnet set --no-dns-nameservers --dns-nameserver {{ dns_fip.stdout }} ci_subnet
 
-# Set the information to update the private DNS records.
 - name: Setting the DNS private update information
   set_fact:
-    dns_private_info: { key_algorithm: "{{ dns_key_algorithm }}", key_name: "{{ dns_key_name }}", key_secret: "{{ dns_key_secret }}", server: "{{ cluster_dns_ip }}" }
+    dns_private_info:
+      key_algorithm: hmac-md5
+      key_name: update-key
+      key_secret: "{{ dns_key_secret.stdout }}"
+      server: "{{ dns_fip.stdout }}"
 
-# Set the OpenShift update keys with the private update information.
 - name: Setting the OpenShift name server update keys
   set_fact:
-    nsupdate_keys: { openshift_openstack_dns_nameservers: ["{{ cluster_dns_ip }}"], openshift_openstack_external_nsupdate_keys: { private: "{{ dns_private_info }}" } }
+    nsupdate_keys:
+      openshift_openstack_external_nsupdate_keys:
+        private: "{{ dns_private_info }}"
 
-# Write the OpenShift update keys to a YAML file.
 - name: Writing the OpenShift name server update keys to a file
   copy:
     content: "{{ nsupdate_keys|to_nice_yaml }}"
-    dest: "{{ nsupdate_file }}"
+    dest: /home/cloud-user/scale-ci/nsupdate_keys.yml
 
-- name: Adding target-server to DNS
+- name: Adding bastion machine to DNS
   nsupdate:
-    key_name: "{{ dns_key_name }}"
-    key_secret: "{{ dns_key_secret }}"
-    key_algorithm: "{{ dns_key_algorithm }}"
-    server: "{{ cluster_dns_ip }}"
+    key_name: update-key
+    key_secret: "{{ dns_key_secret.stdout }}"
+    key_algorithm: hmac-md5
+    server: "{{ dns_fip.stdout }}"
     zone: "{{ clusterid }}.{{ dns_domain }}"
-    record: "{{ openstack_server_name }}"
+    record: "{{ ocp_bastion_name }}"
     type: "A"
     value: "{{ item }}"
     state: present
-  with_items: "{{ groups['target-server'] }}"
+  with_items: "{{ groups['bastion'] }}"
   register: nsupdate_add_result
   until: nsupdate_add_result is succeeded
   retries: 10
@@ -141,7 +92,7 @@
   lineinfile:
     backup: yes
     dest: /etc/resolv.conf
-    line: "nameserver {{ cluster_dns_ip }}"
+    line: "nameserver {{ dns_fip.stdout }}"
     insertbefore: "^nameserver.*"
   become: true
 

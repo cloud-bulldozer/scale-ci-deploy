@@ -1,7 +1,0 @@
----
-# A block device to use as pbench storage.
-pbench_storage_device: '/dev/vda'
-# A partition on {{ pbench_storage_device }} to use.
-pbench_storage_device_partition: 3
-# Pbench agent default directory.
-pbench_storage_mount_path: '/var/lib/pbench-agent'

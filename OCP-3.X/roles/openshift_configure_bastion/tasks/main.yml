@@ -1,0 +1,103 @@
+---
+# Tasks to configure the bastion machine for OCP on OSP install
+
+- name: Cleaning the yum cache
+  become: true
+  shell: rm -fr /var/cache/yum/*; yum clean all
+
+- name: Installing the common operating system software packages
+  become: true
+  yum:
+    name: "{{packages}}"
+  vars:
+    packages:
+      - bind
+      - curl
+      - gcc
+      - git
+      - jq
+      - libselinux-python
+      - redhat-rpm-config
+      - python-crypto
+      - sshpass
+      - python-devel
+      - python-virtualenv
+
+- name: Installing the Python packages
+  become: true
+  command: "pip install {{ item }}"
+  with_items:
+    - "ansible=={{ ansible_required_version }}"
+    - dnspython==1.15.0
+    - decorator==4.3.0
+    - Jinja2==2.10
+    - jmespath==0.9.3
+    - python-openstackclient==3.14.0
+    - python-heatclient==1.14.0
+    - shade==1.28.0
+
+- name: Creating the /home/cloud-user/.ssh directory
+  file:
+    path: /home/cloud-user/.ssh"
+    state: directory
+    mode: 0700
+
+- name: Copy ssh keys
+  copy:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    mode: "{{item.mode}}"
+  with_items:
+    - src: "{{ ansible_public_key_file }}"
+      dest: /home/cloud-user/.ssh/id_rsa.pub
+      mode: "0644"
+    - src: "{{ ansible_private_key_file }}"
+      dest:  /home/cloud-user/.ssh/id_rsa
+      mode: "0600"
+
+- name: Copying the public key to the root user's authorized_keys
+  copy:
+    src: "{{ ansible_public_key_file }}"
+    dest: /root/.ssh/authorized_keys
+    mode: 0600
+  become: true
+
+- name: Changing the sshd configuration
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item['find'] }}"
+    line: "{{ item['replace'] }}"
+  with_items:
+    - find: "^#?ClientAliveCountMax.*"
+      replace: "ClientAliveCountMax 3"
+    - find: "^#?ClientAliveInterval.*"
+      replace: "ClientAliveInterval 20"
+    - find: "^#?PermitRootLogin.*"
+      replace: "PermitRootLogin yes"
+  become: true
+
+- name: Restarting the sshd service
+  service:
+    name: sshd
+    state: restarted
+  become: true
+
+- name: Copying the overcloudrc file
+  copy:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+  with_items:
+    - src: "{{ playbook_dir }}/overcloudrc"
+      dest: /home/cloud-user/overcloudrc
+    - src: "{{ playbook_dir }}/overcloudrc"
+      dest: /home/cloud-user/keystonerc
+
+- name: Create directories
+  file:
+    path: "{{item}}"
+    state: directory
+  with_items:
+    - /home/cloud-user/scale-ci/
+    - /home/cloud-user/scale-ci/log
+    - /home/cloud-user/inventory
+    - /home/cloud-user/inventory/group_vars

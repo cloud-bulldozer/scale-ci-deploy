@@ -1,4 +1,7 @@
 ---
+#
+# Installs a 3.X OpenShift Cluster on OpenStack
+#
 
 - name: Enable nested virt on the hypervisors
   hosts: undercloud
@@ -9,7 +12,7 @@
     - role: openstack_nested_virtualization
       when: openstack_nested_virtualization | default(True) | bool
 
-- name: Find and prepare the virtual machine images
+- name: Find and prepare OCP image files
   hosts: image-server
   remote_user: root
   vars_files:
@@ -24,54 +27,56 @@
     - role: image_preparation
       when: openstack_upload_images | default(True) | bool
 
-- name: Upload images to OpenStack
+- name: Create OpenStack resources, upload OCP images and create Bastion machine
   hosts: undercloud
   remote_user: stack
   vars_files:
     - vars/install.yml
   roles:
+    - name: update-motd
+      vars:
+        update_motd: Creating OCP Cluster OSP Resources
+    - openstack_create_overcloud_resources
     - role: openstack_upload_images
       when: openstack_upload_images | default(True) | bool
-
-- name: Set up one virtual machine server in a new OpenStack environment
-  hosts: undercloud
-  remote_user: stack
-  vars_files:
-    - vars/install.yml
-  roles:
-    - openstack_create_server
-
-- name: Install the prerequisite software on the virtual machine server
-  hosts: target-server
-  remote_user: cloud-user
-  vars_files:
-    - vars/install.yml
-  # This host may not have Python installed, do not collect facts at this time.
-  gather_facts: false
-  roles:
-    - openshift_dependencies
+    - openstack_create_bastion
 
 - name: Install OpenShift on OpenStack
-  hosts: target-server
-  remote_user: cloud-user
+  hosts: bastion
+  gather_facts: false
   vars_files:
     - vars/install.yml
   roles:
+    - openshift_configure_bastion
     - pbench_storage
+    - name: update-motd
+      vars:
+        update_motd: Installing OCP Cluster DNS
     - openshift_dns
-    - openshift_on_openstack
+    - name: update-motd
+      vars:
+        update_motd: Installing OCP Cluster
+    - openshift_on_openstack_install
     - role: openshift_metering
       when: ocp_metering_install|bool
+    - name: update-motd
+      vars:
+        update_motd: Finished Installing OCP Cluster
 
-- name: Find the core cluster and add it to the in-memory inventory
+- name: Add core cluster to inventory
   hosts: undercloud
   remote_user: stack
+  vars:
+    openshift_core_cluster: []
   vars_files:
     - vars/install.yml
   roles:
+    - name: update-motd
+      vars:
+        update_motd: Finishing OCP Cluster Configuration
     - openstack_add_fips
     - openshift_get_core_cluster
-    - openstack_etc_hosts
+    - etc_hosts
 
 - name: Use the remaining disk space on the core cluster for Pbench
   hosts: masters infras lb cns app_nodes
@@ -81,20 +86,28 @@
     - pbench_storage
 
 - name: Run post OpenShift installation tasks
-  hosts: target-server
+  hosts: bastion
   vars_files:
     - vars/install.yml
   roles:
     - openshift_copy_kube_config
-    - openstack_etc_hosts
+    - etc_hosts
     - openshift_dns_wildcard
-    - openshift_label_nodes
     - pbench_web_server
+  post_tasks:
+    - name: label the application nodes in the core cluster
+      shell: oc label node {{ item }}.{{ clusterid }}.{{ dns_domain }} core_app_node=true
+      with_items:
+        - "{{ groups['app_nodes'] }}"
 
 - name: Copy the certs to the location where golang looks for
   hosts: masters
   vars_files:
     - vars/install.yml
   become: yes
-  roles:
-    - openshift_copy_certs
+  tasks:
+    - name: copy the certs on masters
+      copy:
+        src: /etc/origin/master/ca.crt
+        dest: /etc/ssl/certs/
+        remote_src: true

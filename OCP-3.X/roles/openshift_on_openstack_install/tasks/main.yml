@@ -1,0 +1,215 @@
+---
+# Install OpenShift on OpenStack
+
+- name: Copy root openshift-ansible files to /home/cloud-user/openshift-ansible
+  command: cp -a /root/openshift-ansible/ /home/cloud-user/openshift-ansible
+  become: true
+  when: not openshift_ansible_clone | bool
+
+- name: Set cloud-user to own /home/cloud-user/openshift-ansible
+  become: true
+  shell: chown -R cloud-user:cloud-user /home/cloud-user/openshift-ansible
+  when: not openshift_ansible_clone | bool
+
+- name: Cloning the openshift-ansible repository
+  git:
+    dest: /home/cloud-user/openshift-ansible
+    repo: "{{ openshift_ansible_repo }}"
+    version: "{{ openshift_ansible_version }}"
+    force: true
+  when: openshift_ansible_clone | bool
+
+- name: Applying patches to files in /home/cloud-user directory
+  patch:
+    src: "{{item}}"
+    basedir: /home/cloud-user
+    strip: 0
+  with_items:
+    - 00-heat-template-cns-secgrp.patch
+    - 40-glusterfs_wipefs.patch
+
+- name: Copying the Ansible configuration file from openshift-ansible
+  copy:
+    remote_src: true
+    src: "openshift-ansible/ansible.cfg"
+    dest: /etc/ansible/ansible.cfg
+  become: true
+
+- name: Changing the Ansible configuration for this host
+  lineinfile:
+    dest: /etc/ansible/ansible.cfg
+    regexp: "{{ item['find'] }}"
+    line: "{{ item['replace'] }}"
+  with_items:
+    - find: "^#?log_path =.*"
+      replace: "log_path = /var/tmp/ansible.log"
+    - find: "^#?ssh_args =.*"
+      replace: "ssh_args = -o ControlMaster=auto -o ControlPersist=600s -o ServerAliveInterval=20 -o ServerAliveCountMax=3"
+  become: true
+
+- name: Get DNS ns-master FIP
+  shell: |
+    . /home/cloud-user/overcloudrc
+    openstack server show ns-master.{{ clusterid }}.{{ dns_domain }} --format value -c addresses | awk '{print $2}'
+  register: dns_fip
+  changed_when: false
+
+- name: Reading the contents of the nsupdate file
+  shell: cat /home/cloud-user/scale-ci/nsupdate_keys.yml
+  register: nsupdate_contents
+  changed_when: false
+
+
+# # Merge inventory config files Install process
+# # Copy the remote sample-inventory to another remote directory.
+# - name: Copying the sample inventory directory
+#   # Note: The copy module does not support recurisve copy of remote sources.
+#   command: cp -a {{ openshift_openstack_dir }}/sample-inventory/ inventory
+# # Add a block of configuration to the end of the all.yml file.
+# - name: Adding DNS configuration to the end of /home/cloud-user/inventory/group_vars/all.yml
+#   blockinfile:
+#     backup: yes
+#     block: "{{ nsupdate_contents['stdout'] }}"
+#     insertafter: EOF
+#     path: "/home/cloud-user/inventory/group_vars/all.yml"
+#   when: nsupdate['stat']['exists']
+#
+# - name: Create the all.yml.cfg (all.yml override) file.
+#   template:
+#     dest: "/home/cloud-user/inventory/group_vars/all.yml.cfg"
+#     src: all.yml.cfg.j2
+#
+# - name: Reading the contents of /home/cloud-user/inventory/group_vars/all.yml
+#   command: "cat /home/cloud-user/inventory/group_vars/all.yml"
+#   register: l_all_yml
+#   changed_when: false
+#
+# - name: Reading the contents of /home/cloud-user/inventory/group_vars/all.yml.cfg
+#   command: "cat /home/cloud-user/inventory/group_vars/all.yml.cfg"
+#   register: l_all_yml_cfg
+#   changed_when: false
+#
+# - name: Setting facts from /home/cloud-user/inventory/group_vars/all.yml and /home/cloud-user/inventory/group_vars/all.yml.cfg
+#   set_fact:
+#     all_yml: "{{ l_all_yml.stdout | from_yaml }}"
+#     all_yml_override: "{{ l_all_yml_cfg.stdout | from_yaml }}"
+#
+# - name: Override the settings in /home/cloud-user/inventory/group_vars/all.yml
+#   set_fact:
+#     all_yml: "{{ all_yml|combine(all_yml_override, recursive=False) }}"
+#
+# - name: Write the updated /home/cloud-user/inventory/group_vars/all.yml
+#   copy:
+#     content: "{{ all_yml | to_nice_yaml(width=80, indent=2) }}"
+#     dest: "/home/cloud-user/inventory/group_vars/all.yml"
+#     backup: yes
+#
+# - name: Copy /home/cloud-user/inventory/group_vars/all.yml to the artifacts directory
+#   synchronize:
+#     src: "/home/cloud-user/inventory/group_vars/all.yml"
+#     dest: "{{ artifacts_dir }}"
+#     mode: pull
+#     use_ssh_args: yes
+#
+# - name: Create the OSEv3.yml.cfg (OSEv3.yml override) file.
+#   template:
+#     dest: "/home/cloud-user/inventory/group_vars/OSEv3.yml.cfg"
+#     src: OSEv3.yml.cfg.j2
+#
+# - name: Reading the contents of /home/cloud-user/inventory/group_vars/OSEv3.yml
+#   command: "cat /home/cloud-user/inventory/group_vars/OSEv3.yml"
+#   register: l_osev3_yml
+#   changed_when: false
+#
+# - name: Reading the contents of /home/cloud-user/inventory/group_vars/OSEv3.yml.cfg
+#   command: "cat /home/cloud-user/inventory/group_vars/OSEv3.yml.cfg"
+#   register: l_osev3_yml_cfg
+#   changed_when: false
+#
+# - name: Setting facts from /home/cloud-user/inventory/group_vars/OSEv3.yml and /home/cloud-user/inventory/group_vars/OSEv3.yml.cfg
+#   set_fact:
+#     osev3_yml: "{{ l_osev3_yml.stdout | from_yaml }}"
+#     osev3_yml_override: "{{ l_osev3_yml_cfg.stdout | from_yaml }}"
+#
+# - name: Override the settings in /home/cloud-user/inventory/group_vars/OSEv3.yml
+#   set_fact:
+#     osev3_yml: "{{ osev3_yml|combine(osev3_yml_override, recursive=False) }}"
+#
+# - name: Write the updated /home/cloud-user/inventory/group_vars/OSEv3.yml
+#   copy:
+#     content: "{{ osev3_yml | to_nice_yaml(width=80, indent=2) }}"
+#     dest: "/home/cloud-user/inventory/group_vars/OSEv3.yml"
+#     backup: yes
+#
+# - name: Copy /home/cloud-user/inventory/group_vars/OSEv3.yml to the artifacts directory
+#   synchronize:
+#     src: "/home/cloud-user/inventory/group_vars/OSEv3.yml"
+#     dest: "{{ artifacts_dir }}"
+#     mode: pull
+#     use_ssh_args: yes
+
+- name: Place templates for install
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+  with_items:
+    - src: chrony.conf.j2
+      dest: /home/cloud-user/scale-ci/chrony.conf
+    - src: all.yml.j2
+      dest: /home/cloud-user/inventory/group_vars/all.yml
+    - src: OSEv3.yml.j2
+      dest: /home/cloud-user/inventory/group_vars/OSEv3.yml
+
+- name: Place files for install
+  copy:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+  with_items:
+    - src: prepare_block_devices.yml
+      dest: /home/cloud-user/scale-ci/prepare_block_devices.yml
+    - src: configure_time_servers.yml
+      dest: /home/cloud-user/scale-ci/configure_time_servers.yml
+
+- name: Install OpenShift on OpenStack playbooks
+  block:
+    - name: Checking the prerequisites for cluster provisioning in OpenStack
+      shell: |
+        . /home/cloud-user/overcloudrc
+        ansible-playbook -vvv --user openshift -i inventory -i openshift-ansible/playbooks/openstack/inventory.py openshift-ansible/playbooks/openstack/openshift-cluster/prerequisites.yml 2>&1 >> /home/cloud-user/scale-ci/log/openshift_prerequisites.log
+
+    - name: Creating the OpenStack resources
+      shell: |
+        . /home/cloud-user/overcloudrc
+        ansible-playbook -vvv --user openshift -i inventory -i openshift-ansible/playbooks/openstack/inventory.py openshift-ansible/playbooks/openstack/openshift-cluster/provision.yml 2>&1 >> /home/cloud-user/scale-ci/log/openstack_provision.log
+
+    - name: Configuring the time servers on all the provisioned nodes
+      shell: |
+        . /home/cloud-user/overcloudrc
+        ansible-playbook -vv --user openshift -i openshift-ansible/playbooks/openstack/inventory.py /home/cloud-user/scale-ci/configure_time_servers.yml 2>&1 >> /home/cloud-user/scale-ci/log/time_servers.log
+
+    - name: Configuring the block devices on the master nodes
+      shell: |
+        . /home/cloud-user/overcloudrc
+        ansible-playbook -vv --user openshift -i openshift-ansible/playbooks/openstack/inventory.py /home/cloud-user/scale-ci/prepare_block_devices.yml 2>&1 >> /home/cloud-user/scale-ci/log/block_devices.log
+
+    - name: Installing OpenShift on OpenStack
+      shell: |
+        . /home/cloud-user/overcloudrc
+        ansible-playbook -vvv --user openshift -i inventory -i openshift-ansible/playbooks/openstack/inventory.py openshift-ansible/playbooks/openstack/openshift-cluster/install.yml 2>&1 >> /home/cloud-user/scale-ci/log/openshift_install.log
+
+  always:
+    - name: Running commands that create debug information needed to open issues
+      shell: "{{ item }} 2>&1 >> /home/cloud-user/scale-ci/log/debug_information.txt"
+      with_items:
+        - "printf \"$(uname -srm)\n$(cat /etc/os-release)\n\""
+        - "ansible --version"
+        - "cd openshift-ansible ; git describe"
+        - "rpm -q atomic-openshift-utils openshift-ansible"
+      ignore_errors: true
+
+    - name: Copy logs to artifacts directory
+      synchronize:
+        src: /home/cloud-user/scale-ci/log
+        dest: "{{artifacts_dir}}"
+        mode: pull
+        use_ssh_args: yes
