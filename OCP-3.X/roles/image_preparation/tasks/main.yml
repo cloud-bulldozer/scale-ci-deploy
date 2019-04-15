@@ -41,13 +41,13 @@
 # Create the transfer directories to ensure they exist.
 - name: Creating the transfer directories on the image server
   file:
-    path: "{{ web_root }}/{{ item|dirname }}"
+    path: "/var/www/html/{{ item|dirname }}"
     state: directory
   with_items: "{{ files }}"
 
 # Get the disk usage numbers.
 - name: Getting the disk usage information from the image server
-  command: "df --output=avail,pcent {{ web_root }}"
+  command: df --output=avail,pcent /var/www/html
   register: disk_space
   changed_when: false
 
@@ -68,16 +68,16 @@
     msg: "WARNING: The image server {{ inventory_hostname }} is over 99% full!"
   when: "percent_used | int >= 99"
 
-# Get all the atomic files in the web_root matching the pattern.
-- name: Searching for all files in {{ web_root }}/{{ atomic_image_directory }}
+# Get all the atomic files in /var/www/html matching the pattern.
+- name: Searching for all files in /var/www/html/{{ atomic_image_directory }}
   find:
-    paths: "{{ web_root }}/{{ atomic_image_directory }}"
+    paths: "/var/www/html/{{ atomic_image_directory }}"
   register: atomic_qcow2_images
 
-# Get all the rhel files in the web_root matching the pattern.
-- name: Searching for all files in {{ web_root }}/{{ rhel_image_directory }}
+# Get all the rhel files in /var/www/html matching the pattern.
+- name: Searching for all files in /var/www/html/{{ rhel_image_directory }}
   find:
-    paths: "{{ web_root }}/{{ rhel_image_directory }}"
+    paths: "/var/www/html/{{ rhel_image_directory }}"
   register: rhel_qcow2_images
 
 # Sort the images by mtime and take the first image.
@@ -111,14 +111,14 @@
   stat:
     get_checksum: no
     get_md5: no
-    path: "{{ web_root }}/{{ (item|splitext)[0] }}.qcow2"
+    path: "/var/www/html/{{ (item|splitext)[0] }}.qcow2"
   with_items: "{{ files }}"
   register: qcow2_files
 
 # Convert the raw images to qcow2 when image does not exist
 - name: Converting and compressing the images for transport
   # qemu-img convert -c -O qcow2 path/image_name.raw path/image_name.qcow2
-  command: "qemu-img convert -c -O qcow2 {{ item[0] }} {{ web_root }}/{{ (item[0]|splitext)[0] }}.qcow2"
+  command: "qemu-img convert -c -O qcow2 {{ item[0] }} /var/www/html/{{ (item[0]|splitext)[0] }}.qcow2"
   with_together:
     - "{{ files }}"
     - "{{ qcow2_files['results'] }}"
@@ -128,28 +128,28 @@
 - name: Generating the checksum of the qcow2 files
   stat:
     checksum_algorithm: sha256
-    path: "{{ web_root }}/{{ (item|splitext)[0] }}.qcow2"
+    path: "/var/www/html/{{ (item|splitext)[0] }}.qcow2"
   with_items: "{{ files }}"
   register: qcow2_files
 
 # Create the image directories on the remote host.
-- name: "Creating the {{ remote_image_directory }} on {{ remote_host }}"
+- name: "Creating the /home/stack/scale-ci on {{ groups['undercloud'][0] }}"
   file:
-    path: "{{ remote_image_directory }}/{{ item|dirname }}"
+    path: "/home/stack/scale-ci/{{ item|dirname }}"
     state: directory
     owner: stack
     group: stack
   with_items: "{{ files }}"
-  delegate_to: "{{ remote_host }}"
+  delegate_to: "{{ groups['undercloud'][0] }}"
 
 # Copy the images from image server to the remote host.
-- name: "Copying qcow2 images from the image server to {{ remote_host }}"
+- name: "Copying qcow2 images from the image server to {{ groups['undercloud'][0] }}"
   get_url:
     checksum: "sha256:{{ item[1]['stat']['checksum'] }}"
-    dest: "{{ remote_image_directory }}/{{ (item[0]|splitext)[0] }}.qcow2"
+    dest: "/home/stack/scale-ci/{{ (item[0]|splitext)[0] }}.qcow2"
     # http://image-server/image_builder/qcow_images/{atomic,rhel}/*.qcow2
     url: "http://{{ groups['image-server'][0] }}/{{ (item[0]|splitext)[0] }}.qcow2"
   with_together:
     - "{{ files }}"
     - "{{ qcow2_files['results'] }}"
-  delegate_to: "{{ remote_host }}"
+  delegate_to: "{{ groups['undercloud'][0] }}"

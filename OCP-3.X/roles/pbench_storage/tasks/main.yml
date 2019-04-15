@@ -7,25 +7,23 @@
 #    state: present
 #  become: true
 
-- name: Adding primary partition 3 to {{ pbench_storage_device }}
-  shell: "echo -e 'n\np\n3\n\n\nw\n' | fdisk {{ pbench_storage_device }}"
-  args:
-    executable: /bin/bash
+- name: Adding primary partition 3 to /dev/vda
+  shell: echo -e 'n\np\n3\n\n\nw\n' | fdisk /dev/vda
   become: yes
   ignore_errors: yes
 
 - name: partprobe
-  command: "partprobe {{ pbench_storage_device }}"
+  command: partprobe /dev/vda
   become: yes
 
-- name: Creating an xfs filesystem on {{ pbench_storage_device }}{{ pbench_storage_device_partition }}
-  command: "mkfs.xfs -f {{ pbench_storage_device }}{{ pbench_storage_device_partition }}"
+- name: Creating an xfs filesystem on /dev/vda3
+  command: mkfs.xfs -f /dev/vda3
   become: yes
 
-- name: Creating an entry in fstab and mounting {{ pbench_storage_device }}{{ pbench_storage_device_partition }}
+- name: Creating an entry in fstab and mounting /dev/vda3
   mount:
-    path: "{{ pbench_storage_mount_path }}"
-    src: "{{ pbench_storage_device }}{{ pbench_storage_device_partition }}"
+    path: /var/lib/pbench-agent
+    src: /dev/vda3
     fstype: xfs
     state: mounted
   become: yes

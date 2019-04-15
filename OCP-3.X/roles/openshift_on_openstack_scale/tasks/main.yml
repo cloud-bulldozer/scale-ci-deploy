@@ -31,8 +31,8 @@
     cluster_dns_ip: "{{ dns_addresses['stdout'].split(', ')[1] }}"
   failed_when: cluster_dns_ip == ""
 
-- name: Reading the remote /home/cloud-user/dns_update.key file
-  command: "grep secret /home/cloud-user/dns_update.key "
+- name: Reading the remote /home/cloud-user/scale-ci/dns_update.key file
+  command: "grep secret /home/cloud-user/scale-ci/dns_update.key "
   register: update_secret
   changed_when: false
 

@@ -8,16 +8,16 @@
     - name: Add OpenShift Metering variables
       template:
         src: openshift_metering_vars.yml.j2
-        dest: "{{ansible_user_dir}}/inventory/group_vars/openshift_metering_vars.yml"
+        dest: "/home/cloud-user/inventory/group_vars/openshift_metering_vars.yml"
 
     - name: Run OpenShift Metering install playbook
       shell: |
         set -o pipefail
-        . {{ansible_user_dir}}/keystonerc
-        { time ansible-playbook -vvv --user openshift -e @{{ansible_user_dir}}/inventory/group_vars/openshift_metering_vars.yml -i inventory -i {{ansible_user_dir}}/openshift-ansible/playbooks/openstack/inventory.py {{ansible_user_dir}}/openshift-ansible/playbooks/openshift-metering/config.yml 2>&1 | tee -a {{log_directory}}/openshift_metering_install.log; } 2>> {{log_directory}}/openshift_metering_install.log
+        . /home/cloud-user/keystonerc
+        { time ansible-playbook -vvv --user openshift -e @/home/cloud-user/inventory/group_vars/openshift_metering_vars.yml -i inventory -i /home/cloud-user/openshift-ansible/playbooks/openstack/inventory.py /home/cloud-user/openshift-ansible/playbooks/openshift-metering/config.yml 2>&1 | tee -a /home/cloud-user/scale-ci/log/openshift_metering_install.log; } 2>> /home/cloud-user/scale-ci/log/openshift_metering_install.log
   always:
     - name: Collect OpenShift Metering Install artifacts
       synchronize:
-        src: "{{log_directory}}/openshift_metering_install.log"
+        src: "/home/cloud-user/scale-ci/log/openshift_metering_install.log"
         dest: "{{artifacts_dir}}"
         mode: pull

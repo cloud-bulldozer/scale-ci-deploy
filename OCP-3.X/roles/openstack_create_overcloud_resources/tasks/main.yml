@@ -1,0 +1,95 @@
+---
+# Create the overcloud resources needed for OCP install
+
+- name: Copy ssh keys to stack user on Undercloud
+  copy:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    mode: "{{item.mode}}"
+  with_items:
+    - src: "{{ ansible_public_key_file }}"
+      dest: /home/stack/.ssh/id_rsa.pub
+      mode: "0644"
+    - src: "{{ ansible_private_key_file }}"
+      dest: /home/stack/.ssh/id_rsa
+      mode: "0600"
+
+- name: Fetching the overcloudrc file
+  fetch:
+    src: /home/stack/overcloudrc
+    flat: yes
+    dest: "{{playbook_dir}}/overcloudrc"
+
+- name: Creating ci_router
+  shell: |
+    . /home/stack/overcloudrc
+    openstack router create ci_router --format value -c id
+
+- name: Creating ci_network
+  shell: |
+    . /home/stack/overcloudrc
+    openstack network create ci_network --format value -c id
+
+- name: Getting the dns_nameservers addresses from the public subnet
+  shell: |
+    . /home/stack/overcloudrc
+    openstack subnet show public_subnet --format value -c dns_nameservers
+  register: dns_nameservers
+  changed_when: false
+
+- name: Creating ci_subnet
+  shell: |
+    . /home/stack/overcloudrc
+    openstack subnet create --network ci_network --subnet-range 192.168.0.0/16 ci_subnet --format value -c id
+
+- name: Setting the DNS nameservers on ci_subnet
+  shell: |
+    . /home/stack/overcloudrc
+    openstack subnet set --dns-nameserver {{ item }} ci_subnet
+  with_items: "{{ dns_nameservers['stdout'].split(',') }}"
+
+- name: Adding ci_subnet to ci_router
+  shell: |
+    . /home/stack/overcloudrc
+    openstack router add subnet ci_router ci_subnet
+
+- name: Assigning the public network as the gateway for the new router
+  shell: |
+    . /home/stack/overcloudrc
+    openstack router set ci_router --external-gateway public
+
+- name: Creating ci_security_group
+  shell: |
+    . /home/stack/overcloudrc
+    openstack security group create ci_security_group --format value -c id
+
+- name: Creating ci_security_group and rules
+  shell: |
+    set -o pipefail
+    . /home/stack/overcloudrc
+    openstack security group rule create --ingress --protocol icmp ci_security_group
+    openstack security group rule create --ingress --protocol tcp --dst-port 22 ci_security_group
+    openstack security group rule create --ingress --protocol tcp --dst-port 80:81 ci_security_group
+    openstack security group rule create --ingress --protocol tcp --dst-port 443 ci_security_group
+    openstack security group rule create --ingress --protocol tcp --dst-port 9090 ci_security_group
+
+- name: Creating ci_keypair
+  shell: |
+    . /home/stack/overcloudrc
+    openstack keypair create --public-key /home/stack/.ssh/id_rsa.pub ci_keypair --format value -c fingerprint
+
+- name: Creating the flavors
+  shell: |
+    . /home/stack/overcloudrc
+    openstack flavor create --ram {{ item['memory'] }} --disk {{ item['disk'] }} --vcpus {{ item['vcpu'] }} {{ item['name'] }} --format value -c id
+    openstack flavor create --ram {{ item['memory'] }} --disk {{ item['disk'] }} --vcpus {{ item['vcpu'] }} --property "pci_passthrough:alias"="nvme:1" {{ item['name'] }}-pci --format value -c id
+  with_items: "{{ ec2_flavors }}"
+  when: openstack_create_flavors
+  ignore_errors: true
+
+- name: Disable Overcloud admin quota
+  shell: ". /home/stack/overcloudrc \n
+    openstack quota set --properties -1 --server-groups -1 --ram -1 --key-pairs -1 --instances -1 --fixed-ips -1 --injected-file-size -1 --server-group-members -1
+    --injected-files -1 --cores -1 --injected-path-size -1 --per-volume-gigabytes -1 --gigabytes -1 --backup-gigabytes -1 --snapshots -1 --volumes -1
+    --backups -1 --subnetpools -1 --vips -1 --ports -1 --subnets -1 --networks -1 --floating-ips -1 --secgroup-rules -1 --secgroups -1 --routers -1
+    --rbac-policies -1 admin"

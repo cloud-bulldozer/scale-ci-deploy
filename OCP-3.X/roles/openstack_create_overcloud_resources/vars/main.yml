@@ -20,7 +20,3 @@ ec2_flavors:
   - { name: r4.4xlarge, vcpu: 16, memory: "{{ 124928 - 256 }}", disk: 128 }
   - { name: r4.8xlarge, vcpu: 32, memory: "{{ 249856 - 256 }}", disk: 256 }
   - { name: r4.16xlarge, vcpu: 64, memory: "{{ 499712 - 256 }}", disk: 512 }
-# The path to the OpenStack RC file on the openstack-server, may be named differently than other servers.
-openstack_rc: "{{ ansible_user_dir }}/overcloudrc"
-# The flavor property name and value to indicate the device for PCI passthrough.
-pci_passthrough_property: '"pci_passthrough:alias"="nvme:1"'
