@@ -69,7 +69,6 @@
         dest: "{{ workdir }}/bin/config.json"
 
     - name: extract openshift-install binary from the payload
-      #shell: "cd {{ workdir }}/bin; oc image extract {{ OPENSHIFT_INSTALL_BINARY_IMAGE }} --file=/usr/bin/openshift-install; chmod +x openshift-install"
       shell: "cd {{ workdir }}/bin; oc adm release extract --tools {{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }}; ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'; chmod +x openshift-install"
   when: not OPENSHIFT_INSTALL_USE_GIT_INSTALLER | default(False)
 
@@ -122,15 +121,21 @@
         cd {{ workdir }}
         export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }}
         export _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }}
-        bin/openshift-install create cluster --log-level=debug 2>&1 | tee -a {{ OPENSHIFT_INSTALL_LOG_DIR }}/install.log
+        bin/openshift-install create cluster --log-level=debug
       when: (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE is defined) and (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE != "")
 
     - name: run openshift installer on aws using the default release image
       shell: |
         set -o pipefail
         cd {{ workdir }}
-        bin/openshift-install create cluster --log-level=debug 2>&1 | tee -a {{ OPENSHIFT_INSTALL_LOG_DIR }}/install.log
+        bin/openshift-install create cluster --log-level=debug
       when: (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE is undefined) or (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE == "")
+
+    - name: copy the install log
+      copy:
+        src: "{{ workdir }}/.openshift_install.log"
+        dest: "{{ OPENSHIFT_INSTALL_LOG_DIR }}/openshift_install.log"
+        remote_src: true
 
     - name: sleep for sometime for the cluster to settle
       pause:
