@@ -44,7 +44,7 @@
       file:
         path: "{{ workdir }}"
         state: absent
- 
+
     - name: get the installer bits
       git:
         repo: 'https://github.com/openshift/installer.git'
@@ -69,7 +69,12 @@
         dest: "{{ workdir }}/bin/config.json"
 
     - name: extract openshift-install binary from the payload
-      shell: "cd {{ workdir }}/bin; oc adm release extract --tools {{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }}; ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'; chmod +x openshift-install"
+      shell: |
+        set -o pipefail
+        cd {{ workdir }}/bin
+        oc adm release extract --tools {{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }}
+        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
+        chmod +x openshift-install
   when: not OPENSHIFT_INSTALL_USE_GIT_INSTALLER | default(False)
 
 - name: create openshift install log dir
@@ -96,7 +101,7 @@
     - name: setup install-config
       template:
         src: install-config.yaml.j2
-        dest: "{{ workdir }}/install-config.yaml" 
+        dest: "{{ workdir }}/install-config.yaml"
     - name: ignition configs
       shell: "cd {{ workdir }}; OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }} _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE }} bin/openshift-install create ignition-configs"
       when: (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE is defined) and (OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE != "")
