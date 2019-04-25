@@ -81,6 +81,9 @@ RHCOS_PBENCH_NODE_VOLUME_TYPE=gp2
 PROMETHEUS_RETENTION_PERIOD=15d
 PROMETHEUS_STORAGE_SIZE=20Gi
 ALERTMANAGER_STORAGE_SIZE=10Gi
+## To specify an alternate auth dir containing kubeconfig, e.g. from AWS cluster installed by Flexy,
+## use only when NOT using the default auth dir located in "${GOPATH}/src/github.com/openshift/installer" 
+KUBECONFIG_AUTH_DIR_PATH= 
 
 # openshift tooling
 OPENSHIFT_TOOLING=True

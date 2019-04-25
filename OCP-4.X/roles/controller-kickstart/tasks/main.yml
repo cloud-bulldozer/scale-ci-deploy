@@ -2,7 +2,17 @@
 - name: set workdir
   set_fact:
     workdir: "{{ GOPATH }}/src/github.com/openshift/installer"
+  when:
+    - KUBECONFIG_AUTH_DIR_PATH is undefined
 
+# Needed when using an AWS cluster installed by Flexy
+- name: set workdir when KUBECONFIG_AUTH_DIR_PATH is defined
+  set_fact:
+    workdir: "{{ KUBECONFIG_AUTH_DIR_PATH }}"
+  when: 
+    - KUBECONFIG_AUTH_DIR_PATH is defined
+    - KUBECONFIG_AUTH_DIR_PATH != ""
+    
 - name: ensure that .kube dir exists on controller
   file:
     path: "{{ item }}"
@@ -64,3 +74,4 @@
   add_host: name={{ item }} groups=nodes
   with_items:
     - "{{ ocp_nodes.stdout_lines }}"
+
