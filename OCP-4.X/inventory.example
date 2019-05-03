@@ -4,7 +4,6 @@
 [all:vars]
 ORCHESTRATION_USER=root
 GOPATH="/root/.go"
-DISABLE_SELINUX=False
 
 # Install vars
 OPENSHIFT_INSTALL_USER=core
@@ -82,8 +81,8 @@ PROMETHEUS_RETENTION_PERIOD=15d
 PROMETHEUS_STORAGE_SIZE=20Gi
 ALERTMANAGER_STORAGE_SIZE=10Gi
 ## To specify an alternate auth dir containing kubeconfig, e.g. from AWS cluster installed by Flexy,
-## use only when NOT using the default auth dir located in "${GOPATH}/src/github.com/openshift/installer" 
-KUBECONFIG_AUTH_DIR_PATH= 
+## use only when NOT using the default auth dir located in "${GOPATH}/src/github.com/openshift/installer"
+KUBECONFIG_AUTH_DIR_PATH=
 
 # openshift tooling
 OPENSHIFT_TOOLING=True
