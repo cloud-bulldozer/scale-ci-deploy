@@ -10,13 +10,27 @@
     - /home/core/.kube
     - /root/.kube
 
-- name: copy the kubeconfig
+- name: copy the kubeconfig to a node
   copy:
-    src: /root/.kube/config
+    src: "{{playbook_dir}}/kubeconfig"
     dest: "{{ item }}"
   with_items:
     - /home/core/.kube/config
     - /root/.kube/config
+  when:
+    - KUBECONFIG_AUTH_DIR_PATH is undefined
+
+# handle case where kubeconfig is in another specified dir
+- name: copy the kubeconfig to controller node from specific directory
+  copy:
+    src: "{{ KUBECONFIG_AUTH_DIR_PATH }}/auth/kubeconfig"
+    dest: "{{ item }}"
+  with_items:
+    - /home/core/.kube/config
+    - /root/.kube/config
+  when:
+    - KUBECONFIG_AUTH_DIR_PATH is defined
+    - KUBECONFIG_AUTH_DIR_PATH != ""
 
 - name: ensure that ssh dir exists
   file:
@@ -34,11 +48,11 @@
     owner: root
     group: root
 
-- name: copy perf private key
+- name: copy perf private key to a node
   copy:
-    src: /root/.ssh/id_rsa
+    src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item }}"
     mode: 0600
   with_items:
-    - /root/.ssh/id_rsa
     - /home/core/.ssh/id_rsa
+    - /root/.ssh/id_rsa

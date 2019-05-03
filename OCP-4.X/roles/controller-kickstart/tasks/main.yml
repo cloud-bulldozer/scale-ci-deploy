@@ -1,18 +1,4 @@
 ---
-- name: set workdir
-  set_fact:
-    workdir: "{{ GOPATH }}/src/github.com/openshift/installer"
-  when:
-    - KUBECONFIG_AUTH_DIR_PATH is undefined
-
-# Needed when using an AWS cluster installed by Flexy
-- name: set workdir when KUBECONFIG_AUTH_DIR_PATH is defined
-  set_fact:
-    workdir: "{{ KUBECONFIG_AUTH_DIR_PATH }}"
-  when: 
-    - KUBECONFIG_AUTH_DIR_PATH is defined
-    - KUBECONFIG_AUTH_DIR_PATH != ""
-    
 - name: ensure that .kube dir exists on controller
   file:
     path: "{{ item }}"
@@ -20,14 +6,28 @@
   with_items:
     - /home/core/.kube
     - /root/.kube
- 
+
 - name: copy the kubeconfig to controller node
   copy:
-    src: "{{ workdir }}/auth/kubeconfig"
+    src: "{{playbook_dir}}/kubeconfig"
     dest: "{{ item }}"
   with_items:
     - /home/core/.kube/config
     - /root/.kube/config
+  when:
+    - KUBECONFIG_AUTH_DIR_PATH is undefined
+
+# handle case where kubeconfig is in another specified dir
+- name: copy the kubeconfig to controller node from specific directory
+  copy:
+    src: "{{ KUBECONFIG_AUTH_DIR_PATH }}/auth/kubeconfig"
+    dest: "{{ item }}"
+  with_items:
+    - /home/core/.kube/config
+    - /root/.kube/config
+  when:
+    - KUBECONFIG_AUTH_DIR_PATH is defined
+    - KUBECONFIG_AUTH_DIR_PATH != ""
 
 - name: ensure that ssh dir exists
   file:
@@ -47,7 +47,7 @@
 
 - name: copy perf private key to controller host
   copy:
-    src: /root/.ssh/id_rsa
+    src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item }}"
     mode: 0600
   with_items:
@@ -66,12 +66,15 @@
 - name: pbench-controller image
   shell: podman pull docker.io/ravielluri/image:controller
 
-- name: nodes
-  shell: oc get nodes | awk 'NR>1 {print $1}'
+- name: get nodes
+  shell: oc get nodes | grep -v pbench | awk 'NR>1 {print $1}'
   register: ocp_nodes
 
 - name: add nodes to group
-  add_host: name={{ item }} groups=nodes
+  add_host:
+    name: "{{ item }}"
+    groups: nodes
+    ansible_ssh_common_args: |-
+      -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p {{ OPENSHIFT_INSTALL_USER | default('core') }}@{{inventory_hostname}}'
   with_items:
     - "{{ ocp_nodes.stdout_lines }}"
-
