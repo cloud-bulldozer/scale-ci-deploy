@@ -39,12 +39,12 @@
   set_fact:
     workdir: "{{ GOPATH }}/src/github.com/openshift/installer"
 
-- block:
-    - name: cleanup installer code if it exists
-      file:
-        path: "{{ workdir }}"
-        state: absent
+- name: cleanup installer code if it exists
+  file:
+    path: "{{ workdir }}"
+    state: absent
 
+- block:
     - name: get the installer bits
       git:
         repo: 'https://github.com/openshift/installer.git'
