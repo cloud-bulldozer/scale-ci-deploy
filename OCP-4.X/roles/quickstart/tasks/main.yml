@@ -16,7 +16,7 @@
   copy:
     src: "{{ workdir }}/auth/kubeconfig"
     dest: /root/.kube/config
-  ignore_errors: yes
+    remote_src: true
 
 - name: stat svt repo
   stat:

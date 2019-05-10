@@ -15,18 +15,16 @@
 
 - hosts: controller
   remote_user: "{{ OPENSHIFT_INSTALL_USER | default('core') }}"
-  become: yes
+  become: true
   roles:
     - role: controller-kickstart
       when: OPENSHIFT_TOOLING | default(False) | bool
     - role: disable-selinux
       when: (OPENSHIFT_TOOLING | default(False) | bool) and (DISABLE_SELINUX | default(False) | bool)
-    - role: node-config
-      when: OPENSHIFT_TOOLING | default(True) | bool
 
 - hosts: nodes
   remote_user: "{{ OPENSHIFT_INSTALL_USER | default('core') }}"
-  become: yes
+  become: true
   roles:
     - role: node-config
       when: OPENSHIFT_TOOLING | default(True) | bool

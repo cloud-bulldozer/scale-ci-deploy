@@ -1,36 +1,21 @@
 ---
 - name: Get cluster name
   shell: |
-        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: rhcos_cluster_name
 
-- name: get the controller node
-  shell: oc get nodes -l node-role.kubernetes.io/pbench="" | awk 'NR>1 {print $1}' | tail -n1
-  register: controller_node
-
 - name: add the controller label
-  shell: oc label node {{ controller_node.stdout }} {{ item }} --overwrite=true
-  with_items:
-    - "role=controller"
-
-- name: add a taint to the controller
-  shell: oc adm taint node {{ controller_node.stdout }} role=controller:NoSchedule --overwrite=true
+  shell: oc label node --overwrite -l 'node-role.kubernetes.io/pbench=' role=controller
 
 - block:
-    - name: get the public ip of the pbench controller
-      shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | grep {{ controller_node.stdout }} | awk '{print $5}'
+    - name: Get public ip of the controller node
+      shell: oc get nodes -l node-role.kubernetes.io/pbench= -o wide | awk 'NR>1 {print $7}'
       register: controller_public_ip
 
-    - name: get the private ip of the controller
-      shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | grep {{ controller_node.stdout }} | awk '{print $6}'
-      register: controller_private_ip
-
     - name: add controller to group
-      add_host: name={{ controller_private_ip.stdout }} groups=controller
-
-    - name: set controller host as fact
-      set_fact:
-        controller: "{{ controller_private_ip.stdout }}"
+      add_host:
+        name: "{{ controller_public_ip.stdout }}"
+        groups: controller
 
     - name: get VpcId
       shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName, VpcId]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | awk '{print $7}' | grep -v '^$' | sort -u
@@ -87,7 +72,6 @@
       template:
         src: ssh-config.j2
         dest: /root/.ssh/config
-      delegate_to: localhost
 
     - name: get the ocp nodes
       shell: oc get nodes | awk 'NR>1 {print $1}'
@@ -102,4 +86,13 @@
       shell: oc debug node/{{ item }} -- chroot /host /usr/bin/systemctl enable sshd
       with_items:
         - "{{ ocp_nodes.stdout_lines }}"
+
+    - name: Get the kubeconfig off of the orchestration host
+      fetch:
+        src: "{{ GOPATH }}/src/github.com/openshift/installer/auth/kubeconfig"
+        dest: "{{playbook_dir}}/kubeconfig"
+        flat: true
+      when:
+        - KUBECONFIG_AUTH_DIR_PATH is undefined
+
   when: OPENSHIFT_INSTALL_PLATFORM == "aws"

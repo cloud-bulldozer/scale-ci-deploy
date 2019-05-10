@@ -3,3 +3,4 @@ virtualenv
 openstackrc
 overcloudrc
 inventory
+kubeconfig
