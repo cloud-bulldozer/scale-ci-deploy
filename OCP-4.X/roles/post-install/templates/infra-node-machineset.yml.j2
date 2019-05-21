@@ -39,6 +39,8 @@ items:
                 iops: {{RHCOS_INFRA_NODE_VOLUME_IOPS}}
                 volumeSize: {{RHCOS_INFRA_NODE_VOLUME_SIZE}}
                 volumeType: {{RHCOS_INFRA_NODE_VOLUME_TYPE}}
+            credentialsSecret:
+              name: aws-cloud-credentials
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile
@@ -108,6 +110,8 @@ items:
                 iops: {{RHCOS_INFRA_NODE_VOLUME_IOPS}}
                 volumeSize: {{RHCOS_INFRA_NODE_VOLUME_SIZE}}
                 volumeType: {{RHCOS_INFRA_NODE_VOLUME_TYPE}}
+            credentialsSecret:
+              name: aws-cloud-credentials
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile
@@ -177,6 +181,8 @@ items:
                 iops: {{RHCOS_INFRA_NODE_VOLUME_IOPS}}
                 volumeSize: {{RHCOS_INFRA_NODE_VOLUME_SIZE}}
                 volumeType: {{RHCOS_INFRA_NODE_VOLUME_TYPE}}
+            credentialsSecret:
+              name: aws-cloud-credentials
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile

@@ -39,6 +39,8 @@ items:
                 iops: {{RHCOS_PBENCH_NODE_VOLUME_IOPS}}
                 volumeSize: {{RHCOS_PBENCH_NODE_VOLUME_SIZE}}
                 volumeType: {{RHCOS_PBENCH_NODE_VOLUME_TYPE}}
+            credentialsSecret:
+              name: aws-cloud-credentials
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile
