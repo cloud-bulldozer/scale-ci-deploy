@@ -86,3 +86,5 @@ KUBECONFIG_AUTH_DIR_PATH=
 
 # openshift tooling
 OPENSHIFT_TOOLING=True
+# Populates core cluster with kubeconfig and ssh keys for "quicker" debugging
+OPENSHIFT_DEBUG_TOOLING=False

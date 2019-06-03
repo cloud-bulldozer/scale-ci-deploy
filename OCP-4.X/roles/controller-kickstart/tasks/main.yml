@@ -1,5 +1,9 @@
 ---
-- name: ensure that .kube dir exists on controller
+#
+# Populates the workload/controiller host with kubeconfig and ssh configuration for easier debugging
+#
+
+- name: ensure that .kube dir exists on workload/controller
   file:
     path: "{{ item }}"
     state: directory
@@ -7,7 +11,7 @@
     - /home/core/.kube
     - /root/.kube
 
-- name: copy the kubeconfig to controller node
+- name: copy the kubeconfig to workload/controller node
   copy:
     src: "{{playbook_dir}}/kubeconfig"
     dest: "{{ item }}"
@@ -18,7 +22,7 @@
     - KUBECONFIG_AUTH_DIR_PATH is undefined
 
 # handle case where kubeconfig is in another specified dir
-- name: copy the kubeconfig to controller node from specific directory
+- name: copy the kubeconfig to workload/controller node from specific directory
   copy:
     src: "{{ KUBECONFIG_AUTH_DIR_PATH }}/auth/kubeconfig"
     dest: "{{ item }}"
@@ -45,7 +49,7 @@
     owner: root
     group: root
 
-- name: copy perf private key to controller host
+- name: copy private key to workload/controller host
   copy:
     src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item }}"
@@ -62,9 +66,6 @@
   with_items:
     - /home/core/.ssh/config
     - /root/.ssh/config
-
-- name: pbench-controller image
-  shell: podman pull docker.io/ravielluri/image:controller
 
 - name: get nodes
   shell: oc get nodes | grep -v pbench | awk 'NR>1 {print $1}'
