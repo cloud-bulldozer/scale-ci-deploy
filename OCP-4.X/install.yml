@@ -22,11 +22,11 @@
   become: true
   roles:
     - role: controller-kickstart
-      when: OPENSHIFT_TOOLING | default(False) | bool
+      when: OPENSHIFT_DEBUG_TOOLING | default(False) | bool
 
 - hosts: nodes
   remote_user: "{{ OPENSHIFT_INSTALL_USER | default('core') }}"
   become: true
   roles:
     - role: node-config
-      when: OPENSHIFT_TOOLING | default(True) | bool
+      when: OPENSHIFT_DEBUG_TOOLING | default(False) | bool

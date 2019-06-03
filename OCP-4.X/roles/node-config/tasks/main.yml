@@ -1,6 +1,7 @@
 ---
-- name: pbench-agent image
-  shell: podman pull docker.io/ravielluri/image:agent
+#
+# Populates nodes with kubeconfig and ssh configuration for easier debugging
+#
 
 - name: ensure that .kube dir exists
   file:
@@ -21,7 +22,7 @@
     - KUBECONFIG_AUTH_DIR_PATH is undefined
 
 # handle case where kubeconfig is in another specified dir
-- name: copy the kubeconfig to controller node from specific directory
+- name: copy the kubeconfig to node from specific directory
   copy:
     src: "{{ KUBECONFIG_AUTH_DIR_PATH }}/auth/kubeconfig"
     dest: "{{ item }}"
@@ -48,7 +49,7 @@
     owner: root
     group: root
 
-- name: copy perf private key to a node
+- name: copy private key to a node
   copy:
     src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item }}"

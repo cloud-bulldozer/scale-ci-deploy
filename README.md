@@ -1,4 +1,4 @@
-# scale-ci-ansible
+# scale-ci-deploy
 
 The repo contains playbooks for scale-ci automation tasks.  Those include install, scaling, upgrade,
 and post install configuration. The environments under test include RHCOS based OCP on AWS and OCP3
@@ -18,8 +18,8 @@ orchestration host can be localhost if properly setup.
 ### Run
 Clone the github repo:
 ```
-$ git clone https://github.com/redhat-performance/scale-ci-ansible.git
-$ cd scale-ci-ansible
+$ git clone https://github.com/redhat-performance/scale-ci-deploy.git
+$ cd scale-ci-deploy
 $ cp OCP-4.X/inventory.example inventory
 ```
 Set the variables including AWS credentials, Install config, post-install and kick off the playbook:
@@ -28,11 +28,12 @@ $ ansible-playbook -vv -i inventory OCP-4.X/install.yml
 ```
 
 Set OPENSHIFT_POST_INSTALL and OPENSHIFT_TOOLING to true to run the post-install and post-config options to configure
-the cluster to be able to run perf and scale tests using Scale-CI pipeline. The varibles under the post-install section
+the cluster to be able to run performance and scale tests using Scale-CI pipeline. The variables under the post-install section
 of the inventory can be modified to override the default values.
 
 ### Cleanup
-Set OPENSHIFT_INSTALL, OPENSHIFT_POST_INSTALL, OPENSHIFT_TOOLING to False and OPENSHIFT_AWS_INSTALL_CLEANUP to True in the inventory and run the playbook:
+Set OPENSHIFT_INSTALL, OPENSHIFT_POST_INSTALL, OPENSHIFT_TOOLING, OPENSHIFT_DEBUG_TOOLING to False and
+OPENSHIFT_AWS_INSTALL_CLEANUP to True in the inventory and run the playbook:
 ```
 $ ansible-playbook -vv -i inventory OCP-4.X/install.yml
 ```
