@@ -43,27 +43,29 @@
         - "{{ security_groups.stdout_lines }}"
       ignore_errors: yes
 
-    - name: add inbound rule to allow tcp traffic on port range 20000 to 20100
-      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 20000-20100 --cidr 0.0.0.0/0
+    - name: add inbound rule to allow tcp traffic on port range 20000 to 20109
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 20000-20109 --cidr 0.0.0.0/0
       with_items:
         - "{{ security_groups.stdout_lines }}"
       ignore_errors: yes
 
-    - name: add inbound rule to allow udp traffic on port range 20000 to 20100
-      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 20000-20100 --cidr 0.0.0.0/0
+    - name: add inbound rule to allow udp traffic on port range 20000 to 20109
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 20000-20109 --cidr 0.0.0.0/0
       with_items:
         - "{{ security_groups.stdout_lines }}"
       ignore_errors: yes
 
-    # uperf needs more ports for its control port which is choosen at random thus, open a very large range to facilitate this test
-    - name: add inbound rule to allow tcp traffic on port range 40000 to 65535
-      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 40000-65535 --cidr 0.0.0.0/0
+    # Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
+    # Currently there is no method outside of sysctls to control those ports
+    # See pbench issue #1238 - https://github.com/distributed-system-analysis/pbench/issues/1238
+    - name: add inbound rule to allow tcp traffic on port range 32768 to 60999
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 32768-60999 --cidr 0.0.0.0/0
       with_items:
         - "{{ security_groups.stdout_lines }}"
       ignore_errors: yes
 
-    - name: add inbound rule to allow udp traffic on port range 40000 to 65535
-      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 40000-65535 --cidr 0.0.0.0/0
+    - name: add inbound rule to allow udp traffic on port range 32768 to 60999
+      shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 32768-60999 --cidr 0.0.0.0/0
       with_items:
         - "{{ security_groups.stdout_lines }}"
       ignore_errors: yes
