@@ -4,18 +4,15 @@
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: rhcos_cluster_name
 
-- name: add the controller label
-  shell: oc label node --overwrite -l 'node-role.kubernetes.io/pbench=' role=controller
-
 - block:
-    - name: Get public ip of the controller node
-      shell: oc get nodes -l node-role.kubernetes.io/pbench= -o wide | awk 'NR>1 {print $7}'
-      register: controller_public_ip
+    - name: Get public ip of the workload node
+      shell: oc get nodes -l node-role.kubernetes.io/workload= -o wide | awk 'NR>1 {print $7}'
+      register: workload_public_ip
 
-    - name: add controller to group
+    - name: add workload node to group
       add_host:
-        name: "{{ controller_public_ip.stdout }}"
-        groups: controller
+        name: "{{ workload_public_ip.stdout }}"
+        groups: workload
 
     - name: get VpcId
       shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName, VpcId]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | awk '{print $7}' | grep -v '^$' | sort -u
