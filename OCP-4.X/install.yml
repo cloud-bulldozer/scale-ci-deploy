@@ -17,11 +17,11 @@
     - role: post-config
       when: OPENSHIFT_TOOLING | default(False) | bool
 
-- hosts: controller
+- hosts: workload
   remote_user: "{{ OPENSHIFT_INSTALL_USER | default('core') }}"
   become: true
   roles:
-    - role: controller-kickstart
+    - role: workload-kickstart
       when: OPENSHIFT_DEBUG_TOOLING | default(False) | bool
 
 - hosts: nodes

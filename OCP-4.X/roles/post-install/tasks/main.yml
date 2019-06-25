@@ -4,9 +4,10 @@
 #
 # Performs:
 #  * Creates infra node machineset
-#  * Creates pbench node machineset
+#  * Creates workload node machineset
 #  * Moves infra node pods/workload to infra nodes
 #
+
 - name: Get cluster name
   shell: |
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ RHCOS_METADATA_LABEL_PREFIX }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
@@ -31,9 +32,9 @@
     - src: templates/infra-node-machineset.yml.j2
       dest: ~/infra-node-machineset.yml
       toggle: "{{ RHCOS_TOGGLE_INFRA_NODE }}"
-    - src: templates/pbench-node-machineset.yml.j2
-      dest: ~/pbench-node-machineset.yml
-      toggle: "{{ RHCOS_TOGGLE_PBENCH_NODE }}"
+    - src: templates/workload-node-machineset.yml.j2
+      dest: ~/workload-node-machineset.yml
+      toggle: "{{ RHCOS_TOGGLE_WORKLOAD_NODE }}"
 
 - name: Get current ready node count
   shell: oc get nodes | grep " Ready" -ic
@@ -46,8 +47,8 @@
   with_items:
     - ms: infra-node-machineset.yml
       toggle: "{{ RHCOS_TOGGLE_INFRA_NODE }}"
-    - ms: pbench-node-machineset.yml
-      toggle: "{{ RHCOS_TOGGLE_PBENCH_NODE }}"
+    - ms: workload-node-machineset.yml
+      toggle: "{{ RHCOS_TOGGLE_WORKLOAD_NODE }}"
 
 - name: Set expected node count
   set_fact:
@@ -58,10 +59,10 @@
     expected_node_count: "{{expected_node_count|int + 3}}"
   when: RHCOS_TOGGLE_INFRA_NODE
 
-- name: Increment expected node count with pbench node
+- name: Increment expected node count with workload node
   set_fact:
     expected_node_count: "{{expected_node_count|int + 1}}"
-  when: RHCOS_TOGGLE_PBENCH_NODE
+  when: RHCOS_TOGGLE_WORKLOAD_NODE
 
 - name: Poll nodes to see if creating nodes finished
   shell: oc get nodes | grep " Ready" -ic
@@ -69,17 +70,17 @@
   until: current_node_count.stdout|int >= (expected_node_count|int)
   delay: 1
   retries: "{{POLL_ATTEMPTS|int}}"
-  when: (RHCOS_TOGGLE_INFRA_NODE == true or RHCOS_TOGGLE_PBENCH_NODE == true)
+  when: (RHCOS_TOGGLE_INFRA_NODE == true or RHCOS_TOGGLE_WORKLOAD_NODE == true)
 
 - name: Relabel the infra nodes
   shell: |
     oc label nodes --overwrite -l 'node-role.kubernetes.io/infra=' node-role.kubernetes.io/worker-
   when: RHCOS_TOGGLE_INFRA_NODE
 
-- name: Relabel the pbench controller node
+- name: Relabel the workload node
   shell: |
-    oc label nodes --overwrite -l 'node-role.kubernetes.io/pbench=' node-role.kubernetes.io/worker-
-  when: RHCOS_TOGGLE_PBENCH_NODE
+    oc label nodes --overwrite -l 'node-role.kubernetes.io/workload=' node-role.kubernetes.io/worker-
+  when: RHCOS_TOGGLE_WORKLOAD_NODE
 
 - name: Add additional label to worker nodes to provide ablity to isolate workloads on workers
   shell: |
@@ -90,10 +91,10 @@
 # # shell: |
   #  oc scale --replicas 0 -n openshift-cluster-version deployments/cluster-version-operator
 
-- name: Taint the pbench controller node
+- name: Taint the workload node
   shell: |
-    oc adm taint node -l node-role.kubernetes.io/pbench= role=controller:NoSchedule --overwrite=true
-  when: RHCOS_TOGGLE_PBENCH_NODE
+    oc adm taint node -l node-role.kubernetes.io/workload= role=workload:NoSchedule --overwrite=true
+  when: RHCOS_TOGGLE_WORKLOAD_NODE
 
 - name: Copy new cluster-monitoring-config
   template:

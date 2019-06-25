@@ -1,9 +1,9 @@
 ---
 #
-# Populates the workload/controiller host with kubeconfig and ssh configuration for easier debugging
+# Populates the workload node with kubeconfig and ssh configuration for easier debugging
 #
 
-- name: ensure that .kube dir exists on workload/controller
+- name: ensure that .kube dir exists on workload node
   file:
     path: "{{ item }}"
     state: directory
@@ -11,7 +11,7 @@
     - /home/core/.kube
     - /root/.kube
 
-- name: copy the kubeconfig to workload/controller node
+- name: copy the kubeconfig to workload node
   copy:
     src: "{{playbook_dir}}/kubeconfig"
     dest: "{{ item }}"
@@ -22,7 +22,7 @@
     - KUBECONFIG_AUTH_DIR_PATH is undefined
 
 # handle case where kubeconfig is in another specified dir
-- name: copy the kubeconfig to workload/controller node from specific directory
+- name: copy the kubeconfig to workload node from specific directory
   copy:
     src: "{{ KUBECONFIG_AUTH_DIR_PATH }}/auth/kubeconfig"
     dest: "{{ item }}"
@@ -49,7 +49,7 @@
     owner: root
     group: root
 
-- name: copy private key to workload/controller host
+- name: copy private key to workload host
   copy:
     src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item }}"
@@ -68,7 +68,7 @@
     - /root/.ssh/config
 
 - name: get nodes
-  shell: oc get nodes | grep -v pbench | awk 'NR>1 {print $1}'
+  shell: oc get nodes | grep -v workload | awk 'NR>1 {print $1}'
   register: ocp_nodes
 
 - name: add nodes to group

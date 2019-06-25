@@ -6,29 +6,29 @@ items:
     creationTimestamp: null
     labels:
       {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: pbench
-      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: pbench
-    name: {{rhcos_cluster_name.stdout}}-pbench-{{rhcos_region.stdout}}a
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: workload
+      {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: workload
+    name: {{rhcos_cluster_name.stdout}}-workload-{{rhcos_region.stdout}}a
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-pbench-{{rhcos_region.stdout}}a
+        {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-workload-{{rhcos_region.stdout}}a
     template:
       metadata:
         creationTimestamp: null
         labels:
           {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-cluster: {{rhcos_cluster_name.stdout}}
-          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: pbench
-          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: pbench
-          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-pbench-{{rhcos_region.stdout}}a
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-role: workload
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machine-type: workload
+          {{RHCOS_METADATA_LABEL_PREFIX}}/cluster-api-machineset: {{rhcos_cluster_name.stdout}}-workload-{{rhcos_region.stdout}}a
       spec:
         metadata:
           creationTimestamp: null
           labels:
-            node-role.kubernetes.io/pbench: ""
+            node-role.kubernetes.io/workload: ""
         providerSpec:
           value:
             ami:
@@ -36,15 +36,15 @@ items:
             apiVersion: awsproviderconfig.openshift.io/v1beta1
             blockDevices:
             - ebs:
-                iops: {{RHCOS_PBENCH_NODE_VOLUME_IOPS}}
-                volumeSize: {{RHCOS_PBENCH_NODE_VOLUME_SIZE}}
-                volumeType: {{RHCOS_PBENCH_NODE_VOLUME_TYPE}}
+                iops: {{RHCOS_WORKLOAD_NODE_VOLUME_IOPS}}
+                volumeSize: {{RHCOS_WORKLOAD_NODE_VOLUME_SIZE}}
+                volumeType: {{RHCOS_WORKLOAD_NODE_VOLUME_TYPE}}
             credentialsSecret:
               name: aws-cloud-credentials
             deviceIndex: 0
             iamInstanceProfile:
               id: {{rhcos_cluster_name.stdout}}-worker-profile
-            instanceType: {{RHCOS_PBENCH_NODE_INSTANCE_TYPE}}
+            instanceType: {{RHCOS_WORKLOAD_NODE_INSTANCE_TYPE}}
             kind: AWSMachineProviderConfig
             metadata:
               creationTimestamp: null
