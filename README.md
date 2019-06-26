@@ -18,7 +18,7 @@ orchestration host can be localhost if properly setup.
 ### Run
 Clone the github repo:
 ```
-$ git clone https://github.com/redhat-performance/scale-ci-deploy.git
+$ git clone https://github.com/openshift-scale/scale-ci-deploy.git
 $ cd scale-ci-deploy
 $ cp OCP-4.X/inventory.example inventory
 ```
