@@ -1,7 +1,7 @@
 ---
 #
 # Adjusts the scale of a RHCOS cluster by spreading worker count across each availablity zone in a
-# typical default cluster (3 availablity zones).
+# typical default cluster (4 availablity zones).
 #
 
 - name: Adjust the scale of a RHCOS cluster
@@ -21,29 +21,26 @@
         {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0 ).spec.template.spec.providerSpec.value.placement.region }}'{%endraw%}
       register: rhcos_region
 
-    - name: Get current worker count
-      shell: |
-        oc get nodes | grep worker -c
-      register: rhcos_current_worker_count
-
     - name: Set each machineset in each availability zone
       shell: |
         oc patch machineset {{rhcos_cluster_name.stdout}}-worker-{{rhcos_region.stdout}}{{item.ms}} --type=merge -n openshift-machine-api -p '{"spec": {"replicas": {{item.count|int}} }}'
       with_items:
         - ms: a
-          count: "{{(rhcos_worker_count|int / 3) | round(0, 'floor')}}"
+          count: "{{(rhcos_worker_count|int / 4) | round(0, 'ceil')}}"
         - ms: b
-          count: "{{(rhcos_worker_count|int / 3) | round(0, 'floor')}}"
+          count: "{{((rhcos_worker_count|int / 4) - 0.25) | round(0, 'ceil')}}"
         - ms: c
-          count: "{{(rhcos_worker_count|int - ((rhcos_worker_count|int / 3) | round(0, 'floor') * 2)) | round(0,'ceil')}}"
+          count: "{{((rhcos_worker_count|int / 4) - 0.5) | round(0, 'ceil')}}"
+        - ms: d
+          count: "{{(rhcos_worker_count|int / 4) | round(0, 'floor')}}"
 
     - name: Poll node count to see if scaling finished
-      shell: oc get nodes | grep worker | grep " Ready" -c
+      shell: oc get nodes -l node-role.kubernetes.io/worker= --no-headers | grep " Ready" -c
       register: scaled_worker_node_count
       until: scaled_worker_node_count.stdout|int == rhcos_worker_count|int
       delay: 1
       retries: "{{poll_attempts|int}}"
 
-    - name: Add additional label to worker nodes to provide ablity to isolate workloads on workers
+    - name: Add additional label to worker nodes to provide ability to isolate workloads on workers
       shell: |
         oc label nodes --overwrite -l 'node-role.kubernetes.io/worker=' computenode=true
