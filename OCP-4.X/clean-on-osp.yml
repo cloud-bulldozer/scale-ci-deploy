@@ -1,0 +1,81 @@
+---
+#
+# Playbook to uninstall OCP 4 on OSP and clean OSP environment
+#
+
+- name: Uninstall OCP 4 on OSP and cleanup OSP resources
+  hosts: orchestration
+  gather_facts: true
+  remote_user: "{{ ORCHESTRATION_USER | default('stack') }}"
+  vars_files:
+    - vars/clean-on-osp.yml
+  roles:
+    - name: update-motd
+      vars:
+        update_motd: OCP Cluster uninstalled and OSP environment cleaned
+        clusterid: "{{openshift_cluster_name}}"
+  pre_tasks:
+    - name: Destroy OCP cluster using openshift-install on OSP
+      shell: |
+        set -o pipefail
+        cd {{ansible_user_dir}}/scale-ci-deploy
+        export OS_CLIENT_CONFIG_FILE={{ansible_user_dir}}/scale-ci-deploy/clouds.yml
+        bin/openshift-install destroy cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack/
+      ignore_errors: true
+
+    - name: Get all the floating ip addresses
+      shell: |
+        source {{ansible_user_dir}}/overcloudrc
+        openstack floating ip list --format value -c 'Floating IP Address'
+      register: floating_ips
+
+    - name: Delete the all floating ip addresses
+      shell: |
+        source {{ansible_user_dir}}/overcloudrc
+        openstack floating ip delete {{ item }}
+      with_items: "{{ floating_ips.stdout_lines }}"
+
+    - name: Get all the flavor ids
+      shell: |
+        source {{ansible_user_dir}}/overcloudrc
+        openstack flavor list --format value -c ID
+      register: flavors
+      when: delete_flavors|bool
+
+    - name: Delete all the flavors
+      shell: |
+        source {{ansible_user_dir}}/overcloudrc
+        openstack flavor delete {{ item }}
+      with_items: "{{ flavors.stdout_lines }}"
+      ignore_errors: true
+      when: delete_flavors|bool
+
+    - name: Delete the existing RHCOS image in OSP
+      shell: |
+        source {{ansible_user_dir}}/overcloudrc
+        openstack image delete rhcos
+      ignore_errors: true
+      when: delete_image|bool
+
+    - name: Clean scale-ci-deploy openshift-install directories
+      become: true
+      file:
+        path: "{{item}}"
+        state: absent
+      with_items:
+        - "{{ansible_user_dir}}/scale-ci-deploy/bin"
+        - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack"
+
+    - name: Remove old entries from /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        state: absent
+        regexp: "{{item}}"
+      with_items:
+        - "[0-9]+.[0-9]+.[0-9]+.[0-9]+ api.{{openshift_cluster_name}}.{{openshift_base_domain}}"
+        - "[0-9]+.[0-9]+.[0-9]+.[0-9]+ console-openshift-console.apps.{{openshift_cluster_name}}.{{openshift_base_domain}}"
+        - "[0-9]+.[0-9]+.[0-9]+.[0-9]+ integrated-oauth-server-openshift-authentication.apps.{{openshift_cluster_name}}.{{openshift_base_domain}}"
+        - "[0-9]+.[0-9]+.[0-9]+.[0-9]+ oauth-openshift.apps.{{openshift_cluster_name}}.{{openshift_base_domain}}"
+        - "[0-9]+.[0-9]+.[0-9]+.[0-9]+ prometheus-k8s-openshift-monitoring.apps.{{openshift_cluster_name}}.{{openshift_base_domain}}"
+        - "[0-9]+.[0-9]+.[0-9]+.[0-9]+ grafana-openshift-monitoring.apps.{{openshift_cluster_name}}.{{openshift_base_domain}}"

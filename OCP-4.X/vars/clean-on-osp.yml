@@ -1,0 +1,17 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+# For OCP on OSP this will be the undercloud user account (usually stack)
+orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('stack', true) }}"
+###############################################################################
+# Clean OCP on OSP variables.
+###############################################################################
+openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN')|default('example.com', true) }}"
+openshift_cluster_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER_NAME')|default('scale-ci', true) }}"
+
+delete_flavors: "{{ lookup('env', 'OSP_DELETE_FLAVORS')|default(true, true) }}"
+delete_image: "{{ lookup('env', 'OSP_DELETE_IMAGE')|default(true, true) }}"

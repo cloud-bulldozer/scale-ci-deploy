@@ -1,0 +1,85 @@
+---
+#
+# IPI install of OCP 4 on OSP
+#
+
+- name: Perform IPI install OCP 4 on OSP
+  hosts: orchestration
+  gather_facts: true
+  remote_user: "{{ orchestration_user }}"
+  vars_files:
+    - vars/install-on-osp.yml
+  vars:
+    platform: "osp"
+  roles:
+    - role: install-on-osp
+      when: openshift_install|bool
+    - role: post-install
+      when: openshift_post_install|bool
+    - role: post-config-on-osp
+      when: openshift_post_config|bool
+
+- name: (Optional) Debugging configuration of workload node
+  hosts: workload
+  gather_facts: true
+  remote_user: core
+  vars_files:
+    - vars/install-on-osp.yml
+  roles:
+    - role: node-debug-config-on-osp
+      when: openshift_debug_config|bool
+  post_tasks:
+    - name: Add other nodes to in-memory inventory
+      when: openshift_debug_config|bool
+      block:
+        - name: Get master nodes
+          shell: |
+            {%raw%}oc get nodes -l 'node-role.kubernetes.io/master=' -o=go-template='{{range .items}}{{range .status.addresses }}{{if eq .type "InternalIP"}}{{printf "%s\n" .address}}{{end}}{{end}}{{end}}'{%endraw%}
+          register: ocp_master_nodes
+
+        - name: Get infra nodes
+          shell: |
+            {%raw%}oc get nodes -l 'node-role.kubernetes.io/infra=' -o=go-template='{{range .items}}{{range .status.addresses }}{{if eq .type "InternalIP"}}{{printf "%s\n" .address}}{{end}}{{end}}{{end}}'{%endraw%}
+          register: ocp_infra_nodes
+
+        - name: Get worker nodes
+          shell: |
+            {%raw%}oc get nodes -l 'node-role.kubernetes.io/worker=' -o=go-template='{{range .items}}{{range .status.addresses }}{{if eq .type "InternalIP"}}{{printf "%s\n" .address}}{{end}}{{end}}{{end}}'{%endraw%}
+          register: ocp_worker_nodes
+
+        - name: Add master nodes to in-memory inventory
+          add_host:
+            name: "{{ item }}"
+            groups: master
+            ansible_ssh_common_args: |-
+              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
+          with_items:
+            - "{{ ocp_master_nodes.stdout_lines }}"
+
+        - name: Add infra nodes to in-memory inventory
+          add_host:
+            name: "{{ item }}"
+            groups: infra
+            ansible_ssh_common_args: |-
+              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
+          with_items:
+            - "{{ ocp_infra_nodes.stdout_lines }}"
+
+        - name: Add worker nodes to in-memory inventory
+          add_host:
+            name: "{{ item }}"
+            groups: worker
+            ansible_ssh_common_args: |-
+              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
+          with_items:
+            - "{{ ocp_worker_nodes.stdout_lines }}"
+
+- name: (Optional) Debugging configuration of initially deployed nodes
+  hosts: master, infra, worker
+  gather_facts: true
+  remote_user: core
+  vars_files:
+    - vars/install-on-osp.yml
+  roles:
+    - role: node-debug-config-on-osp
+      when: openshift_debug_config|bool
