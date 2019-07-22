@@ -1,0 +1,68 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+# For OCP on OSP this will be the undercloud user account (usually stack)
+orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('stack', true) }}"
+###############################################################################
+# IPI install on OSP variables.
+###############################################################################
+# Playbook flow control
+openshift_install: "{{ lookup('env', 'OPENSHIFT_INSTALL')|default(true, true)|bool }}"
+openshift_post_install: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL')|default(true, true)|bool }}"
+openshift_post_config: "{{ lookup('env', 'OPENSHIFT_POST_CONFIG')|default(true, true)|bool }}"
+openshift_debug_config: "{{ lookup('env', 'OPENSHIFT_DEBUG_CONFIG')|default(true, true)|bool }}"
+
+# Openstack resources to create
+openstack_create_flavors: "{{ lookup('env', 'OPENSTACK_CREATE_FLAVORS')|default(true, true)|bool }}"
+openstack_upload_image: "{{ lookup('env', 'OPENSTACK_UPLOAD_IMAGE')|default(true, true)|bool }}"
+
+# Installation variables
+# Check https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/ for latest client
+openshift_client_location: "{{ lookup('env', 'OPENSHIFT_CLIENT_LOCATION')|default('', true) }}"
+# Check https://github.com/openshift/installer/blob/master/data/data/rhcos.json for latest image
+openshift_image_location: "{{ lookup('env', 'OPENSHIFT_IMAGE_LOCATION') }}"
+# Release payload
+openshift_install_release_image_override: "{{ lookup('env', 'OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE') }}"
+openshift_install_apiversion: "{{ lookup('env', 'OPENSHIFT_INSTALL_APIVERSION')|default('v1', true) }}"
+# ssh key for install-config
+openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE') }}"
+# Secrets/Tokens for extract and installing
+openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
+openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
+openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY') }}"
+openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
+
+# Cluster configuration
+openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN')|default('example.com', true) }}"
+openshift_cluster_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER_NAME')|default('scale-ci', true) }}"
+
+openshift_master_count: "{{ lookup('env', 'OPENSHIFT_MASTER_COUNT')|default(3, true)|int }}"
+openshift_worker_count: "{{ lookup('env', 'OPENSHIFT_WORKER_COUNT')|default(3, true)|int }}"
+
+openshift_master_flavor: "{{ lookup('env', 'OPENSHIFT_MASTER_FLAVOR')|default('m4.xlarge', true) }}"
+openshift_worker_flavor: "{{ lookup('env', 'OPENSHIFT_WORKER_FLAVOR')|default('m4.xlarge', true) }}"
+
+openshift_cidr: "{{ lookup('env', 'OPENSHIFT_CIDR')|default('10.128.0.0/14', true) }}"
+openshift_machine_cidr: "{{ lookup('env', 'OPENSHIFT_MACHINE_CIDR')|default('10.0.128.0/17', true) }}"
+openshift_network_type: "{{ lookup('env', 'OPENSHIFT_NETWORK_TYPE')|default('OpenShiftSDN', true) }}"
+openshift_service_network: "{{ lookup('env', 'OPENSHIFT_SERVICE_NETWORK')|default('172.30.0.0/16', true) }}"
+openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, true) }}"
+
+# Post-install configuration
+openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true)|int }}"
+openshift_toggle_infra_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_INFRA_NODE')|default(true, true)|bool }}"
+openshift_toggle_workload_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_WORKLOAD_NODE')|default(true, true)|bool }}"
+# Either machine.openshift.io or sigs.k8s.io
+machineset_metadata_label_prefix: "{{ lookup('env', 'MACHINESET_METADATA_LABEL_PREFIX')|default('machine.openshift.io', true) }}"
+openshift_infra_node_flavor: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_FLAVOR')|default('m4.xlarge', true) }}"
+openshift_workload_node_flavor: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_FLAVOR')|default('m4.xlarge', true) }}"
+
+openshift_prometheus_retention_period: "{{ lookup('env', 'PROMETHEUS_RETENTION_PERIOD')|default('15d', true) }}"
+openshift_prometheus_storage_class: "{{ lookup('env', 'PROMETHEUS_STORAGE_CLASS')|default('standard', true) }}"
+openshift_prometheus_storage_size: "{{ lookup('env', 'PROMETHEUS_STORAGE_SIZE')|default('10Gi', true) }}"
+openshift_alertmanager_storage_class: "{{ lookup('env', 'ALERTMANAGER_STORAGE_CLASS')|default('standard', true) }}"
+openshift_alertmanager_storage_size: "{{ lookup('env', 'ALERTMANAGER_STORAGE_SIZE')|default('2Gi', true) }}"

@@ -1,0 +1,12 @@
+clouds:
+  openstack:
+    auth:
+      auth_url: {{os_auth_url.stdout}}
+      project_name: "{{os_project_name.stdout}}"
+      username: "{{os_username.stdout}}"
+      password: "{{os_password.stdout}}"
+      user_domain_name: "{{os_user_domain_name.stdout}}"
+      project_domain_name: "{{os_project_domain_name.stdout}}"
+      project_id: "{{os_project_id.stdout}}"
+    region_name: regionOne
+    identity_api_version: 3

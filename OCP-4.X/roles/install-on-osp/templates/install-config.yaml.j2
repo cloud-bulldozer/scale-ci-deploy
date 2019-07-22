@@ -1,0 +1,40 @@
+apiVersion: {{openshift_install_apiversion}}
+baseDomain: {{openshift_base_domain}}
+clusterID: {{cluster_uuid.stdout}}
+compute:
+- hyperthreading: Enabled
+  name: worker
+  platform:
+    openstack:
+      type: {{openshift_worker_flavor}}
+  replicas: {{openshift_worker_count}}
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  platform:
+    openstack:
+      type: {{openshift_master_flavor}}
+  replicas: {{openshift_master_count}}
+metadata:
+  name: {{openshift_cluster_name}}
+networking:
+  clusterNetworks:
+  - cidr: {{openshift_cidr}}
+    hostPrefix: {{openshift_host_prefix}}
+    # hostSubnetLength: 9
+  # serviceCIDR: 172.30.0.0/16
+  machineCIDR: {{openshift_machine_cidr}}
+  networkType: {{openshift_network_type}}
+  serviceNetwork:
+  - {{openshift_service_network}}
+platform:
+  openstack:
+    cloud: openstack
+    externalNetwork: public
+    region: regionOne
+    computeFlavor: m4.xlarge
+    lbFloatingIP: "{{public_fip.stdout}}"
+pullSecret: |+
+  {{ openshift_install_pull_secret | to_json }}
+sshKey: |+
+  {{ install_ssh_pub_key.content| b64decode }}

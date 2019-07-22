@@ -1,0 +1,63 @@
+---
+#
+# Post-Config for OCP on OSP
+#
+# Performs:
+# * Add public ip to workload node
+# * Opens firewall rules for workload node for ssh
+# * Opens firewall rules for Network Tests P2P HostNetwork Tests and HTTP tests
+#   Ports 2022 (tcp), 9090 (tcp), 20000-20109 (tcp, udp), 32768 60999 (tcp, udp)
+#
+
+- name: Create FIP for workload node
+  shell: |
+    . {{ansible_user_dir}}/overcloudrc
+    openstack floating ip create public --format value -c floating_ip_address
+  register: public_workload_fip
+
+- name: Get workload machine openstack name
+  shell: oc get nodes -l 'node-role.kubernetes.io/workload=' -o json | jq -r '.items[0].metadata.annotations | .["machine.openshift.io/machine"]'
+  register: workload_machine_annotation
+
+- name: Add FIP to workload machine
+  shell: |
+    . {{ansible_user_dir}}/overcloudrc
+    openstack server add floating ip {{workload_machine_annotation.stdout.split('/')[1] }} {{public_workload_fip.stdout}}
+
+- name: add workload node to group
+  add_host:
+    name: "{{ public_workload_fip.stdout }}"
+    groups: workload
+
+- name: Get security groups for OCP 4 cluster
+  shell: |
+    . {{ansible_user_dir}}/overcloudrc
+    openstack security group list --project ${OS_PROJECT_NAME} --format value -c ID -c Name | grep {{openshift_cluster_name}} | awk '{print $1}'
+  register: security_groups
+
+- name: Allow traffic over tcp port (2022) for pbench-agents
+  shell: |
+    . {{ansible_user_dir}}/overcloudrc
+    openstack security group rule create --ingress --protocol tcp --dst-port 2022 {{item}}
+  with_items: "{{security_groups.stdout_lines}}"
+
+- name: Allow traffic over tcp port (9090) for HTTP tests
+  shell: |
+    . {{ansible_user_dir}}/overcloudrc
+    openstack security group rule create --ingress --protocol tcp --dst-port 9090 {{item}}
+  with_items: "{{security_groups.stdout_lines}}"
+
+- name: Allow traffic over tcp/udp ports (20000-20109, 32768-60999) for HostNetwork Network Tests
+  shell: |
+    . {{ansible_user_dir}}/overcloudrc
+    openstack security group rule create --ingress --protocol tcp --dst-port 20000:20109 {{item}}
+    openstack security group rule create --ingress --protocol udp --dst-port 20000:20109 {{item}}
+    openstack security group rule create --ingress --protocol tcp --dst-port 32768:60999 {{item}}
+    openstack security group rule create --ingress --protocol udp --dst-port 32768:60999 {{item}}
+  with_items: "{{security_groups.stdout_lines}}"
+
+- name: Get the kubeconfig off of the orchestration host
+  fetch:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack/auth/kubeconfig"
+    dest: "{{playbook_dir}}/kubeconfig"
+    flat: true

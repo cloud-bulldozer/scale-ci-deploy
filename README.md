@@ -38,6 +38,24 @@ OPENSHIFT_AWS_INSTALL_CLEANUP to True in the inventory and run the playbook:
 $ ansible-playbook -vv -i inventory OCP-4.X/install.yml
 ```
 
+## RHCOS install on OSP
+
+To install RHCOS on an OSP cloud, we use a different playbook. (`OCP-4.X/install-ocp-on-osp.yml`)
+
+Running from CLI:
+
+```sh
+$ cp OCP-4.X/inventory.example inventory
+$ # Add orchestration host to inventory
+$ # Edit vars in OCP-4.X/vars/install-ocp-on-osp.yml or define Environment vars
+$ ansible-playbook -vv -i inventory OCP-4.X/install-ocp-on-osp.yml
+```
+
+Typical usage for OCP on OSP install requires a cloud created by [openshift-scale/scale-ci-tripleo](https://github.com/openshift-scale/scale-ci-tripleo).
+
+The orchestration host will be the undercloud machine.
+
+
 ## RHCOS scale
 
 The RHCOS scale playbook is `OCP-4.X/scale.yml` and can scale an existing RHCOS cluster.

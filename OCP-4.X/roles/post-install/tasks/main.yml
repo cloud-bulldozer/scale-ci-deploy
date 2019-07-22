@@ -29,28 +29,44 @@
         {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.placement.region}}'{%endraw%}
       register: aws_region
 
-    - name: (AWS) Template out the infra node machineset yaml
+    - name: (AWS) Template out machineset yamls
       template:
-        src: aws-infra-node-machineset.yml.j2
-        dest: "{{ansible_user_dir}}/aws-infra-node-machineset.yml"
-      when: openshift_toggle_infra_node|bool
-
-    - name: (AWS) Template out the workload machineset yaml
-      template:
-        src: aws-workload-node-machineset.yml.j2
-        dest: "{{ansible_user_dir}}/aws-workload-node-machineset.yml"
-      when: openshift_toggle_workload_node|bool
-
-    - name: (AWS) Create machinesets
-      shell: |
-        oc create -f {{ansible_user_dir}}/{{item.ms}}
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
       when: item.toggle|bool
       with_items:
-        - ms: aws-infra-node-machineset.yml
+        - src: aws-infra-node-machineset.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
           toggle: "{{openshift_toggle_infra_node}}"
-        - ms: aws-workload-node-machineset.yml
+        - src: aws-workload-node-machineset.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
   when: platform == "aws"
+
+- name: (OSP) Template out machineset yamls
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+  with_items:
+    - src: osp-infra-node-machineset.yml.j2
+      dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+      toggle: "{{openshift_toggle_infra_node}}"
+    - src: osp-workload-node-machineset.yml.j2
+      dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+      toggle: "{{openshift_toggle_workload_node}}"
+  when:
+    - item.toggle|bool
+    - platform == "osp"
+
+- name: Create machinesets
+  shell: |
+    oc create -f {{item.ms}}
+  when: item.toggle|bool
+  with_items:
+    - ms: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+      toggle: "{{openshift_toggle_infra_node}}"
+    - ms: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+      toggle: "{{openshift_toggle_workload_node}}"
 
 - name: Set expected node count
   set_fact:
