@@ -4,6 +4,7 @@
 #
 
 - name: ensure that .kube dir exists
+  become: true
   file:
     path: "{{ item }}"
     state: directory
@@ -12,6 +13,7 @@
     - /root/.kube
 
 - name: copy the kubeconfig to a node
+  become: true
   copy:
     src: "{{playbook_dir}}/kubeconfig"
     dest: "{{ item }}"
@@ -19,21 +21,22 @@
     - /home/core/.kube/config
     - /root/.kube/config
   when:
-    - KUBECONFIG_AUTH_DIR_PATH is undefined
+    - kubeconfig_auth_dir_path == ""
 
 # handle case where kubeconfig is in another specified dir
 - name: copy the kubeconfig to node from specific directory
+  become: true
   copy:
-    src: "{{ KUBECONFIG_AUTH_DIR_PATH }}/auth/kubeconfig"
+    src: "{{ kubeconfig_auth_dir_path }}/auth/kubeconfig"
     dest: "{{ item }}"
   with_items:
     - /home/core/.kube/config
     - /root/.kube/config
   when:
-    - KUBECONFIG_AUTH_DIR_PATH is defined
-    - KUBECONFIG_AUTH_DIR_PATH != ""
+    - kubeconfig_auth_dir_path != ""
 
 - name: ensure that ssh dir exists
+  become: true
   file:
     path: "{{ item }}"
     state: directory
@@ -42,6 +45,7 @@
     - /root/.ssh
 
 - name: copy authorized keys
+  become: true
   copy:
     src: /home/core/.ssh/authorized_keys
     dest: /root/.ssh/authorized_keys
@@ -50,6 +54,7 @@
     group: root
 
 - name: copy private key to a node
+  become: true
   copy:
     src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item }}"

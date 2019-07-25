@@ -4,6 +4,7 @@
 #
 
 - name: ensure that .kube dir exists on workload node
+  become: true
   file:
     path: "{{ item }}"
     state: directory
@@ -12,6 +13,7 @@
     - /root/.kube
 
 - name: copy the kubeconfig to workload node
+  become: true
   copy:
     src: "{{playbook_dir}}/kubeconfig"
     dest: "{{ item }}"
@@ -19,21 +21,22 @@
     - /home/core/.kube/config
     - /root/.kube/config
   when:
-    - KUBECONFIG_AUTH_DIR_PATH is undefined
+    - kubeconfig_auth_dir_path == ""
 
 # handle case where kubeconfig is in another specified dir
 - name: copy the kubeconfig to workload node from specific directory
+  become: true
   copy:
-    src: "{{ KUBECONFIG_AUTH_DIR_PATH }}/auth/kubeconfig"
+    src: "{{ kubeconfig_auth_dir_path }}/auth/kubeconfig"
     dest: "{{ item }}"
   with_items:
     - /home/core/.kube/config
     - /root/.kube/config
   when:
-    - KUBECONFIG_AUTH_DIR_PATH is defined
-    - KUBECONFIG_AUTH_DIR_PATH != ""
+    - kubeconfig_auth_dir_path != ""
 
 - name: ensure that ssh dir exists
+  become: true
   file:
     path: "{{ item }}"
     state: directory
@@ -42,6 +45,7 @@
     - /root/.ssh
 
 - name: copy authorized keys
+  become: true
   copy:
     src: /home/core/.ssh/authorized_keys
     dest: /root/.ssh/authorized_keys
@@ -50,6 +54,7 @@
     group: root
 
 - name: copy private key to workload host
+  become: true
   copy:
     src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item }}"
@@ -59,6 +64,7 @@
     - /root/.ssh/id_rsa
 
 - name: copy ssh config
+  become: true
   copy:
     src: config
     dest: "{{ item }}"
@@ -66,16 +72,3 @@
   with_items:
     - /home/core/.ssh/config
     - /root/.ssh/config
-
-- name: get nodes
-  shell: oc get nodes | grep -v workload | awk 'NR>1 {print $1}'
-  register: ocp_nodes
-
-- name: add nodes to group
-  add_host:
-    name: "{{ item }}"
-    groups: nodes
-    ansible_ssh_common_args: |-
-      -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p {{ OPENSHIFT_INSTALL_USER | default('core') }}@{{inventory_hostname}}'
-  with_items:
-    - "{{ ocp_nodes.stdout_lines }}"

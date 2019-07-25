@@ -1,0 +1,18 @@
+---
+#
+# Clean up AWS install
+#
+
+- name: set workdir
+  set_fact:
+    workdir: "{{ gopath }}/src/github.com/openshift/installer"
+
+- name: cleanup aws cluster
+  shell: |
+    cd {{ workdir }}
+    bin/openshift-install destroy cluster --log-level=debug
+
+- name: cleanup workdir
+  file:
+    path: "{{ workdir }}"
+    state: absent
