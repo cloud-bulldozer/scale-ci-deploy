@@ -1,0 +1,205 @@
+apiVersion: v1
+items:
+- apiVersion: machine.openshift.io/v1beta1
+  kind: MachineSet
+  metadata:
+    creationTimestamp: null
+    labels:
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}1
+    namespace: openshift-machine-api
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}1
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}1
+      spec:
+        metadata:
+          creationTimestamp: null
+          labels:
+            node-role.kubernetes.io/infra: ""
+        providerSpec:
+          value:
+            apiVersion: azureproviderconfig.openshift.io/v1beta1
+            credentialsSecret:
+              name: azure-cloud-credentials
+              namespace: openshift-machine-api
+            image:
+              offer: ""
+              publisher: ""
+              resourceID: /resourceGroups/{{cluster_name.stdout}}-rg/providers/Microsoft.Compute/images/{{cluster_name.stdout}}
+              sku: ""
+              version: ""
+            internalLoadBalancer: ""
+            kind: AzureMachineProviderSpec
+            location: centralus
+            managedIdentity: {{cluster_name.stdout}}-identity
+            metadata:
+              creationTimestamp: null
+            natRule: null
+            networkResourceGroup: ""
+            osDisk:
+              diskSizeGB: {{openshift_infra_node_volume_size}}
+              managedDisk:
+                storageAccountType: {{openshift_infra_node_volume_type}}
+              osType: Linux
+            publicIP: false
+            publicLoadBalancer: ""
+            resourceGroup: {{cluster_name.stdout}}-rg
+            sshPrivateKey: ""
+            sshPublicKey: ""
+            subnet: {{cluster_name.stdout}}-worker-subnet
+            userDataSecret:
+              name: worker-user-data
+            vmSize: {{openshift_workload_node_instance_type}}
+            vnet: {{cluster_name.stdout}}-vnet
+            zone: "1"
+  status:
+    replicas: 0
+- apiVersion: machine.openshift.io/v1beta1
+  kind: MachineSet
+  metadata:
+    creationTimestamp: null
+    labels:
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}2
+    namespace: openshift-machine-api
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}2
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}2
+      spec:
+        metadata:
+          creationTimestamp: null
+          labels:
+            node-role.kubernetes.io/infra: ""
+        providerSpec:
+          value:
+            apiVersion: azureproviderconfig.openshift.io/v1beta1
+            credentialsSecret:
+              name: azure-cloud-credentials
+              namespace: openshift-machine-api
+            image:
+              offer: ""
+              publisher: ""
+              resourceID: /resourceGroups/{{cluster_name.stdout}}-rg/providers/Microsoft.Compute/images/{{cluster_name.stdout}}
+              sku: ""
+              version: ""
+            internalLoadBalancer: ""
+            kind: AzureMachineProviderSpec
+            location: centralus
+            managedIdentity: {{cluster_name.stdout}}-identity
+            metadata:
+              creationTimestamp: null
+            natRule: null
+            networkResourceGroup: ""
+            osDisk:
+              diskSizeGB: {{openshift_infra_node_volume_size}}
+              managedDisk:
+                storageAccountType: {{openshift_infra_node_volume_type}}
+              osType: Linux
+            publicIP: false
+            publicLoadBalancer: ""
+            resourceGroup: {{cluster_name.stdout}}-rg
+            sshPrivateKey: ""
+            sshPublicKey: ""
+            subnet: {{cluster_name.stdout}}-worker-subnet
+            userDataSecret:
+              name: worker-user-data
+            vmSize: {{openshift_workload_node_instance_type}}
+            vnet: {{cluster_name.stdout}}-vnet
+            zone: "2"
+  status:
+    replicas: 0
+- apiVersion: machine.openshift.io/v1beta1
+  kind: MachineSet
+  metadata:
+    creationTimestamp: null
+    labels:
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}3
+    namespace: openshift-machine-api
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}3
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}3
+      spec:
+        metadata:
+          creationTimestamp: null
+          labels:
+            node-role.kubernetes.io/infra: ""
+        providerSpec:
+          value:
+            apiVersion: azureproviderconfig.openshift.io/v1beta1
+            credentialsSecret:
+              name: azure-cloud-credentials
+              namespace: openshift-machine-api
+            image:
+              offer: ""
+              publisher: ""
+              resourceID: /resourceGroups/{{cluster_name.stdout}}-rg/providers/Microsoft.Compute/images/{{cluster_name.stdout}}
+              sku: ""
+              version: ""
+            internalLoadBalancer: ""
+            kind: AzureMachineProviderSpec
+            location: centralus
+            managedIdentity: {{cluster_name.stdout}}-identity
+            metadata:
+              creationTimestamp: null
+            natRule: null
+            networkResourceGroup: ""
+            osDisk:
+              diskSizeGB: {{openshift_infra_node_volume_size}}
+              managedDisk:
+                storageAccountType: {{openshift_infra_node_volume_type}}
+              osType: Linux
+            publicIP: false
+            publicLoadBalancer: ""
+            resourceGroup: {{cluster_name.stdout}}-rg
+            sshPrivateKey: ""
+            sshPublicKey: ""
+            subnet: {{cluster_name.stdout}}-worker-subnet
+            userDataSecret:
+              name: worker-user-data
+            vmSize: {{openshift_workload_node_instance_type}}
+            vnet: {{cluster_name.stdout}}-vnet
+            zone: "3"
+  status:
+    replicas: 0
+kind: List
+metadata: {}

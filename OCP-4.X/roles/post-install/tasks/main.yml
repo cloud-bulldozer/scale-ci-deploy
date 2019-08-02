@@ -43,6 +43,32 @@
           toggle: "{{openshift_toggle_workload_node}}"
   when: platform == "aws"
 
+- name: Azure Block of tasks
+  block:
+    - name: (Azure) Get AMI ID
+      shell: |
+        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.ami.id}}'{%endraw%}
+      register: ami_id
+
+    - name: (Azure) Get cluster location (region)
+      shell: |
+        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.location}}'{%endraw%}
+      register: azure_location
+
+    - name: (Azure) Template out machineset yamls
+      template:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+      when: item.toggle|bool
+      with_items:
+        - src: azure-infra-node-machineset.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+          toggle: "{{openshift_toggle_infra_node}}"
+        - src: azure-workload-node-machineset.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+          toggle: "{{openshift_toggle_workload_node}}"
+  when: platform == "azure"
+
 - name: (OSP) Template out machineset yamls
   template:
     src: "{{item.src}}"
@@ -117,12 +143,12 @@
 - name: Copy new cluster-monitoring-config
   template:
     src: cluster-monitoring-config.yml.j2
-    dest: "{{ansible_user_dir}}/cluster-monitoring-config.yml"
+    dest: "{{ansible_user_dir}}/scale-ci-deploy/cluster-monitoring-config.yml"
   when: openshift_toggle_infra_node|bool
 
 - name: Replace the cluster-monitoring-config ConfigMap
   shell: |
-    oc create -f {{ansible_user_dir}}/cluster-monitoring-config.yml
+    oc create -f {{ansible_user_dir}}/scale-ci-deploy/cluster-monitoring-config.yml
   ignore_errors: yes
   when: openshift_toggle_infra_node|bool
 
