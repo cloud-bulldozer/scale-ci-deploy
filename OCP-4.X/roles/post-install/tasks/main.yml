@@ -90,8 +90,8 @@
 
 # Due to upgrade testing we will no longer disable the CVO
 # - name: Disable CVO to prevent squashed configuration changes to cluster operators
-# # shell: |
-  #  oc scale --replicas 0 -n openshift-cluster-version deployments/cluster-version-operator
+#   shell: |
+#     oc scale --replicas 0 -n openshift-cluster-version deployments/cluster-version-operator
 
 - name: Taint the workload node
   shell: |

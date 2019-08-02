@@ -1,6 +1,12 @@
 ---
 #
-# Post configuration of cluster installed on AWS
+# Post-Config for OCP on AWS
+#
+# Performs:
+# * Opens firewall rules for workload node for ssh (as well as for debugging workload pod ssh)
+# * Opens firewall rules for Network Tests P2P HostNetwork Tests and HTTP tests
+#   Ports 2022 (tcp), 9090 (tcp), 20000-20109 (tcp, udp), 32768 60999 (tcp, udp)
+# * Ensures ssh is started and running on nodes
 #
 
 - name: Get cluster name
@@ -25,14 +31,14 @@
   shell: aws ec2 describe-security-groups --filters "Name=vpc-id,Values={{ vpc_id.stdout }}" --output json | jq .SecurityGroups[].GroupId
   register: security_groups
 
-- name: add inbound rule to allow traffic on 2022
-  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 2022 --cidr 0.0.0.0/0
+- name: add inbound rule to allow traffic on 22
+  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 22 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: add inbound rule to allow traffic on 22
-  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 22 --cidr 0.0.0.0/0
+- name: add inbound rule to allow traffic on 2022
+  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 2022 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
@@ -70,11 +76,6 @@
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: ssh config for nodes
-  template:
-    src: ssh-config.j2
-    dest: "{{ansible_user_dir}}/.ssh/config"
-
 - name: get the ocp nodes
   shell: oc get nodes | awk 'NR>1 {print $1}'
   register: ocp_nodes
@@ -91,7 +92,7 @@
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
-    src: "{{ gopath }}/src/github.com/openshift/installer/auth/kubeconfig"
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/auth/kubeconfig"
     dest: "{{playbook_dir}}/kubeconfig"
     flat: true
   when:

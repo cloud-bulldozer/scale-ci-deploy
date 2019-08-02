@@ -1,7 +1,43 @@
 ---
 #
-# Install on AWS role tasks
+# Tasks to install OCP on AWS
 #
+# Flow:
+# * Setup directories and oc/kubectl client
+# * Either extract install binary or build from source
+# * Install cloud tools and authentication
+# * Install cluster
+#
+
+- name: Create scale-ci-deploy directories
+  file:
+    path: "{{item}}"
+    state: directory
+  with_items:
+    - "{{ansible_user_dir}}/scale-ci-deploy/"
+    - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws"
+    - "{{ansible_user_dir}}/scale-ci-deploy/logs"
+    - "{{ansible_user_dir}}/scale-ci-deploy/bin"
+    - "{{ansible_user_dir}}/.docker"
+
+- name: Download oc client tools
+  get_url:
+    url: "{{openshift_client_location}}"
+    dest: "{{ansible_user_dir}}/scale-ci-deploy/{{openshift_client_location | basename}}"
+
+- name: Untar and install oc client tools
+  become: true
+  shell: |
+    set -o pipefail
+    cd {{ansible_user_dir}}/scale-ci-deploy/
+    tar xzf {{ansible_user_dir}}/scale-ci-deploy/{{openshift_client_location | basename}}
+    cp {{ansible_user_dir}}/scale-ci-deploy/oc /usr/local/bin/oc
+    cp {{ansible_user_dir}}/scale-ci-deploy/kubectl /usr/local/bin/kubectl
+
+- name: Setup config for container registry
+  template:
+    src: registry_auth.j2
+    dest: "{{ansible_user_dir}}/.docker/config.json"
 
 - name: Install dependencies
   package:
@@ -21,10 +57,53 @@
   pip:
     name: awscli
 
-- name: create gopath dir
-  file:
-    path: "{{ gopath }}"
-    state: directory
+- name: Use installer from a build
+  block:
+    - name: Extract openshift-install binary from the payload
+      shell: |
+        set -o pipefail
+        cd {{ansible_user_dir}}/scale-ci-deploy/bin
+        oc adm release extract --tools {{openshift_install_release_image_override}}
+        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
+        chmod +x openshift-install
+  when: not openshift_install_installer_from_source|bool
+
+- name: Build installer from source
+  block:
+    - name: create gopath dir
+      file:
+        path: "{{ gopath }}"
+        state: directory
+
+    - name: set workdir
+      set_fact:
+        workdir: "{{ gopath }}/src/github.com/openshift/installer"
+
+    - name: cleanup installer code if it exists
+      file:
+        path: "{{ workdir }}"
+        state: absent
+
+    - name: get the installer bits
+      git:
+        repo: 'https://github.com/openshift/installer.git'
+        dest: "{{ workdir }}"
+        version: "{{ openshift_install_installer_from_source_version }}"
+
+    - name: build installer binary
+      shell: |
+        cd {{ workdir }}
+        hack/build.sh
+      environment:
+        GOPATH: "{{ gopath }}"
+
+    - name: Copy installer into expected directory
+      copy:
+        src: "{{ workdir }}/bin/openshift-install"
+        dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/openshift-install"
+        remote_src: true
+        mode: 0744
+  when: openshift_install_installer_from_source|bool
 
 - name: create .aws dir
   file:
@@ -41,95 +120,55 @@
      src: credentials.j2
      dest: "{{ ansible_user_dir }}/.aws/credentials"
 
-- name: set workdir
-  set_fact:
-    workdir: "{{ gopath }}/src/github.com/openshift/installer"
+- name: Read contents local ssh public key
+  slurp:
+    src: "{{openshift_install_ssh_pub_key_file}}"
+  delegate_to: localhost
+  register: install_ssh_pub_key
 
-- name: cleanup installer code if it exists
-  file:
-    path: "{{ workdir }}"
-    state: absent
-
-- name: Build installer from source
-  block:
-    - name: get the installer bits
-      git:
-        repo: 'https://github.com/openshift/installer.git'
-        dest: "{{ workdir }}"
-        version: "{{ openshift_install_installer_from_source_version }}"
-
-    - name: build installer binary
-      shell: cd {{ workdir }}; hack/build.sh
-      environment:
-        GOPATH: "{{ gopath }}"
-  when: openshift_install_installer_from_source|bool
-
-- name: Use installer from a build
-  block:
-    - name: create workdir
-      file:
-        path: "{{ workdir }}/bin"
-        state: directory
-
-    - name: setup config to talk to registry
-      template:
-        src: registry_auth.j2
-        dest: "{{ workdir }}/bin/config.json"
-
-    - name: extract openshift-install binary from the payload
-      shell: |
-        set -o pipefail
-        cd {{ workdir }}/bin
-        oc adm release extract --tools {{ openshift_install_release_image_override }}
-        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
-        chmod +x openshift-install
-  when: not openshift_install_installer_from_source|bool
-
-- name: setup install-config
+- name: Setup install-config.yaml
   template:
     src: install-config.yaml.j2
-    dest: "{{ item }}"
+    dest: "{{item}}"
   with_items:
-    - "{{ workdir }}/install-config.yaml"
-    - "{{ workdir }}/install-config.yaml.orig"
-
-- name: ignition configs
-  shell: |
-    cd {{ workdir }}
-    export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
-    export _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
-    bin/openshift-install create ignition-configs
-  when: (openshift_install_release_image_override is defined) and (openshift_install_release_image_override != "")
-
-- name: ignition configs
-  shell: |
-    cd {{ workdir }}
-    bin/openshift-install create ignition-configs
-  when: (openshift_install_release_image_override is undefined) or (openshift_install_release_image_override == "")
+    - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/install-config.yaml"
+    - "{{ansible_user_dir}}/scale-ci-deploy/install-config_aws.yaml"
 
 - name: run openshift installer on aws using the image override
   shell: |
     set -o pipefail
-    cd {{ workdir }}
+    cd {{ansible_user_dir}}/scale-ci-deploy
     export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
-    bin/openshift-install create cluster --log-level=debug
-  when: (openshift_install_release_image_override is defined) and (openshift_install_release_image_override != "")
+    bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
+  when: openshift_install_release_image_override != ""
 
 - name: run openshift installer on aws using the default release image
   shell: |
     set -o pipefail
-    cd {{ workdir }}
-    bin/openshift-install create cluster --log-level=debug
-  when: (openshift_install_release_image_override is undefined) or (openshift_install_release_image_override == "")
+    cd {{ansible_user_dir}}/scale-ci-deploy
+    bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
+  when: openshift_install_release_image_override == ""
 
 - name: ensure that .kube dir exists
+  become: "{{item.become}}"
   file:
-    path: "{{ansible_user_dir}}/.kube"
+    path: "{{item.path}}"
     state: directory
+  with_items:
+    - path: /root/.kube
+      become: true
+    - path: "{{ansible_user_dir}}/.kube"
+      become: false
 
-- name: copy the kubeconfig
+- name: Copy the kubeconfig to .kube directories
+  become: "{{item.become}}"
   copy:
-    src: "{{ workdir }}/auth/kubeconfig"
-    dest: "{{ansible_user_dir}}/.kube/config"
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/auth/kubeconfig"
+    dest: "{{item.dest}}"
     remote_src: true
+  with_items:
+    - dest: /root/.kube/config
+      become: true
+    - dest: "{{ansible_user_dir}}/.kube/config"
+      become: false
