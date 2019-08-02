@@ -9,59 +9,59 @@ orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true
 ###############################################################################
 # IPI install on AWS variables.
 ###############################################################################
-# Main playbook control flow variables
-openshift_aws_install_cleanup: "{{ lookup('env', 'OPENSHIFT_AWS_INSTALL_CLEANUP')|default(false, true) }}"
+# Playbook flow control
+openshift_cleanup: "{{ lookup('env', 'OPENSHIFT_CLEANUP')|default(false, true) }}"
 openshift_install: "{{ lookup('env', 'OPENSHIFT_INSTALL')|default(true, true) }}"
 openshift_post_install: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL')|default(true, true) }}"
 openshift_post_config: "{{ lookup('env', 'OPENSHIFT_POST_CONFIG')|default(true, true) }}"
 openshift_debug_config: "{{ lookup('env', 'OPENSHIFT_DEBUG_CONFIG')|default(false, true) }}"
 
+# Installation variables
+# Check https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/ for latest client
+openshift_client_location: "{{ lookup('env', 'OPENSHIFT_CLIENT_LOCATION')|default('', true) }}"
+# Release payload
+openshift_install_release_image_override: "{{ lookup('env', 'OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE') }}"
+openshift_install_apiversion: "{{ lookup('env', 'OPENSHIFT_INSTALL_APIVERSION')|default('v1', true) }}"
+# ssh key for install-config
+openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE') }}"
+# Secrets/Tokens for extract and installing
+openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
+openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
+openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY') }}"
+openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
+# Not recommended, however you can build the installer from source. (You run the risk of using a mismatched binary vs install payload)
+openshift_install_installer_from_source: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE')|default(false, true) }}"
+openshift_install_installer_from_source_version: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE_VERSION')|default('master', true) }}"
+gopath: "{{ lookup('env', 'GOPATH')|default('/root/.go', true) }}"
+
 # Cloud environment and authentication
 aws_profile: "{{ lookup('env', 'AWS_PROFILE')|default('default', true) }}"
 aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
 aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
-openshift_install_aws_region: "{{ lookup('env', 'OPENSHIFT_INSTALL_AWS_REGION') }}"
+aws_region: "{{ lookup('env', 'AWS_REGION') }}"
 
-# Cluster Configuration
-openshift_install_base_domain: "{{ lookup('env', 'OPENSHIFT_INSTALL_BASE_DOMAIN') }}"
-openshift_install_cluster_name: "{{ lookup('env', 'OPENSHIFT_INSTALL_CLUSTER_NAME') }}"
+# Cluster configuration
+openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN') }}"
+openshift_cluster_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER_NAME') }}"
 
-openshift_install_master_count: "{{ lookup('env', 'OPENSHIFT_INSTALL_MASTER_COUNT')|default(3, true) }}"
-openshift_install_worker_count: "{{ lookup('env', 'OPENSHIFT_INSTALL_WORKER_COUNT')|default(5, true) }}"
+openshift_master_count: "{{ lookup('env', 'OPENSHIFT_MASTER_COUNT')|default(3, true) }}"
+openshift_worker_count: "{{ lookup('env', 'OPENSHIFT_WORKER_COUNT')|default(5, true) }}"
 
-openshift_install_master_instance_type: "{{ lookup('env', 'OPENSHIFT_INSTALL_MASTER_INSTANCE_TYPE')|default('m5.xlarge', true) }}"
-openshift_install_worker_instance_type: "{{ lookup('env', 'OPENSHIFT_INSTALL_WORKER_INSTANCE_TYPE')|default('m5.large', true) }}"
+openshift_master_instance_type: "{{ lookup('env', 'OPENSHIFT_MASTER_INSTANCE_TYPE')|default('m5.xlarge', true) }}"
+openshift_worker_instance_type: "{{ lookup('env', 'OPENSHIFT_WORKER_INSTANCE_TYPE')|default('m5.large', true) }}"
 
-openshift_install_master_root_volume_size: "{{ lookup('env', 'OPENSHIFT_INSTALL_MASTER_ROOT_VOLUME_SIZE')|default(64, true) }}"
-openshift_install_master_root_volume_type: "{{ lookup('env', 'OPENSHIFT_INSTALL_MASTER_ROOT_VOLUME_TYPE')|default('gp2', true) }}"
-openshift_install_master_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_INSTALL_MASTER_ROOT_VOLUME_IOPS')|default(0, true) }}"
+openshift_master_root_volume_size: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_SIZE')|default(64, true) }}"
+openshift_master_root_volume_type: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_TYPE')|default('gp2', true) }}"
+openshift_master_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_IOPS')|default(0, true) }}"
 
-openshift_install_worker_root_volume_size: "{{ lookup('env', 'OPENSHIFT_INSTALL_WORKER_ROOT_VOLUME_SIZE')|default(64, true) }}"
-openshift_install_worker_root_volume_type: "{{ lookup('env', 'OPENSHIFT_INSTALL_WORKER_ROOT_VOLUME_TYPE')|default('gp2', true) }}"
-openshift_install_worker_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_INSTALL_WORKER_ROOT_VOLUME_IOPS')|default(0, true) }}"
+openshift_worker_root_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_SIZE')|default(64, true) }}"
+openshift_worker_root_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_TYPE')|default('gp2', true) }}"
+openshift_worker_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_IOPS')|default(0, true) }}"
 
-openshift_install_cidr: "{{ lookup('env', 'OPENSHIFT_INSTALL_CIDR')|default('10.128.0.0/14', true) }}"
-openshift_install_machine_cidr: "{{ lookup('env', 'OPENSHIFT_INSTALL_MACHINE_CIDR')|default('10.0.0.0/16', true) }}"
-openshift_install_service_network: "{{ lookup('env', 'OPENSHIFT_INSTALL_SERVICE_NETWORK')|default('172.30.0.0/16', true) }}"
-openshift_install_host_prefix: "{{ lookup('env', 'OPENSHIFT_INSTALL_HOST_PREFIX')|default(23, true) }}"
-
-# Version to install variables
-openshift_install_apiversion: "{{ lookup('env', 'OPENSHIFT_INSTALL_APIVERSION')|default('v1', true) }}"
-openshift_install_release_image_override: "{{ lookup('env', 'OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE') }}"
-
-openshift_install_ssh_pub_key: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY') }}"
-openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
-
-# Not recommended, however you can build the installer from source. (You run the risk of using a mismatched binary vs install payload)
-openshift_install_installer_from_source: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE')|default(false, true) }}"
-openshift_install_installer_from_source_version: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE_VERSION')|default('master', true) }}"
-
-# Below tokens/registries are required to extract the openshift-install binary when not building from source
-openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
-openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY') }}"
-openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
-
-gopath: "{{ lookup('env', 'GOPATH')|default('/root/.go', true) }}"
+openshift_cidr: "{{ lookup('env', 'OPENSHIFT_CIDR')|default('10.128.0.0/14', true) }}"
+openshift_machine_cidr: "{{ lookup('env', 'OPENSHIFT_MACHINE_CIDR')|default('10.0.0.0/16', true) }}"
+openshift_service_network: "{{ lookup('env', 'OPENSHIFT_SERVICE_NETWORK')|default('172.30.0.0/16', true) }}"
+openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, true) }}"
 
 # Post-install configuration
 openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true) }}"

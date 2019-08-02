@@ -13,7 +13,7 @@
     platform: "aws"
   roles:
     - role: cleanup-on-aws
-      when: openshift_aws_install_cleanup|bool
+      when: openshift_cleanup|bool
     - role: install-on-aws
       when: openshift_install|bool
     - role: post-install
@@ -28,7 +28,7 @@
   vars_files:
     - vars/install-on-aws.yml
   roles:
-    - role: workload-debug-config-on-aws
+    - role: node-debug-config-on-aws
       when: openshift_debug_config|bool
   post_tasks:
     - name: Add other nodes to in-memory inventory

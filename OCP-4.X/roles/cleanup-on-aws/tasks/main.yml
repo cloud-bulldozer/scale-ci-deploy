@@ -3,16 +3,16 @@
 # Clean up AWS install
 #
 
-- name: set workdir
-  set_fact:
-    workdir: "{{ gopath }}/src/github.com/openshift/installer"
-
 - name: cleanup aws cluster
   shell: |
-    cd {{ workdir }}
-    bin/openshift-install destroy cluster --log-level=debug
+    cd {{ansible_user_dir}}/scale-ci-deploy
+    bin/openshift-install destroy cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
 
-- name: cleanup workdir
+- name: Clean scale-ci-deploy openshift-install directories
+  become: true
   file:
-    path: "{{ workdir }}"
+    path: "{{item}}"
     state: absent
+  with_items:
+    - "{{ansible_user_dir}}/scale-ci-deploy/bin"
+    - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws"
