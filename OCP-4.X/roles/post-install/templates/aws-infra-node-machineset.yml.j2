@@ -8,7 +8,7 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}a
+    name: infra-{{aws_region.stdout}}a
     namespace: openshift-machine-api
   spec:
     replicas: 1
@@ -79,7 +79,7 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}b
+    name: infra-{{aws_region.stdout}}b
     namespace: openshift-machine-api
   spec:
     replicas: 1
@@ -150,7 +150,7 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}c
+    name: infra-{{aws_region.stdout}}c
     namespace: openshift-machine-api
   spec:
     replicas: 1

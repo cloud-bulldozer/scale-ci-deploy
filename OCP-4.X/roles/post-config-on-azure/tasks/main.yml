@@ -1,0 +1,60 @@
+---
+#
+# Post-Config for OCP on Azure
+#
+# Performs:
+# * Opens firewall rules for workload/worker nodes for ssh (as well as for debugging workload pod ssh)
+# * Opens firewall rules for Network Tests P2P HostNetwork Tests
+#   Ports 2022 (tcp), 20000-20109 (tcp, udp), 32768-60999 (tcp, udp)
+#
+
+- name: Get cluster name
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{machineset_metadata_label_prefix}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
+  register: rhcos_cluster_name
+
+- name: Get public ip of the workload node
+  shell: |
+    az network public-ip list --query "[].[name,ipAddress]" -o tsv | grep "{{rhcos_cluster_name.stdout}}-workload" | awk '{print $2}'
+  register: workload_public_ip
+
+- name: Add workload node to group
+  add_host:
+    name: "{{ workload_public_ip.stdout }}"
+    groups: workload
+
+- name: Get node network security group
+  shell: |
+    az network nsg list -g {{rhcos_cluster_name.stdout}}-rg --query "[].name" -o tsv | grep "node-nsg"
+  register: azure_sg
+
+- name: Create network security group rule for ICMP
+  shell: |
+    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-icmp --nsg-name {{azure_sg.stdout}} --priority 100 --access Allow --description "scale-ci allow Icmp" --protocol Icmp --destination-port-ranges "*"
+
+- name: Create network security group rule for ssh (22)
+  shell: |
+    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-ssh --nsg-name {{azure_sg.stdout}} --priority 101 --access Allow --description "scale-ci allow ssh" --protocol Tcp --destination-port-ranges "22"
+
+- name: Create network security group rule for pbench-agent ssh (2022)
+  shell: |
+    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-pbench-agent --nsg-name {{azure_sg.stdout}} --priority 102 --access Allow --description "scale-ci allow pbench-agent" --protocol Tcp --destination-port-ranges "2022"
+
+- name: Create network security group rule for tcp,udp network tests (20000-20109)
+  shell: |
+    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-net --nsg-name {{azure_sg.stdout}} --priority 104 --access Allow --description "scale-ci allow tcp,udp network tests" --protocol "*" --destination-port-ranges "20000-20109"
+
+# Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
+# Currently there is no method outside of sysctls to control those ports
+# See pbench issue #1238 - https://github.com/distributed-system-analysis/pbench/issues/1238
+- name: Create network security group rule for tcp,udp hostnetwork tests (32768-60999)
+  shell: |
+    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-hostnet --nsg-name {{azure_sg.stdout}} --priority 106 --access Allow --description "scale-ci allow tcp,udp hostnetwork tests" --protocol "*" --destination-port-ranges "32768-60999"
+
+- name: Get the kubeconfig off of the orchestration host
+  fetch:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-azure/auth/kubeconfig"
+    dest: "{{playbook_dir}}/kubeconfig"
+    flat: true
+  when:
+    - kubeconfig_auth_dir_path == ""

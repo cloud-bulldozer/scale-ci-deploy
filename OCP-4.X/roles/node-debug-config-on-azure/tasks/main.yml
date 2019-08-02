@@ -1,0 +1,87 @@
+---
+#
+# Populates nodes with kubeconfig and ssh configuration for easier debugging
+#
+
+- name: Ensure that .kube dir exists
+  become: "{{item.become}}"
+  file:
+    path: "{{ item.path }}"
+    state: directory
+  with_items:
+    - path: /home/core/.kube
+      become: false
+    - path: /root/.kube
+      become: true
+
+- name: Copy the kubeconfig to a node
+  become: "{{item.become}}"
+  copy:
+    src: "{{playbook_dir}}/kubeconfig"
+    dest: "{{ item.dest }}"
+  with_items:
+    - dest: /home/core/.kube/config
+      become: false
+    - dest: /root/.kube/config
+      become: true
+  when:
+    - kubeconfig_auth_dir_path == ""
+
+# Handle case where kubeconfig is in another specified dir
+- name: Copy the kubeconfig to node from specific directory
+  become: "{{item.become}}"
+  copy:
+    src: "{{ kubeconfig_auth_dir_path }}/auth/kubeconfig"
+    dest: "{{ item }}"
+  with_items:
+    - dest: /home/core/.kube/config
+      become: false
+    - dest: /root/.kube/config
+      become: true
+  when:
+    - kubeconfig_auth_dir_path != ""
+
+- name: Ensure that ssh dir exists
+  become: "{{item.become}}"
+  file:
+    path: "{{ item.path }}"
+    state: directory
+  with_items:
+    - path: /home/core/.ssh
+      become: false
+    - path: /root/.ssh
+      become: true
+
+- name: Copy authorized keys
+  become: true
+  copy:
+    src: /home/core/.ssh/authorized_keys
+    dest: /root/.ssh/authorized_keys
+    remote_src: yes
+    owner: root
+    group: root
+
+- name: Copy private key to a node
+  become: "{{item.become}}"
+  copy:
+    src: "{{ansible_ssh_private_key_file}}"
+    dest: "{{ item.dest }}"
+    mode: 0600
+  with_items:
+    - dest: /home/core/.ssh/id_rsa
+      become: false
+    - dest: /root/.ssh/id_rsa
+      become: true
+
+- name: Permit root login
+  become: true
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "PermitRootLogin no"
+    line: "PermitRootLogin yes"
+
+- name: Restart sshd
+  become: true
+  systemd:
+    name: sshd
+    state: restarted
