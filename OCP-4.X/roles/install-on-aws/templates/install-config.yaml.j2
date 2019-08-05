@@ -35,6 +35,6 @@ platform:
   aws:
     region: {{ aws_region }}
 pullSecret: |+
-  {{ openshift_install_pull_secret | tojson }}
+  {{ openshift_install_pull_secret | to_json }}
 sshKey: |+
   {{ install_ssh_pub_key.content| b64decode }}
