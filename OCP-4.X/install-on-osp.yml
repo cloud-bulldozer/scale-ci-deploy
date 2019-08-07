@@ -23,10 +23,12 @@
   hosts: workload
   gather_facts: true
   remote_user: core
+  vars:
+    kubeconfig_auth_dir_path: ""
   vars_files:
     - vars/install-on-osp.yml
   roles:
-    - role: node-debug-config-on-osp
+    - role: node-debug-config
       when: openshift_debug_config|bool
   post_tasks:
     - name: Add other nodes to in-memory inventory
@@ -78,8 +80,10 @@
   hosts: master, infra, worker
   gather_facts: true
   remote_user: core
+  vars:
+    kubeconfig_auth_dir_path: ""
   vars_files:
     - vars/install-on-osp.yml
   roles:
-    - role: node-debug-config-on-osp
+    - role: node-debug-config
       when: openshift_debug_config|bool

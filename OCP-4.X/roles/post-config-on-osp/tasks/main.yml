@@ -4,9 +4,9 @@
 #
 # Performs:
 # * Add public ip to workload node
-# * Opens firewall rules for workload node for ssh
-# * Opens firewall rules for Network Tests P2P HostNetwork Tests and HTTP tests
-#   Ports 2022 (tcp), 9090 (tcp), 20000-20109 (tcp, udp), 32768 60999 (tcp, udp)
+# * Opens firewall rules for workload/worker nodes for ssh (as well as for debugging workload pod ssh)
+# * Opens firewall rules for Network Tests P2P HostNetwork Tests
+#   Ports 2022 (tcp), 20000-20109 (tcp, udp), 32768-60999 (tcp, udp)
 #
 
 - name: Create FIP for workload node
@@ -24,7 +24,7 @@
     . {{ansible_user_dir}}/overcloudrc
     openstack server add floating ip {{workload_machine_annotation.stdout.split('/')[1] }} {{public_workload_fip.stdout}}
 
-- name: add workload node to group
+- name: Add workload node to group
   add_host:
     name: "{{ public_workload_fip.stdout }}"
     groups: workload
@@ -35,18 +35,15 @@
     openstack security group list --project ${OS_PROJECT_NAME} --format value -c ID -c Name | grep {{openshift_cluster_name}} | awk '{print $1}'
   register: security_groups
 
-- name: Allow traffic over tcp port (2022) for pbench-agents
+- name: Allow traffic over tcp port (2022)
   shell: |
     . {{ansible_user_dir}}/overcloudrc
     openstack security group rule create --ingress --protocol tcp --dst-port 2022 {{item}}
   with_items: "{{security_groups.stdout_lines}}"
 
-- name: Allow traffic over tcp port (9090) for HTTP tests
-  shell: |
-    . {{ansible_user_dir}}/overcloudrc
-    openstack security group rule create --ingress --protocol tcp --dst-port 9090 {{item}}
-  with_items: "{{security_groups.stdout_lines}}"
-
+# Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
+# Currently there is no method outside of sysctls to control those ports
+# See pbench issue #1238 - https://github.com/distributed-system-analysis/pbench/issues/1238
 - name: Allow traffic over tcp/udp ports (20000-20109, 32768-60999) for HostNetwork Network Tests
   shell: |
     . {{ansible_user_dir}}/overcloudrc

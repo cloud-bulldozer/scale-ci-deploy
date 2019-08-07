@@ -28,7 +28,7 @@
   vars_files:
     - vars/install-on-aws.yml
   roles:
-    - role: node-debug-config-on-aws
+    - role: node-debug-config
       when: openshift_debug_config|bool
   post_tasks:
     - name: Add other nodes to in-memory inventory
@@ -83,5 +83,5 @@
   vars_files:
     - vars/install-on-aws.yml
   roles:
-    - role: node-debug-config-on-aws
+    - role: node-debug-config
       when: openshift_debug_config|bool
