@@ -3,9 +3,9 @@
 # Post-Config for OCP on AWS
 #
 # Performs:
-# * Opens firewall rules for workload node for ssh (as well as for debugging workload pod ssh)
-# * Opens firewall rules for Network Tests P2P HostNetwork Tests and HTTP tests
-#   Ports 2022 (tcp), 9090 (tcp), 20000-20109 (tcp, udp), 32768 60999 (tcp, udp)
+# * Opens firewall rules for workload/worker nodes for ssh (as well as for debugging workload pod ssh)
+# * Opens firewall rules for Network Tests P2P HostNetwork Tests
+#   Ports 2022 (tcp), 20000-20109 (tcp, udp), 32768-60999 (tcp, udp)
 # * Ensures ssh is started and running on nodes
 #
 
@@ -18,44 +18,38 @@
   shell: oc get nodes -l node-role.kubernetes.io/workload= -o wide | awk 'NR>1 {print $7}'
   register: workload_public_ip
 
-- name: add workload node to group
+- name: Add workload node to group
   add_host:
     name: "{{ workload_public_ip.stdout }}"
     groups: workload
 
-- name: get VpcId
+- name: Get VpcId
   shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName, VpcId]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | awk '{print $7}' | grep -v '^$' | sort -u
   register: vpc_id
 
-- name: get security groups
+- name: Get security groups
   shell: aws ec2 describe-security-groups --filters "Name=vpc-id,Values={{ vpc_id.stdout }}" --output json | jq .SecurityGroups[].GroupId
   register: security_groups
 
-- name: add inbound rule to allow traffic on 22
+- name: Add inbound rule to allow traffic on 22
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 22 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: add inbound rule to allow traffic on 2022
+- name: Add inbound rule to allow traffic on 2022
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 2022 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: add inbound rule to allow traffic on 9090
-  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 9090 --cidr 0.0.0.0/0
-  with_items:
-    - "{{ security_groups.stdout_lines }}"
-  ignore_errors: yes
-
-- name: add inbound rule to allow tcp traffic on port range 20000 to 20109
+- name: Add inbound rule to allow tcp traffic on port range 20000 to 20109
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 20000-20109 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: add inbound rule to allow udp traffic on port range 20000 to 20109
+- name: Add inbound rule to allow udp traffic on port range 20000 to 20109
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 20000-20109 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
@@ -64,31 +58,17 @@
 # Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
 # Currently there is no method outside of sysctls to control those ports
 # See pbench issue #1238 - https://github.com/distributed-system-analysis/pbench/issues/1238
-- name: add inbound rule to allow tcp traffic on port range 32768 to 60999
+- name: Add inbound rule to allow tcp traffic on port range 32768 to 60999
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 32768-60999 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: add inbound rule to allow udp traffic on port range 32768 to 60999
+- name: Add inbound rule to allow udp traffic on port range 32768 to 60999
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 32768-60999 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
-
-- name: get the ocp nodes
-  shell: oc get nodes | awk 'NR>1 {print $1}'
-  register: ocp_nodes
-
-- name: start sshd on the core nodes
-  shell: oc debug node/{{ item }} -- chroot /host /usr/bin/systemctl start sshd
-  with_items:
-    - "{{ ocp_nodes.stdout_lines }}"
-
-- name: enable sshd on core cluster
-  shell: oc debug node/{{ item }} -- chroot /host /usr/bin/systemctl enable sshd
-  with_items:
-    - "{{ ocp_nodes.stdout_lines }}"
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
