@@ -17,7 +17,7 @@
 
     - name: Initiate Upgrade
       shell: |
-        oc adm upgrade --to-image={{rhcos_new_version_url}}:{{rhcos_new_version}}
+        oc adm upgrade --force={{force_upgrade}} --to-image={{rhcos_new_version_url}}:{{rhcos_new_version}}
 
     # # Unclear if needed or only needed in specific upgrade scenarios
     # - name: Initiate Upgrade via patching clusterversion/version
