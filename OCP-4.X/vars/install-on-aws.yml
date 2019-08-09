@@ -18,16 +18,16 @@ openshift_debug_config: "{{ lookup('env', 'OPENSHIFT_DEBUG_CONFIG')|default(fals
 
 # Installation variables
 # Check https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/ for latest client
-openshift_client_location: "{{ lookup('env', 'OPENSHIFT_CLIENT_LOCATION')|default('', true) }}"
+openshift_client_location: "{{ lookup('env', 'OPENSHIFT_CLIENT_LOCATION') }}"
 # Release payload
 openshift_install_release_image_override: "{{ lookup('env', 'OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE') }}"
 openshift_install_apiversion: "{{ lookup('env', 'OPENSHIFT_INSTALL_APIVERSION')|default('v1', true) }}"
 # ssh key for install-config
-openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE') }}"
+openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE')|default('~/.ssh/id_rsa.pub', true) }}"
 # Secrets/Tokens for extract and installing
 openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
 openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
-openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY') }}"
+openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY')|default('registry.svc.ci.openshift.org', true) }}"
 openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
 # Not recommended, however you can build the installer from source. (You run the risk of using a mismatched binary vs install payload)
 openshift_install_installer_from_source: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE')|default(false, true) }}"

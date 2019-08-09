@@ -62,7 +62,7 @@ items:
             subnet: {{cluster_name.stdout}}-worker-subnet
             userDataSecret:
               name: worker-user-data
-            vmSize: {{openshift_workload_node_instance_type}}
+            vmSize: {{openshift_workload_node_vm_size}}
             vnet: {{cluster_name.stdout}}-vnet
             zone: "1"
   status:
