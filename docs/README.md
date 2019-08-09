@@ -8,7 +8,7 @@ The scale-ci-deploy repo is split into two major directories, playbooks for Open
 | ------------------------ | ----------- | -------- | ------- | ---------------------------- |
 | [AWS](ocp4_aws.md)       | Yes         | Yes      | Yes     | Variable `OPENSHIFT_CLEANUP` |
 | [Azure](ocp4_azure.md)   | Yes         | No       | Yes     | Variable `OPENSHIFT_CLEANUP` |
-| GCP                      | No          | No       | No      | No                           |
+| [GCP](ocp4_gcp.md)       | Yes         | No       | No      | Variable `OPENSHIFT_CLEANUP` |
 | [OpenStack](ocp4_osp.md) | Yes         | No       | Yes     | Separate Playbook            |
 
 ### OpenShift 4 Scale playbook
