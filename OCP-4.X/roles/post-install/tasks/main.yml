@@ -69,6 +69,22 @@
           toggle: "{{openshift_toggle_workload_node}}"
   when: platform == "azure"
 
+- name: GCP block of tasks
+  block:
+    - name: (GCP) Template out machineset yamls
+      template:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+      when: item.toggle|bool
+      with_items:
+        - src: gcp-infra-node-machineset.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+          toggle: "{{openshift_toggle_infra_node}}"
+        - src: gcp-workload-node-machineset.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+          toggle: "{{openshift_toggle_workload_node}}"
+  when: platform == "gcp"
+
 - name: (OSP) Template out machineset yamls
   template:
     src: "{{item.src}}"

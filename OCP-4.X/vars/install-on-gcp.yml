@@ -1,0 +1,86 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true) }}"
+###############################################################################
+# IPI install on GCP variables.
+###############################################################################
+# Playbook flow control
+openshift_cleanup: "{{ lookup('env', 'OPENSHIFT_CLEANUP')|default(false, true) }}"
+openshift_install: "{{ lookup('env', 'OPENSHIFT_INSTALL')|default(true, true) }}"
+openshift_post_install: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL')|default(true, true) }}"
+openshift_post_config: "{{ lookup('env', 'OPENSHIFT_POST_CONFIG')|default(true, true) }}"
+openshift_debug_config: "{{ lookup('env', 'OPENSHIFT_DEBUG_CONFIG')|default(false, true) }}"
+
+# Installation variables
+# Check https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/ for latest client
+openshift_client_location: "{{ lookup('env', 'OPENSHIFT_CLIENT_LOCATION') }}"
+# Release payload
+openshift_install_release_image_override: "{{ lookup('env', 'OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE') }}"
+openshift_install_apiversion: "{{ lookup('env', 'OPENSHIFT_INSTALL_APIVERSION')|default('v1', true) }}"
+# ssh key for install-config
+openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE')|default('~/.ssh/id_rsa.pub', true) }}"
+# Secrets/Tokens for extract and installing
+openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
+openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
+openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY')| default('registry.svc.ci.openshift.org', true) }}"
+openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
+# Not recommended, however you can build the installer from source. (You run the risk of using a mismatched binary vs install payload)
+openshift_install_installer_from_source: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE')|default(false, true) }}"
+openshift_install_installer_from_source_version: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE_VERSION')|default('master', true) }}"
+gopath: "{{ lookup('env', 'GOPATH')|default('/root/.go', true) }}"
+
+# Cloud environment and authentication
+gcp_service_account: "{{ lookup('env', 'GCP_SERVICE_ACCOUNT') }}"
+gcp_service_account_email: "{{ lookup('env', 'GCP_SERVICE_ACCOUNT_EMAIL') }}"
+gcp_auth_key_file: "{{ lookup('env', 'GCP_AUTH_KEY_FILE') }}"
+gcp_project: "{{ lookup('env', 'GCP_PROJECT') }}"
+gcp_region: "{{ lookup('env', 'GCP_REGION') }}"
+
+# Cluster Configuration
+openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN') }}"
+openshift_cluster_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER_NAME') }}"
+
+openshift_master_count: "{{ lookup('env', 'OPENSHIFT_MASTER_COUNT')|default(3, true) }}"
+openshift_worker_count: "{{ lookup('env', 'OPENSHIFT_WORKER_COUNT')|default(5, true) }}"
+
+openshift_master_machine_type: "{{ lookup('env', 'OPENSHIFT_MASTER_MACHINE_TYPE')|default('n1-standard-4', true) }}"
+openshift_worker_machine_type: "{{ lookup('env', 'OPENSHIFT_WORKER_MACHINE_TYPE')|default('n1-standard-4', true) }}"
+
+openshift_master_root_volume_size: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_SIZE')|default(64, true) }}"
+
+openshift_worker_root_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_SIZE')|default(64, true) }}"
+
+openshift_cidr: "{{ lookup('env', 'OPENSHIFT_CIDR')|default('10.128.0.0/14', true) }}"
+openshift_machine_cidr: "{{ lookup('env', 'OPENSHIFT_MACHINE_CIDR')|default('10.0.0.0/16', true) }}"
+openshift_service_network: "{{ lookup('env', 'OPENSHIFT_SERVICE_NETWORK')|default('172.30.0.0/16', true) }}"
+openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, true) }}"
+
+# Post-install configuration
+openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true) }}"
+openshift_toggle_infra_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_INFRA_NODE')|default(true, true) }}"
+openshift_toggle_workload_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_WORKLOAD_NODE')|default(true, true) }}"
+# Either machine.openshift.io or sigs.k8s.io
+machineset_metadata_label_prefix: "{{ lookup('env', 'MACHINESET_METADATA_LABEL_PREFIX')|default('machine.openshift.io', true) }}"
+openshift_infra_node_machine_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_MACHINE_TYPE')|default('n1-standard-4', true) }}"
+openshift_workload_node_machine_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_MACHINE_TYPE')|default('n1-standard-4', true) }}"
+
+openshift_infra_node_volume_size: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_SIZE')|default(64, true) }}"
+openshift_infra_node_volume_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_TYPE')|default('pd-ssd', true) }}"
+
+openshift_workload_node_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_SIZE')|default(64, true) }}"
+openshift_workload_node_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_TYPE')|default('pd-ssd', true) }}"
+
+openshift_prometheus_retention_period: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_RETENTION_PERIOD')|default('15d', true) }}"
+openshift_prometheus_storage_class: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_CLASS')|default('pd-ssd', true) }}"
+openshift_prometheus_storage_size: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_SIZE')|default('10Gi', true) }}"
+openshift_alertmanager_storage_class: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_CLASS')|default('pd-ssd', true) }}"
+openshift_alertmanager_storage_size: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_SIZE')|default('2Gi', true) }}"
+
+## To specify an alternate auth dir containing kubeconfig, e.g. from GCP cluster installed by Flexy,
+## use only when NOT using the default auth dir located in "${GOPATH}/src/github.com/openshift/installer"
+kubeconfig_auth_dir_path: "{{ lookup('env', 'KUBECONFIG_AUTH_DIR_PATH') }}"

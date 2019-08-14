@@ -1,0 +1,65 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  generation: 1
+  labels:
+    {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}} 
+  name: {{cluster_name.stdout}}-workload-a
+  namespace: openshift-machine-api
+  selfLink: /apis/machine.openshift.io/v1beta1/namespaces/openshift-machine-api/machinesets/{{cluster_name.stdout}}-workload-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
+      {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-a
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
+        {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-a
+    spec:
+      metadata:
+        creationTimestamp: null
+        labels:
+          node-role.kubernetes.io/workload: ""
+      providerSpec:
+        value:
+          apiVersion: gcpprovider.openshift.io/v1beta1
+          canIPForward: false
+          credentialsSecret:
+            name: gcp-cloud-credentials
+          deletionProtection: false
+          disks:
+          - autoDelete: false
+            boot: true
+            image: {{cluster_name.stdout}}-rhcos-image
+            labels: null
+            sizeGb: {{openshift_workload_node_volume_size}}
+            type: {{openshift_workload_node_volume_type}}
+          kind: GCPMachineProviderSpec
+          machineType: {{openshift_workload_node_machine_type}}
+          metadata:
+            creationTimestamp: null
+          networkInterfaces:
+          - network: {{cluster_name.stdout}}-network
+            subnetwork: {{cluster_name.stdout}}-worker-subnet
+            publicIP: true
+          projectID: {{ gcp_project }}
+          region: {{ gcp_region }}
+          serviceAccounts:
+          - email: {{cluster_name.stdout}}-w@{{ gcp_service_account_email }}
+            scopes:
+            - https://www.googleapis.com/auth/cloud-platform
+          tags:
+          - {{cluster_name.stdout}}-workload
+          userDataSecret:
+            name: worker-user-data
+          zone: {{ gcp_region }}-a
+status:
+  replicas: 1

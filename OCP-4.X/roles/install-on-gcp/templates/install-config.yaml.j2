@@ -1,0 +1,35 @@
+apiVersion: {{ openshift_install_apiversion }}
+baseDomain: {{ openshift_base_domain }}
+compute:
+- hyperthreading: Enabled
+  name: worker
+  platform: 
+    gcp:
+      type: {{ openshift_worker_machine_type }}
+  replicas: {{ openshift_worker_count }}
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  platform:
+    gcp:
+      type: {{ openshift_master_machine_type }}
+  replicas: {{ openshift_master_count }}
+metadata:
+  creationTimestamp: null
+  name: {{ openshift_cluster_name }}
+networking:
+  clusterNetwork:
+  - cidr: {{ openshift_cidr }}
+    hostPrefix: {{ openshift_host_prefix }}
+  machineCIDR: {{ openshift_machine_cidr }}
+  networkType: OpenShiftSDN
+  serviceNetwork:
+  - {{ openshift_service_network }}
+platform:
+  gcp:
+    projectID: {{ gcp_project }}
+    region: {{ gcp_region }}
+pullSecret: |+
+  {{ openshift_install_pull_secret | to_json }}
+sshKey: |+
+  {{ install_ssh_pub_key.content| b64decode }}
