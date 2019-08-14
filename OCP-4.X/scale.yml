@@ -16,23 +16,54 @@
         {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{rhcos_metadata_label_prefix}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
       register: rhcos_cluster_name
 
-    - name: Get cluster region
+    - name: Get worker machineset names
       shell: |
-        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0 ).spec.template.spec.providerSpec.value.placement.region }}'{%endraw%}
-      register: rhcos_region
+        oc get machineset -n openshift-machine-api | egrep "\-worker\-|\-w\-" | awk '{print $1}'
+      register: rhcos_worker_machinesets
 
-    - name: Set each machineset in each availability zone
+    - name: Set machineset replica count for single availablity zone
       shell: |
-        oc patch machineset {{rhcos_cluster_name.stdout}}-worker-{{rhcos_region.stdout}}{{item.ms}} --type=merge -n openshift-machine-api -p '{"spec": {"replicas": {{item.count|int}} }}'
+        oc patch machineset {{item.ms}} --type=merge -n openshift-machine-api -p '{"spec": {"replicas": {{item.count|int}} }}'
       with_items:
-        - ms: a
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[0]}}"
+          count: "{{rhcos_worker_count}}"
+      when: rhcos_worker_machinesets.stdout_lines|length == 1
+
+    - name: Evenly split machineset replica count for two availablity zones
+      shell: |
+        oc patch machineset {{item.ms}} --type=merge -n openshift-machine-api -p '{"spec": {"replicas": {{item.count|int}} }}'
+      with_items:
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[0]}}"
+          count: "{{(rhcos_worker_count|int / 2) | round(0, 'ceil')}}"
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[1]}}"
+          count: "{{(rhcos_worker_count|int / 2) | round(0, 'floor')}}"
+      when: rhcos_worker_machinesets.stdout_lines|length == 2
+
+    - name: Evenly split machineset replica count for three availablity zones
+      shell: |
+        oc patch machineset {{item.ms}} --type=merge -n openshift-machine-api -p '{"spec": {"replicas": {{item.count|int}} }}'
+      with_items:
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[0]}}"
+          count: "{{(rhcos_worker_count|int / 3) | round(0, 'ceil')}}"
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[1]}}"
+          count: "{{((rhcos_worker_count|int / 3) - 0.5) | round(0, 'ceil')}}"
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[2]}}"
+          count: "{{(rhcos_worker_count|int / 3) | round(0, 'floor')}}"
+      when: rhcos_worker_machinesets.stdout_lines|length == 3
+
+    - name: Evenly split machineset replica count for four availablity zones
+      shell: |
+        oc patch machineset {{item.ms}} --type=merge -n openshift-machine-api -p '{"spec": {"replicas": {{item.count|int}} }}'
+      with_items:
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[0]}}"
           count: "{{(rhcos_worker_count|int / 4) | round(0, 'ceil')}}"
-        - ms: b
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[1]}}"
           count: "{{((rhcos_worker_count|int / 4) - 0.25) | round(0, 'ceil')}}"
-        - ms: c
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[2]}}"
           count: "{{((rhcos_worker_count|int / 4) - 0.5) | round(0, 'ceil')}}"
-        - ms: d
+        - ms: "{{rhcos_worker_machinesets.stdout_lines[3]}}"
           count: "{{(rhcos_worker_count|int / 4) | round(0, 'floor')}}"
+      when: rhcos_worker_machinesets.stdout_lines|length == 4
 
     - name: Poll node count to see if scaling finished
       shell: oc get nodes -l node-role.kubernetes.io/worker= --no-headers | grep " Ready" -c
