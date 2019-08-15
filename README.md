@@ -1,6 +1,6 @@
 # scale-ci-deploy
 
-This repo contains playbooks to install, scale and upgrade OpenShift 4 clusters on Azure, AWS, and OpenStack for the Scale-CI environment and test framework. Included are the playbooks to install and scale an OpenShift 3 cluster on OpenStack as well.
+This repo contains playbooks to install, scale and upgrade OpenShift 4 clusters on Azure, AWS, GCP, and OpenStack for the Scale-CI environment and test framework. Included are the playbooks to install and scale an OpenShift 3 cluster on OpenStack as well.
 
 ## Documentation, Usage and Examples
 
