@@ -1,8 +1,6 @@
 # OpenShift 4 Scale playbook
 
-Currently the OpenShift 4 scale playbook has only been tested against environments in AWS on us-west-2 region. The playbook follows the same conventions as the install playbooks in terms of running/orchestrating.
-
-The scale playbook is `OCP-4.X/scale.yml` and can scale an existing cluster.
+The scale playbook is `OCP-4.X/scale.yml` and can scale an existing cluster's worker machinesets up or down. The playbook follows the same conventions as the install playbooks in terms of running/orchestrating.
 
 Running from CLI:
 
