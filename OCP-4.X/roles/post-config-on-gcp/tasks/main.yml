@@ -30,19 +30,19 @@
 
 - name: Create firewall rule for ICMP
   shell: |
-    gcloud compute firewall-rules create scale-ci-icmp-{{ rhcos_cluster_name }} --network {{ gcp_network.stdout }} --priority 101 --description "scale-ci allow icmp" --allow icmp
+    gcloud compute firewall-rules create scale-ci-icmp-{{ rhcos_cluster_name.stdout }} --network {{ gcp_network.stdout }} --priority 101 --description "scale-ci allow icmp" --allow icmp
 
 - name: Create firewall rule for ssh (22)
   shell: |
-    gcloud compute firewall-rules create scale-ci-ssh-{{ rhcos_cluster_name }} --network {{ gcp_network.stdout }} --direction INGRESS --priority 102 --description "scale-ci allow ssh" --allow tcp:22
+    gcloud compute firewall-rules create scale-ci-ssh-{{ rhcos_cluster_name.stdout }} --network {{ gcp_network.stdout }} --direction INGRESS --priority 102 --description "scale-ci allow ssh" --allow tcp:22
 
 - name: Create firewall rule for pbench-agent ssh (2022)
   shell: |
-    gcloud compute firewall-rules create scale-ci-pbench-{{ rhcos_cluster_name }} --network {{ gcp_network.stdout }} --direction INGRESS --priority 103 --description "scale-ci allow pbench-agents" --allow tcp:2022
+    gcloud compute firewall-rules create scale-ci-pbench-{{ rhcos_cluster_name.stdout }} --network {{ gcp_network.stdout }} --direction INGRESS --priority 103 --description "scale-ci allow pbench-agents" --allow tcp:2022
 
 - name: Create firewall rule for tcp,udp network tests (20000-20109)
   shell: |
-    gcloud compute firewall-rules create scale-ci-net-{{ rhcos_cluster_name }} --network {{ gcp_network.stdout }} --direction INGRESS --priority 104 --description "scale-ci allow tcp,udp network tests" --rules tcp,udp:20000-20109 --action allow
+    gcloud compute firewall-rules create scale-ci-net-{{ rhcos_cluster_name.stdout }} --network {{ gcp_network.stdout }} --direction INGRESS --priority 104 --description "scale-ci allow tcp,udp network tests" --rules tcp,udp:20000-20109 --action allow
 
 # Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
 # Currently there is no method outside of sysctls to control those ports
@@ -50,7 +50,7 @@
 
 - name: Create firewall rule for tcp,udp hostnetwork tests (32768-60999)
   shell: |
-    gcloud compute firewall-rules create scale-ci-hostnet-{{ rhcos_cluster_name }} --network {{ gcp_network.stdout }}  --priority 105 --description "scale-ci allow tcp,udp hostnetwork tests" --rules tcp,udp:32768-60999 --action allow
+    gcloud compute firewall-rules create scale-ci-hostnet-{{ rhcos_cluster_name.stdout }} --network {{ gcp_network.stdout }}  --priority 105 --description "scale-ci allow tcp,udp hostnetwork tests" --rules tcp,udp:32768-60999 --action allow
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
