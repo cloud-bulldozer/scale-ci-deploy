@@ -1,7 +1,6 @@
 ---
 #
-# Adjusts the scale of a RHCOS cluster by spreading worker count across each availablity zone in a
-# typical default cluster (4 availablity zones).
+# Adjusts the scale of a RHCOS cluster by spreading worker count across each machineset
 #
 
 - name: Adjust the scale of a RHCOS cluster
