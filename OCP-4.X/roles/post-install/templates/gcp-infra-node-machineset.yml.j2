@@ -58,7 +58,7 @@ items:
               scopes:
               - https://www.googleapis.com/auth/cloud-platform
             tags:
-            - {{cluster_name.stdout}}-infra
+            - {{cluster_name.stdout}}-worker
             userDataSecret:
               name: worker-user-data
             zone: {{ gcp_region }}-a
@@ -122,7 +122,7 @@ items:
               scopes:
               - https://www.googleapis.com/auth/cloud-platform
             tags:
-            - {{cluster_name.stdout}}-infra
+            - {{cluster_name.stdout}}-worker
             userDataSecret:
               name: worker-user-data
             zone: {{ gcp_region }}-b
@@ -186,7 +186,7 @@ items:
               scopes:
               - https://www.googleapis.com/auth/cloud-platform
             tags:
-            - {{cluster_name.stdout}}-infra
+            - {{cluster_name.stdout}}-worker
             userDataSecret:
               name: worker-user-data
             zone: {{ gcp_region }}-c

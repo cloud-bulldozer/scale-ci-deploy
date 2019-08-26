@@ -57,7 +57,7 @@ spec:
             scopes:
             - https://www.googleapis.com/auth/cloud-platform
           tags:
-          - {{cluster_name.stdout}}-workload
+          - {{cluster_name.stdout}}-worker
           userDataSecret:
             name: worker-user-data
           zone: {{ gcp_region }}-a
