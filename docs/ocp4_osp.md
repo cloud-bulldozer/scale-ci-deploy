@@ -57,7 +57,7 @@ Determines if the image will be uploaded into Glance on the OpenStack Cloud. If 
 
 ### OPENSHIFT_CLIENT_LOCATION
 Default: No default.  
-Location to download and unpack the OpenShift client tool `oc`. The latest client can be found [https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/)
+Location to download and unpack the OpenShift client tool `oc`. The latest client can be found [https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/) or [https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview).
 
 ### OPENSHIFT_IMAGE_LOCATION
 Default: No default.  
@@ -66,6 +66,10 @@ Location to download the latest RHCOS image. The image is expected in qcow2 form
 ### OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE
 Default: No default.  
 The release image override payload. Also where the install `openshift-install` binary is extracted from. Find the latest test images at [https://openshift-release.svc.ci.openshift.org/](https://openshift-release.svc.ci.openshift.org/)
+
+### OPENSHIFT_INSTALL_BINARY_URL
+Default: No default.
+Link to the binary url tarball to extract the openshift-install from. Find the latest builds at [https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview](https://mirror.openshift.com/pub/openshift-v4/clients/ocp-dev-preview)
 
 ### OPENSHIFT_INSTALL_APIVERSION
 Default: `v1`  
