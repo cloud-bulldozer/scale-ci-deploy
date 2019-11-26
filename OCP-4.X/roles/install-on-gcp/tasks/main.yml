@@ -66,7 +66,7 @@
         oc adm release extract --tools {{openshift_install_release_image_override}}
         find -name \*.tar.gz -exec tar -xvf {} \;
         chmod +x openshift-install
-  when: not openshift_install_installer_from_source|bool
+  when: not openshift_install_installer_from_source|bool and openshift_install_build_url == ""
 
 - name: Build installer from source
   block:
@@ -128,6 +128,25 @@
     - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp/install-config.yaml"
     - "{{ansible_user_dir}}/scale-ci-deploy/install-config_gcp.yaml"
 
+- block:
+   - name: Fetch the openshift-install binary tarball 
+     get_url:
+       url: "{{ openshift_install_build_url }}"
+       dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/"
+
+   - name: Extract openshift-install binary
+     shell: |
+       set -o pipefail
+       cd {{ansible_user_dir}}/scale-ci-deploy/bin
+       ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
+       chmod +x openshift-install
+   - name: Run openshift installer on aws using the provided binary
+     shell: |
+       set -o pipefail
+       cd {{ansible_user_dir}}/scale-ci-deploy
+       bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp/
+  when: openshift_install_build_url != ""
+
 - name: Run openshift-install on GCP using the image override
   shell: |
     set -o pipefail
@@ -136,6 +155,7 @@
     export _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export GOOGLE_CREDENTIALS={{ gcp_auth_key_file }}
     bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp/
+  when: openshift_install_release_image_override != "" and openshift_install_build_url == ""
 
 - name: Ensure that .kube dir exists
   become: "{{item.become}}"

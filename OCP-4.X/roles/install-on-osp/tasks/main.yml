@@ -46,6 +46,7 @@
     oc adm release extract --tools {{openshift_install_release_image_override}}
     ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
     chmod +x openshift-install
+  when: openshift_install_build_url == ""
 
 - name: Get OpenStack auth url
   shell: |
@@ -181,6 +182,25 @@
     - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack/install-config.yaml"
     - "{{ansible_user_dir}}/scale-ci-deploy/install-config_openstack.yaml"
 
+- block:
+   - name: Fetch the openshift-install binary tarball
+     get_url:
+       url: "{{ openshift_install_build_url }}"
+       dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/"
+
+   - name: Extract openshift-install binary
+     shell: |
+       set -o pipefail
+       cd {{ansible_user_dir}}/scale-ci-deploy/bin
+       ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
+       chmod +x openshift-install
+   - name: Run openshift installer on aws using the provided binary
+     shell: |
+       set -o pipefail
+       cd {{ansible_user_dir}}/scale-ci-deploy
+       bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack/
+  when: openshift_install_build_url != ""
+
 - name: Run openshift-install on OSP using the image override
   shell: |
     set -o pipefail
@@ -189,6 +209,7 @@
     export _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export OS_CLIENT_CONFIG_FILE={{ansible_user_dir}}/scale-ci-deploy/clouds.yml
     bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack/
+  when: openshift_install_release_image_override != "" and openshift_install_build_url == ""
 
 - name: ensure that .kube dir exists
   become: "{{item.become}}"
