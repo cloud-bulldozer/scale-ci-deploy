@@ -62,6 +62,7 @@ openshift_cidr: "{{ lookup('env', 'OPENSHIFT_CIDR')|default('10.128.0.0/14', tru
 openshift_machine_cidr: "{{ lookup('env', 'OPENSHIFT_MACHINE_CIDR')|default('10.0.0.0/16', true) }}"
 openshift_service_network: "{{ lookup('env', 'OPENSHIFT_SERVICE_NETWORK')|default('172.30.0.0/16', true) }}"
 openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, true) }}"
+openshift_network_type: "{{ lookup('env', 'OPENSHIFT_NETWORK_TYPE')|default('OpenShiftSDN', true) }}"
 
 # Post-install configuration
 openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true) }}"
