@@ -28,7 +28,7 @@ networking:
   - cidr: {{ openshift_cidr }}
     hostPrefix: {{ openshift_host_prefix }}
   machineCIDR: {{ openshift_machine_cidr }}
-  networkType: OpenshiftSDN
+  networkType: {{openshift_network_type}}
   serviceNetwork:
   - {{ openshift_service_network }}
 platform:

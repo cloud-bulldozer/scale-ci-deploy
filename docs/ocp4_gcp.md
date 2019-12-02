@@ -163,6 +163,10 @@ The block of IP addresses for services.
 Default: `23`  
 The subnet prefix length to assign to each individual node for Pod IP addresses.
 
+### OPENSHIFT_NETWORK_TYPE
+Default: `OpenShiftSDN`
+The network type used for the cluster, for OVN set it to `OVNKubernetes`.
+
 ### OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS
 Default: `600`  
 The number of times to poll to check while the infra and workload node are being created and added to the cluster.
