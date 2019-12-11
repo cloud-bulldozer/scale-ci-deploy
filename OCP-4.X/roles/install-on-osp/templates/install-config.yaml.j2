@@ -24,7 +24,7 @@ networking:
     # hostSubnetLength: 9
   # serviceCIDR: 172.30.0.0/16
   machineCIDR: {{openshift_machine_cidr}}
-  networkType: {{openshift_network_type}}
+  networkType: {{ openshift_network_type | default(OpenshiftSDN) }}
   serviceNetwork:
   - {{openshift_service_network}}
 platform:
