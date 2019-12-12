@@ -66,7 +66,7 @@
         oc adm release extract --tools {{openshift_install_release_image_override}}
         ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
         chmod +x openshift-install
-  when: not openshift_install_installer_from_source|bool and openshift_install_binary_url == ""
+  when: not openshift_install_installer_from_source|bool and openshift_install_build_url == ""
 
 - name: Build installer from source
   block:
@@ -137,7 +137,7 @@
 - block:
    - name: Fetch the openshift-install binary tarball 
      get_url:
-       url: "{{ openshift_install_binary_url }}"
+       url: "{{ openshift_install_build_url }}"
        dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/"
 
    - name: Extract openshift-install binary
@@ -152,7 +152,7 @@
        set -o pipefail
        cd {{ansible_user_dir}}/scale-ci-deploy
        bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
-  when: openshift_install_binary_url != ""
+  when: openshift_install_build_url != ""
 
 - name: run openshift installer on aws using the image override
   shell: |
@@ -161,14 +161,14 @@
     export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
-  when: openshift_install_release_image_override != "" and openshift_install_binary_url == ""
+  when: openshift_install_release_image_override != "" and openshift_install_build_url == ""
 
 - name: run openshift installer on aws using the default release image
   shell: |
     set -o pipefail
     cd {{ansible_user_dir}}/scale-ci-deploy
     bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
-  when: openshift_install_release_image_override == "" and openshift_install_binary_url == ""
+  when: openshift_install_release_image_override == "" and openshift_install_build_url == ""
 
 - name: ensure that .kube dir exists
   become: "{{item.become}}"
