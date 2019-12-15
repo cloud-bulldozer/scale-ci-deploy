@@ -186,17 +186,18 @@
 
 - name: Create dir to store artifacts
   file:
-    path: "{{ ansible_user_dir }}/scale-ci-azure-artifacts"
+    path: "{{ playbook_dir }}/scale-ci-azure-artifacts"
     state: directory
+  delegate_to: localhost
 
 - name: Copy the install log to the artifacts dir
   fetch:
     src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-azure/.openshift_install.log"
-    dest: "{{ ansible_user_dir }}/scale-ci-azure-artifacts/openshift_install.log"
+    dest: "{{ playbook_dir }}/scale-ci-azure-artifacts/openshift_install.log"
     flat: yes
 
 - name: Copy the kubeconfig to the artifacts dir
   fetch:
     src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-azure/auth/kubeconfig"
-    dest: "{{ ansible_user_dir }}/scale-ci-azure-artifacts/kubeconfig"
+    dest: "{{ playbook_dir }}/scale-ci-azure-artifacts/kubeconfig"
     flat: yes

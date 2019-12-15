@@ -238,15 +238,16 @@
   file:
     path: "{{ ansible_user_dir }}/scale-ci-osp-artifacts"
     state: directory
+  delegate_to: localhost
 
 - name: Copy the install log to the artifacts dir
   fetch:
     src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-osp/.openshift_install.log"
-    dest: "{{ ansible_user_dir }}/scale-ci-osp-artifacts/openshift_install.log"
+    dest: "{{ playbook_dir }}/scale-ci-osp-artifacts/openshift_install.log"
     flat: yes
 
 - name: Copy the kubeconfig to the artifacts dir
   fetch:
     src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-osp/auth/kubeconfig"
-    dest: "{{ ansible_user_dir }}/scale-ci-osp-artifacts/kubeconfig"
+    dest: "{{ playbook_dir }}/scale-ci-osp-artifacts/kubeconfig"
     flat: yes
