@@ -56,6 +56,8 @@ openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, tr
 
 # Post-install configuration
 
+## Mutable Grafana
+dittybopper_enable : "{{ lookup('env', 'ENABLE_DITTYBOPPER')|default(true, true) }}"
 
 ## Remote write details
 sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"

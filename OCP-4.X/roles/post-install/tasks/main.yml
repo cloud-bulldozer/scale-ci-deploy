@@ -266,3 +266,17 @@
         chdir: "{{ansible_user_dir}}/sincgars"
       when: sincgars_cluster_name != ""
   when: sincgars_enable and sincgars_remote_write_url != ""
+
+- name: Deploy dittybopper
+  block:
+    - name: clone dittybopper
+      git:
+        repo: 'https://github.com/cloud-bulldozer/dittybopper.git'
+        dest: "{{ansible_user_dir}}/dittybopper"
+        force: yes
+
+    - name: Deploy mutable Grafana
+      command: ./deploy.sh
+      args:
+        chdir: "{{ansible_user_dir}}/dittybopper"
+  when: dittybopper_enable
