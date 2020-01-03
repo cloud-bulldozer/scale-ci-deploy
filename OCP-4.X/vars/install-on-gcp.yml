@@ -65,6 +65,9 @@ openshift_network_type: "{{ lookup('env', 'OPENSHIFT_NETWORK_TYPE')|default('Ope
 
 # Post-install configuration
 
+## Mutable Grafana
+dittybopper_enable : "{{ lookup('env', 'ENABLE_DITTYBOPPER')|default(true, true) }}"
+
 ## Remote write details
 sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"
 sincgars_cluster_name: "{{ lookup('env', 'SINCGARS_CLUSTER_NAME') }}"
