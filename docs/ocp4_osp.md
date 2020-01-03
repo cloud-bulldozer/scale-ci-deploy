@@ -37,7 +37,19 @@ Controls if cluster create and install portion of playbook is ran. The only reas
 
 ### OPENSHIFT_POST_INSTALL
 Default: `true`  
-Controls if day 2 operations are ran against this cluster. Day 2 operations includes creating infra nodes, creating a workload node, and steering infra workloads to infra nodes.
+Controls if day 2 operations are ran against this cluster. Day 2 operations includes creating infra nodes, creating a workload node, adding remote write config and steering infra workloads to infra nodes.
+
+### ENABLE_REMOTE_WRITE
+Default: `false`
+Controls whether remote write should be enabled or not, only applicable when OPENSHIFT_POST_INSTALL is set to true and also will need to set SINCGARS_REMOTE_WRITE_URL when this var is set to true.
+
+### SINCGARS_CLUSTER_NAME
+Default: value of label machine.openshift.io/cluster-api-cluster
+This is an identifier to associate system metrics
+
+### SINCGARS_REMOTE_WRITE_URL
+Default: no default
+This is the connection url that will be used for remote write, must set this when ENABLE_REMOTE_WRITE is set and OPENSHIFT_POST_INSTALL is set
 
 ### OPENSHIFT_POST_CONFIG
 Default: `true`  

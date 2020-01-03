@@ -64,6 +64,12 @@ openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, tr
 openshift_network_type: "{{ lookup('env', 'OPENSHIFT_NETWORK_TYPE')|default('OpenShiftSDN', true) }}"
 
 # Post-install configuration
+
+## Remote write details
+sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"
+sincgars_cluster_name: "{{ lookup('env', 'SINCGARS_CLUSTER_NAME') }}"
+sincgars_remote_write_url: "{{ lookup('env', 'SINCGARS_REMOTE_WRITE_URL') }}"
+
 openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true) }}"
 openshift_toggle_infra_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_INFRA_NODE')|default(true, true) }}"
 openshift_toggle_workload_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_WORKLOAD_NODE')|default(true, true) }}"
