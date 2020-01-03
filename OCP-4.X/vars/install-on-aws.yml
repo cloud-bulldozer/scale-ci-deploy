@@ -70,6 +70,12 @@ openshift_network_type: "{{ lookup('env', 'OPENSHIFT_NETWORK_TYPE')|default('Ope
 openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true) }}"
 openshift_toggle_infra_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_INFRA_NODE')|default(true, true) }}"
 openshift_toggle_workload_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_WORKLOAD_NODE')|default(true, true) }}"
+
+## Remote write details
+sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"
+sincgars_cluster_name: "{{ lookup('env', 'SINCGARS_CLUSTER_NAME') }}"
+sincgars_remote_write_url: "{{ lookup('env', 'SINCGARS_REMOTE_WRITE_URL') }}"
+
 ## Either machine.openshift.io or sigs.k8s.io
 machineset_metadata_label_prefix: "{{ lookup('env', 'MACHINESET_METADATA_LABEL_PREFIX')|default('machine.openshift.io', true) }}"
 openshift_infra_node_instance_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_INSTANCE_TYPE')|default('m5.large', true) }}"
