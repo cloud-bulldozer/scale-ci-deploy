@@ -228,7 +228,7 @@ Default: `15d`
 The retention period for the Prometheus server.
 
 ### OPENSHIFT_PROMETHEUS_STORAGE_CLASS
-Default: `Premium_LRS`  
+Default: `managed-premium`  
 The storage class for Prometheus server.
 
 ### OPENSHIFT_PROMETHEUS_STORAGE_SIZE
@@ -236,7 +236,7 @@ Default: `10Gi`
 The storage size for Prometheus server.
 
 ### OPENSHIFT_ALERTMANAGER_STORAGE_CLASS
-Default: `Premium_LRS`  
+Default: `managed-premium`  
 The storage class for the alertmanager servers.
 
 ### OPENSHIFT_ALERTMANAGER_STORAGE_SIZE
