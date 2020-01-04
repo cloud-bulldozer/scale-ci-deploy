@@ -168,6 +168,21 @@
   ignore_errors: yes
   when: openshift_toggle_infra_node|bool
 
+- block:
+   - name: Add override for cluster-monitoring-operator to disable CVO management
+     copy:
+       src: version-patch-override.yaml
+       dest: "/tmp/version-patch-override.yaml"
+  
+   - name: Patch the clusteversion with the overrides
+     shell: |
+       oc patch clusterversion version --type json -p "$(cat /tmp/version-patch-override.yaml)"
+
+   - name: Remove the existing node selector from the cluster-monitoring-operator deployment config
+     shell: |
+       oc patch deployment.apps/cluster-monitoring-operator -n openshift-monitoring --type json -p '[{"op": "remove", "path": "/spec/template/spec/nodeSelector"}]'
+  when: openshift_toggle_infra_node|bool
+
 # Attempting to migrate these operators seems to break upgrades
 # - name: Remove existing nodeSelector from ingress-operator
 #   shell: |
@@ -196,7 +211,7 @@
       patch: |
         '{"spec": {"nodePlacement": {"nodeSelector": {"matchLabels": {"node-role.kubernetes.io/infra": ""}}}}}'
       type: "--type merge"
-        # Monitoring (Relocate from worker nodes) - Does not require CVO Disable
+    # Monitoring (Relocate from worker nodes) - Does not require CVO Disable
     - namespace: openshift-monitoring
       object: deployment.apps/cluster-monitoring-operator
       patch: |
@@ -206,6 +221,7 @@
       #   object: deployment.apps/cluster-image-registry-operator
       #   patch: |
       #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+
     - namespace: openshift-image-registry
       object: deployment.apps/image-registry
       patch: |
