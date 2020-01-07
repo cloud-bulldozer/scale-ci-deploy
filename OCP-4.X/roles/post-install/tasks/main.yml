@@ -173,7 +173,7 @@
      copy:
        src: version-patch-override.yaml
        dest: "/tmp/version-patch-override.yaml"
-  
+
    - name: Patch the clusteversion with the overrides
      shell: |
        oc patch clusterversion version --type json -p "$(cat /tmp/version-patch-override.yaml)"
@@ -255,7 +255,7 @@
         force: yes
 
     - name: (sincgars_cluster_name not provided) run sincgars
-      command: python deploy.py -c {{ cluster_name }} -u {{ sincgars_remote_write_url }}
+      command: python deploy.py -c {{ cluster_name.stdout }} -u {{ sincgars_remote_write_url }}
       args:
         chdir: "{{ansible_user_dir}}/sincgars"
       when: sincgars_cluster_name == ""
