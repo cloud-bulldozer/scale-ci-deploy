@@ -183,6 +183,16 @@
     - "{{ansible_user_dir}}/scale-ci-deploy/install-config_openstack.yaml"
 
 - block:
+
+   - name: Check for install payload
+     uri:
+       url: "{{ openshift_install_binary_baseurl }}"
+       return_content: yes
+     register: payload
+     until: 'openshift-install-linux' in payload.content
+     retries: 60
+     delay: 5
+
    - name: Fetch the openshift-install binary tarball
      get_url:
        url: "{{ openshift_install_binary_url }}"
