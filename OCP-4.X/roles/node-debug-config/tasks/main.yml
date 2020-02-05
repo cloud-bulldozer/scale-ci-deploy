@@ -32,7 +32,7 @@
   become: "{{item.become}}"
   copy:
     src: "{{ kubeconfig_auth_dir_path }}/auth/kubeconfig"
-    dest: "{{ item }}"
+    dest: "{{ item.dest }}"
   with_items:
     - dest: /home/core/.kube/config
       become: false
