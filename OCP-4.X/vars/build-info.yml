@@ -1,0 +1,17 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true) }}"
+###############################################################################
+# Build info vars
+###############################################################################
+# Url to query for the build info
+build_info_url: "{{ lookup('env', 'BUILD_INFO_URL') }}"
+
+# Destination to dump the captured build info content.
+# The playbook captures the build info at <build_info_destination>/build_info.json and payload to use at <build_info_destination>/payload.
+build_info_destination: "{{ lookup('env', 'BUILD_INFO_DESTINATION')|default('/tmp', true) }}"
