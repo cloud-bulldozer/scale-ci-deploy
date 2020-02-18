@@ -1,0 +1,67 @@
+---
+- hosts: orchestration
+  remote_user: "{{ orchestration_user }}"
+  vars_files:
+    - vars/build-info.yml
+  tasks:
+    - name: Fetch the build info content from the provided location
+      uri:
+        url: "{{ build_info_url }}"
+        method: GET
+        return_content: yes
+        body_format: json
+      register: build_info
+
+    - name: Dump the captured build info to a file
+      copy:
+        content: "{{ (build_info.content|from_json) }}"
+        dest: "{{ build_info_destination }}/build_info.json"
+
+    - name: Filter and capture the payload to a file
+      copy:
+        content: "{{ (build_info.content|from_json).msg.pullSpec }}"
+        dest: "{{ build_info_destination }}/payload"
+
+    - name: Check if the file with the info about the previous payload exists
+      stat:
+        path: "{{ build_info_destination }}/payload.previous"
+      register: previous_payload_file
+    
+    - block:
+        - name: Capture the previous payload
+          slurp:
+            src: "{{ build_info_destination }}/payload.previous"
+          register: previous_payload
+
+        - name: Capture the current payload
+          slurp:
+            src: "{{ build_info_destination }}/payload"
+          register: current_payload
+
+        - name: Compare the current payload captured from the UMB with previous payload and update the status file with PROCEED signal when they don't match
+          copy:
+            content: "PROCEED"
+            dest: "{{ build_info_destination }}/build.status"
+            force: yes
+          when: previous_payload.content| b64decode| trim != current_payload.content| b64decode| trim
+
+        - name: Compare the current payload captured from the UMB with previous payload and update the status with STOP signal when they match
+          copy:
+            content: "STOP"
+            dest: "{{ build_info_destination }}/build.status"
+            force: yes
+          when: previous_payload.content| b64decode| trim == current_payload.content| b64decode| trim
+      when: previous_payload_file.stat.exists == True
+
+    - block:
+        - name: Update the build status file with Proceed signal when info about previous payload doesn't exist
+          copy:
+            content: "PROCEED"
+            dest: "{{ build_info_destination }}/build.status"
+            force: yes
+
+        - name: Populate the previous payload info
+          copy:
+            content: "{{ (build_info.content|from_json).msg.pullSpec }}"
+            dest: "{{ build_info_destination }}/payload.previous"
+      when: previous_payload_file.stat.exists == False
