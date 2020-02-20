@@ -2,6 +2,7 @@
 # Machine to use in inventory file
 export ORCHESTRATION_HOST="localhost"
 
+# Use the appropriate private and public key here
 export PUBLIC_KEY=~/.ssh/id_rsa.pub
 export PRIVATE_KEY=~/.ssh/id_rsa
 
@@ -14,23 +15,25 @@ export OPENSHIFT_POST_CONFIG=true
 export OPENSHIFT_DEBUG_CONFIG=false
 
 export OPENSHIFT_CLIENT_LOCATION="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.1.9/openshift-client-linux-4.1.9.tar.gz"
-export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=
+export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=  # Normally empty
+export OPENSHIFT_INSTALL_BINARY_URL="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.1.9/openshift-install-linux-4.1.9.tar.gz"
 export OPENSHIFT_INSTALL_APIVERSION=v1
+# Use the appropriate public key here
 export OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE=~/.ssh/id_rsa.pub
-export OPENSHIFT_INSTALL_PULL_SECRET=
-export OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN=
+export OPENSHIFT_INSTALL_PULL_SECRET=[...YOUR PULL SECRET HERE...]
+export OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN=[...YOUR QUAY REGISTRY TOKEN HERE...]
 export OPENSHIFT_INSTALL_IMAGE_REGISTRY=registry.svc.ci.openshift.org
-export OPENSHIFT_INSTALL_REGISTRY_TOKEN=
+export OPENSHIFT_INSTALL_REGISTRY_TOKEN=[...YOUR INSTALL REGISTRY TOKEN HERE...]
 export OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE=false
 export OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE_VERSION=master
 export GOPATH=/root/.go
 
-export AWS_PROFILE=
-export AWS_ACCESS_KEY_ID=
-export AWS_SECRET_ACCESS_KEY=
-export AWS_REGION=
+export AWS_PROFILE=default # or as appropriate
+export AWS_ACCESS_KEY_ID=[...AWS ACCESS KEY HERE...]
+export AWS_SECRET_ACCESS_KEY=[...AWS SECRET ACCESS KEY HERE...]
+export AWS_REGION=[...AWS REGION...]
 
-export OPENSHIFT_BASE_DOMAIN=
+export OPENSHIFT_BASE_DOMAIN=[...BASE DOMAIN HERE...]
 export OPENSHIFT_CLUSTER_NAME=testcluster0
 export OPENSHIFT_MASTER_COUNT=3
 export OPENSHIFT_WORKER_COUNT=5
