@@ -51,6 +51,12 @@
             dest: "{{ build_info_destination }}/build.status"
             force: yes
           when: previous_payload.content| b64decode| trim == current_payload.content| b64decode| trim
+
+        - name: Update the previous payload file with the current payload info for the next runs after comparing and setting the status file when they don't match
+          copy:
+            content: "{{ (build_info.content|from_json).msg.pullSpec }}"
+            dest: "{{ build_info_destination }}/payload.previous"
+          when: previous_payload.content| b64decode| trim != current_payload.content| b64decode| trim
       when: previous_payload_file.stat.exists == True
 
     - block:
@@ -65,3 +71,22 @@
             content: "{{ (build_info.content|from_json).msg.pullSpec }}"
             dest: "{{ build_info_destination }}/payload.previous"
       when: previous_payload_file.stat.exists == False
+
+    - name: Check if the job status file exists
+      stat:
+        path: "{{ build_info_destination }}/job.status"
+      register: job_status_file
+
+    - block:
+        - name: Capture the job status
+          slurp:
+            src: "{{ build_info_destination }}/job.status"
+          register: job_status
+ 
+        - name: Update the build status with STOP signal in case the job status is set to false which means that it failed and we want to investigate instead of rebuilding the cluster
+          copy:
+            content: "STOP"
+            dest: "{{ build_info_destination }}/build.status"
+            force: yes
+          when: not job_status.content | b64decode | trim | bool
+      when: job_status_file.stat.exists == True
