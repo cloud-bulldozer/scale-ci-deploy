@@ -8,7 +8,7 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-    name: workload-{{aws_region.stdout}}a
+    name: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}a
     namespace: openshift-machine-api
   spec:
     replicas: 1
