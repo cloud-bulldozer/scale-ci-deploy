@@ -167,6 +167,70 @@ Enable infra nodes to be created with the `OPENSHIFT_POST_INSTALL` step.
 Default: `true`
 Enable a workload node to be created with the `OPENSHIFT_POST_INSTALL` step.
 
+### KUBE_CONFIG
+Default: `~/.kube/config`
+Path to kube_config.
+
+### CERBERUS_CONFIG
+Default: `~/cerberus.yaml`
+Path to cerberus_config.
+
+### CERBERUS IMAGE
+Default: `quay.io/openshift-scale/cerberus:latest`
+Image to be pulled to run the containerized version of cerberus.
+
+### WATCH NODES
+Default: `true`
+Set to True for the cerberus to monitor the cluster nodes.
+
+### WATCH NAMESPACES
+Default: `'[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn, openshift-ovn-kubernetes]'`
+List the namespaces to be monitored by cerberus.
+
+### CERBERUS_PUBLISH_STATUS
+Default: `true`
+When enabled, cerberus starts a light weight http server and publishes the status.
+
+### INSPECT_COMPONENTS
+Default: `false`
+Enable it only when OpenShift client is supported to run. When enabled, cerberus collects logs, events and metrics of failed components.
+
+### SLACK_INTEGRATION
+Default: `false`
+When enabled, cerberus reports the the failed interations and sends the report for the same on a slack channel.
+
+### SLACK_API_TOKEN
+Default: No default.
+It refers to Bot User OAuth Access Token used for cerberus.
+
+### SLACK_CHANNEL
+Default: No default.
+It refers to the slack channel ID the user wishes to receive the notifications for cerberus failures.
+
+### COP_SLACK_ID
+Default: `'{Monday: , Tuesday: , Wednesday: , Thursday: , Friday: , Saturday: , Sunday: }'`
+When slack_integration is enabled, a cop can be assigned for each day. The cop of the day is tagged while reporting failures in a slack channel. Values are slack member ID's.
+
+### SLACK_TEAM_ALIAS
+Default: No default.
+The slack team alias to be tagged while reporting failures in the slack channel when no cop is assigned.
+
+### ITERATIONS
+Default: `5`
+Iterations to loop before stopping the watch in cerberus monitoring. It will be replaced with infinity when the daemon mode is enabled.
+
+### SLEEP_TIME
+Default: `60`
+Sleep duration between each iteration in cerberus monitoring.
+
+### DAEMON_MODE
+Default: `true`
+Iterations are set to infinity which means that the cerberus will monitor the resources forever.
+
+### CERBERUS_ENABLE
+Default: `false`
+Controls whether the monitoring of Kubernetes/OpenShift cluster components by cerberus should be enabled or not.
+
 ### MACHINESET_METADATA_LABEL_PREFIX
 Default: `machine.openshift.io`
 The prefix used in machinesets. Usually this is `machine.openshift.io` however it might be `sigs.k8s.io` depending on version installed.
