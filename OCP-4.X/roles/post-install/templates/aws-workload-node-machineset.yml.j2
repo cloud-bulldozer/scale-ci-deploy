@@ -8,14 +8,14 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-    name: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}a
+    name: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}d
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}a
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}d
     template:
       metadata:
         creationTimestamp: null
@@ -23,7 +23,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}a
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}d
       spec:
         metadata:
           creationTimestamp: null
@@ -49,7 +49,7 @@ items:
             metadata:
               creationTimestamp: null
             placement:
-              availabilityZone: {{aws_region.stdout}}a
+              availabilityZone: {{aws_region.stdout}}d
               region: {{aws_region.stdout}}
             publicIp: true
             securityGroups:
@@ -61,7 +61,7 @@ items:
               filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-public-{{aws_region.stdout}}a
+                - {{cluster_name.stdout}}-public-{{aws_region.stdout}}d
             tags:
             - name: kubernetes.io/cluster/{{cluster_name.stdout}}
               value: owned
