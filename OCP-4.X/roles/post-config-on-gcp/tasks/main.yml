@@ -13,15 +13,17 @@
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{machineset_metadata_label_prefix}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: rhcos_cluster_name
 
-- name: Get public ip of the workload node
-  shell: |
-    oc get nodes -o wide | grep workload | awk '{print $7}'
-  register: workload_public_ip
+- block:
+    - name: Get public ip of the workload node
+      shell: |
+        oc get nodes -o wide | grep workload | awk '{print $7}'
+      register: workload_public_ip
 
-- name: Add workload node to group
-  add_host:
-    name: "{{ workload_public_ip.stdout }}"
-    groups: workload
+   - name: Add workload node to group
+     add_host:
+       name: "{{ workload_public_ip.stdout }}"
+       groups: workload
+  when: openshift_toggle_workload_node|bool
 
 - name: Get network name
   shell: |
