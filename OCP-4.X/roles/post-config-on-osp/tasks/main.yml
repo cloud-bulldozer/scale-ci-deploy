@@ -9,25 +9,27 @@
 #   Ports 2022 (tcp), 20000-20109 (tcp, udp), 32768-60999 (tcp, udp)
 #
 
-- name: Create FIP for workload node
-  shell: |
-    . {{ansible_user_dir}}/overcloudrc
-    openstack floating ip create public --format value -c floating_ip_address
-  register: public_workload_fip
+- block:
+    - name: Create FIP for workload node
+      shell: |
+        . {{ansible_user_dir}}/overcloudrc
+        openstack floating ip create public --format value -c floating_ip_address
+      register: public_workload_fip
 
-- name: Get workload machine openstack name
-  shell: oc get nodes -l 'node-role.kubernetes.io/workload=' -o json | jq -r '.items[0].metadata.annotations | .["machine.openshift.io/machine"]'
-  register: workload_machine_annotation
+    - name: Get workload machine openstack name
+      shell: oc get nodes -l 'node-role.kubernetes.io/workload=' -o json | jq -r '.items[0].metadata.annotations | .["machine.openshift.io/machine"]'
+      register: workload_machine_annotation
 
-- name: Add FIP to workload machine
-  shell: |
-    . {{ansible_user_dir}}/overcloudrc
-    openstack server add floating ip {{workload_machine_annotation.stdout.split('/')[1] }} {{public_workload_fip.stdout}}
+    - name: Add FIP to workload machine
+      shell: |
+        . {{ansible_user_dir}}/overcloudrc
+        openstack server add floating ip {{workload_machine_annotation.stdout.split('/')[1] }} {{public_workload_fip.stdout}}
 
-- name: Add workload node to group
-  add_host:
-    name: "{{ public_workload_fip.stdout }}"
-    groups: workload
+    - name: Add workload node to group
+      add_host:
+        name: "{{ public_workload_fip.stdout }}"
+        groups: workload
+  when: openshift_toggle_workload_node|bool
 
 - name: Get security groups for OCP 4 cluster
   shell: |
