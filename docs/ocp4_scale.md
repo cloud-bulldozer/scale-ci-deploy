@@ -36,3 +36,7 @@ The prefix used in machinesets. Usually this is `machine.openshift.io` however i
 ### RHCOS_WORKER_COUNT
 Default: `5`  
 The total desired count of nodes.
+
+### CERBERUS_URL
+Default: ""
+To enable Cerberus integration add the url of cerberus in the format http://1.2.3.4:8080

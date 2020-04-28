@@ -211,6 +211,10 @@ Path to cerberus_config.
 Default: `quay.io/openshift-scale/cerberus:latest`
 Image to be pulled to run the containerized version of cerberus.
 
+### CERBERUS_URL
+Default: "http://0.0.0.0:8080"
+Optional arguement for cerberus configuration if cerberus is using a different URL than the default.
+
 ### WATCH NODES
 Default: `true`
 Set to True for the cerberus to monitor the cluster nodes.

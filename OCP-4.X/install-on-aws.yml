@@ -18,8 +18,12 @@
       when: openshift_install|bool
     - role: post-install
       when: openshift_post_install|bool
+    - role: cerberus_install
+      when: cerberus_enable|bool
     - role: post-config-on-aws
       when: openshift_post_config|bool
+    - role: cerberus
+      when: cerberus_enable|bool
 
 - name: (Optional) Debugging configuration of workload node
   hosts: workload

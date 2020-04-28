@@ -17,3 +17,7 @@ rhcos_metadata_label_prefix: "{{ lookup('env', 'RHCOS_METADATA_LABEL_PREFIX')|de
 
 # Total desired count of nodes
 rhcos_worker_count: "{{ lookup('env', 'RHCOS_WORKER_COUNT')|default(5, true) }}"
+
+
+## To enable Cerberus integration add the url of cerberus in the format "http://1.2.3.4:8080"
+cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('') }}"

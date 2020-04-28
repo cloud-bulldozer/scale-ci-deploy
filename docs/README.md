@@ -40,3 +40,12 @@ echo "${ORCHESTRATION_HOST}" >> inventory
 
 ansible-playbook -vv -i inventory OCP-4.X/install-on-aws.yml
 ```
+
+## Cerberus Integration
+
+What is Cerberus? [Cerberus](https://github.com/openshift-scale/cerberus) is a project that will watch an Openshift/Kubernernetes cluster
+for dead nodes, component failures, etc and provide a healthly/unhealthy (True/False) signal.
+
+Cerberus is optionally used for all install/scale/upgrades by defining the CERBERUS_URL variable in the format "http://1.2.3.4:8080"
+
+For installation and startup instructions for Cerberus please see [https://github.com/openshift-scale/cerberus](https://github.com/openshift-scale/cerberus)

@@ -1,0 +1,32 @@
+---
+- name: Generate cerberus config file
+  template:
+    src: cerberus.j2
+    dest: "{{ cerberus_config_path }}"
+
+- name: Install podman
+  yum:
+    name: podman
+    state: latest
+
+- name: Pull "{{ cerberus_image }}" image
+  podman_image:
+    name: "{{ cerberus_image }}"
+    force: yes
+
+- name: Check if cerberus is running
+  shell: podman ps | grep -w cerberus || podman ps -a | grep -w cerberus
+  register: cerberus_status
+  ignore_errors: yes
+
+- name: Delete cerberus container if it exists
+  shell: podman rm -f cerberus
+  when: cerberus_status.rc == 0
+
+- name: Run containerized version of "{{ cerberus_image }}"
+  command: podman run --name=cerberus --net=host -v "{{ kubeconfig_path }}":/root/.kube/config:Z -v "{{ cerberus_config_path }}":/root/cerberus/config/config.yaml:Z -d "{{ cerberus_image }}"
+  when: not slack_integration
+
+- name: Run containerized version of "{{ cerberus_image }}" with slack integration
+  command: podman run --name=cerberus --net=host -v "{{ kubeconfig_path }}":/root/.kube/config:Z -v "{{ cerberus_config_path }}":/root/cerberus/config/config.yaml:Z --env SLACK_API_TOKEN="{{ slack_api_token }}" --env SLACK_CHANNEL="{{ slack_channel }}" -d "{{ cerberus_image }}"
+  when: slack_integration

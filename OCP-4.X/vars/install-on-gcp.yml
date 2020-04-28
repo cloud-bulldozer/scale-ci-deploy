@@ -74,6 +74,9 @@ cerberus_config_path: "{{ lookup('env', 'CERBERUS_CONFIG_PATH')|default('~/cerbe
 
 # Cerberus image
 cerberus_image: "{{ lookup('env', 'CERBERUS_IMAGE')|default('quay.io/openshift-scale/cerberus:latest', true) }}"
+## If cerberus is running but not deployed by scaleci-deploy
+# Add the url of cerberus in the format "http://1.2.3.4:8080"
+cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('http://0.0.0.0:8080') }}"
 
 # Cerberus configurations
 watch_nodes: "{{ lookup('env', 'WATCH_NODES')|default(true, true) }}"
