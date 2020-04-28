@@ -19,10 +19,10 @@
         oc get nodes -o wide | grep workload | awk '{print $7}'
       register: workload_public_ip
 
-   - name: Add workload node to group
-     add_host:
-       name: "{{ workload_public_ip.stdout }}"
-       groups: workload
+    - name: Add workload node to group
+      add_host:
+        name: "{{ workload_public_ip.stdout }}"
+        groups: workload
   when: openshift_toggle_workload_node|bool
 
 - name: Get network name
