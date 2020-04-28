@@ -18,3 +18,6 @@ poll_attempts: "{{ lookup('env', 'POLL_ATTEMPTS')|default(1800, true) }}"
 rhcos_new_version_url: "{{ lookup('env', 'RHCOS_NEW_VERSION_URL')|default('quay.io/openshift-release-dev/ocp-release', true) }}"
 rhcos_new_version: "{{ lookup('env', 'RHCOS_NEW_VERSION')|default('4.0.0-0.10', true) }}"
 force_upgrade: "{{ lookup('env', 'FORCE_UPGRADE')|default(false, true)|bool|lower }}"
+
+## To enable Cerberus integration add the url of cerberus in the format "http://1.2.3.4:8080"
+cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('') }}"

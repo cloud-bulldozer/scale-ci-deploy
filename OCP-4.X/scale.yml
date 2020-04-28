@@ -10,6 +10,11 @@
   vars_files:
     - vars/scale.yml
   tasks:
+    - name: Verify cluster health with Cerberus
+      include_role:
+        name: "cerberus"
+      when: cerberus_url is defined and cerberus_url != ""
+
     - name: Get worker machineset names
       shell: |
         oc get machineset -n openshift-machine-api | egrep "\-worker\-|\-w\-" | awk '{print $1}'
@@ -69,3 +74,8 @@
     - name: Add additional label to worker nodes to provide ability to isolate workloads on workers
       shell: |
         oc label nodes --overwrite -l 'node-role.kubernetes.io/worker=' computenode=true
+    
+    - name: Verify cluster health with Cerberus
+      include_role:
+        name: "cerberus"
+      when: cerberus_url is defined and cerberus_url != ""

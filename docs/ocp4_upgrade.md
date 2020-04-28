@@ -40,3 +40,7 @@ The new version to upgrade to. Check [https://openshift-release.svc.ci.openshift
 ### FORCE_UPGRADE
 Default: `false`  
 Determines the `--force` flag value for the `oc adm upgrade` command to initiate an upgrade.
+
+### CERBERUS_URL
+Default: ""
+To enable Cerberus integration add the url of cerberus in the format http://1.2.3.4:8080

@@ -1,0 +1,7 @@
+---
+- name: Get status from Cerberus
+  uri:
+    url: "{{ cerberus_url }}"
+    return_content: yes
+  register: result
+  failed_when: "'True' not in result.content"

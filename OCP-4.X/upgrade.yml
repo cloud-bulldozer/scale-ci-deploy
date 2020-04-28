@@ -15,6 +15,11 @@
     #   shell: |
     #     {%raw%}oc patch clusterversion/version --patch '{"spec":{"upstream":"{%endraw%}{{rhcos_upstream_url}}{%raw%}"}}' --type=merge{%endraw%}
 
+    - name: Verify cluster health with Cerberus
+      include_role:
+        name: "cerberus"
+      when: cerberus_url is defined and cerberus_url != ""
+
     - name: Initiate Upgrade
       shell: |
         oc adm upgrade --force={{force_upgrade}} --to-image={{rhcos_new_version_url}}:{{rhcos_new_version}}
@@ -44,3 +49,8 @@
       fail:
         msg: "Upgrade exceeded polling"
       when: clusterversion_upgrading.stdout.find("Cluster version is ") == -1
+
+    - name: Verify cluster health with Cerberus
+      include_role:
+        name: "cerberus"
+      when: cerberus_url is defined and cerberus_url != ""
