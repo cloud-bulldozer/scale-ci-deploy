@@ -83,6 +83,16 @@
         - src: gcp-workload-node-machineset.yml.j2
           dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
+        - src: gcp-ssd-sc.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-deploy/pd-ssd-sc.yml"
+          toggle: true
+
+    - name: (GCP) Create faster ssd sc
+      shell: |
+        oc create -f {{ item.sc }}
+      with_items:
+        - sc: "{{ansible_user_dir}}/scale-ci-deploy/pd-ssd-sc.yml"
+
   when: platform == "gcp"
 
 - name: (OSP) Template out machineset yamls

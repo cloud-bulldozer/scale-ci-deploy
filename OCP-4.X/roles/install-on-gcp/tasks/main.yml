@@ -110,10 +110,6 @@
     path: "{{ ansible_user_dir }}/.gcp"
     state: directory
 
-- name: Login GCP account via service account (For GCP CLI interactions) and set the default project
-  shell: |
-    gcloud auth activate-service-account {{ gcp_service_account }} --key-file={{ gcp_auth_key_file }} --project={{ gcp_project }}
-
 - name: Read contents of local ssh public key
   slurp:
     src: "{{openshift_install_ssh_pub_key_file}}"
@@ -129,7 +125,7 @@
     - "{{ansible_user_dir}}/scale-ci-deploy/install-config_gcp.yaml"
 
 - block:
-   - name: Fetch the openshift-install binary tarball 
+   - name: Fetch the openshift-install binary tarball
      get_url:
        url: "{{ openshift_install_binary_url }}"
        dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/"
@@ -144,6 +140,7 @@
      shell: |
        set -o pipefail
        cd {{ansible_user_dir}}/scale-ci-deploy
+       export GOOGLE_CREDENTIALS={{ gcp_auth_key_file }}
        bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp/
   when: openshift_install_binary_url != ""
 

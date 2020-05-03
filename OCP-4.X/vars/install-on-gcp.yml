@@ -115,9 +115,9 @@ openshift_workload_node_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_
 openshift_workload_node_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_TYPE')|default('pd-ssd', true) }}"
 
 openshift_prometheus_retention_period: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_RETENTION_PERIOD')|default('15d', true) }}"
-openshift_prometheus_storage_class: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_CLASS')|default('pd-ssd', true) }}"
+openshift_prometheus_storage_class: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_CLASS')|default('standard', true) }}"
 openshift_prometheus_storage_size: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_SIZE')|default('10Gi', true) }}"
-openshift_alertmanager_storage_class: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_CLASS')|default('pd-ssd', true) }}"
+openshift_alertmanager_storage_class: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_CLASS')|default('standard', true) }}"
 openshift_alertmanager_storage_size: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_SIZE')|default('2Gi', true) }}"
 
 ## To specify an alternate auth dir containing kubeconfig, e.g. from GCP cluster installed by Flexy,

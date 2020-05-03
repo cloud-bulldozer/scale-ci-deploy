@@ -25,9 +25,17 @@
         groups: workload
   when: openshift_toggle_workload_node|bool
 
+- name: set service account
+  shell: |
+     gcloud config set account {{ gcp_service_account }}
+
+- name: set project
+  shell: |
+     gcloud config set project {{ gcp_project }}
+
 - name: Get network name
   shell: |
-     gcloud compute networks list | grep {{ rhcos_cluster_name.stdout }} | awk '{print $1}' 
+     gcloud compute networks list | grep {{ rhcos_cluster_name.stdout }} | awk '{print $1}'
   register: gcp_network
 
 - name: Create firewall rule for ICMP
@@ -61,4 +69,3 @@
     flat: true
   when:
     - kubeconfig_auth_dir_path == ""
-
