@@ -12,15 +12,32 @@
         body_format: json
       register: build_info
 
-    - name: Dump the captured build info to a file
-      copy:
-        content: "{{ (build_info.content|from_json) }}"
-        dest: "{{ build_info_destination }}/build_info.json"
+    - block:
+        - name: Dump the captured build info to a file
+          copy:
+            content: "{{ (build_info.content|from_json) }}"
+            dest: "{{ build_info_destination }}/build_info.json"
 
-    - name: Filter and capture the payload to a file
-      copy:
-        content: "{{ (build_info.content|from_json).msg.pullSpec }}"
-        dest: "{{ build_info_destination }}/payload"
+        - name: Set payload info as fact
+          set_fact:
+            payload_info: "{{ (build_info.content|from_json).msg.pullSpec }}"
+
+        - name: Filter and capture the payload to a file
+          copy:
+            content: "{{ payload_info }}"
+            dest: "{{ build_info_destination }}/payload"
+      when: umb_message_format| bool
+
+    - block:
+        - name: Filter and capture the payload to a file
+          copy:
+            content: "{{ build_info.content }}"
+            dest: "{{ build_info_destination }}/payload"
+
+        - name: Set payload info as fact
+          set_fact:
+            payload_info: "{{ build_info.content }}"
+      when: not umb_message_format| bool
 
     - name: Check if the file with the info about the previous payload exists
       stat:
@@ -54,7 +71,7 @@
 
         - name: Update the previous payload file with the current payload info for the next runs after comparing and setting the status file when they don't match
           copy:
-            content: "{{ (build_info.content|from_json).msg.pullSpec }}"
+            content: "{{ payload_info }}"
             dest: "{{ build_info_destination }}/payload.previous"
           when: previous_payload.content| b64decode| trim != current_payload.content| b64decode| trim
       when: previous_payload_file.stat.exists == True
@@ -68,7 +85,7 @@
 
         - name: Populate the previous payload info
           copy:
-            content: "{{ (build_info.content|from_json).msg.pullSpec }}"
+            content: "{{ payload_info }}"
             dest: "{{ build_info_destination }}/payload.previous"
       when: previous_payload_file.stat.exists == False
 
