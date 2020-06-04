@@ -9,6 +9,9 @@ orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true
 ###############################################################################
 # Build info vars
 ###############################################################################
+# Type of the message containing payload details
+umb_message_format: "{{ lookup('env', 'UMB_MESSAGE_FORMAT')|default(false, true) }}"
+
 # Url to query for the build info
 build_info_url: "{{ lookup('env', 'BUILD_INFO_URL') }}"
 
