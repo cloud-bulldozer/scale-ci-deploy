@@ -104,3 +104,11 @@ openshift_prometheus_storage_class: "{{ lookup('env', 'PROMETHEUS_STORAGE_CLASS'
 openshift_prometheus_storage_size: "{{ lookup('env', 'PROMETHEUS_STORAGE_SIZE')|default('10Gi', true) }}"
 openshift_alertmanager_storage_class: "{{ lookup('env', 'ALERTMANAGER_STORAGE_CLASS')|default('standard', true) }}"
 openshift_alertmanager_storage_size: "{{ lookup('env', 'ALERTMANAGER_STORAGE_SIZE')|default('2Gi', true) }}"
+
+
+data_server_enable: "{{ lookup('env', 'DATA_SERVER_ENABLE')|default(false, true) }}"
+data_server_image: "{{ lookup('env', 'DATA_SERVER_IMAGE')|default('quay.io/openshift-scale/snappy-data-server:latest', true) }}"
+data_server_root_path: "{{ lookup('env', 'DATA_SERVER_ROOT_PATH')|default('/root/data_server', true) }}"
+data_server_port: "{{ lookup('env', 'DATA_SERVER_PORT')|default(7070, true) }}"
+data_server_log_lvl: "{{ lookup('env', 'DATA_SERVER_LOG_LVL')|default(info, true) }}"
+data_server_public_host: "{{ lookup('env', 'DATA_SERVER_PUBLIC_HOST')|default(localhost, true) }}"

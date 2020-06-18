@@ -309,3 +309,27 @@ Determines if the flavors will be deleted on the OpenStack Cloud.
 ### OPENSTACK_DELETE_IMAGE
 Default: `true`
 Determines if the image will be deleted from Glance on the OpenStack Cloud.
+
+### DATA_SERVER_ENABLE
+Default: `false`
+Controls whether the data server is launched.
+
+### DATA_SERVER_ROOT_PATH
+Default: `/root/data_server`
+Absolute path to the data server's host's directory.
+
+### DATA_SERVER_IMAGE
+Default: `quay.io/openshift-scale/snappy-data-server`
+Latest, maintained image of the snappy data server.
+
+### DATA_SERVER_PUBLIC_HOST
+Default: `localhost`  
+URL to public host of data server.
+
+### DATA_SERVER_PORT
+Default: `7070`  
+Service port.
+
+### DATA_SERVER_LOG_LVL
+Default: `info`  
+Data server log level. Current [Uvicorn server](https://www.uvicorn.org) **options:** *'critical', 'error', 'warning', 'info', 'debug', 'trace'.

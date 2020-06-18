@@ -1,0 +1,38 @@
+---
+- name: Install podman
+  package:
+    name: podman
+    state: latest
+
+- name: Pull "{{ data_server_image }}" image
+  podman_image:
+    name: "{{ data_server_image }}"
+    force: "yes"
+
+- name: Check if data server is on the machine
+  shell: podman ps -a | grep -w snappy-data-server
+  register: data_server_status
+  ignore_errors: yes
+
+- name: Delete data server container if it exists
+  shell: podman rm -f data_server
+  when: data_server_status.rc == 0
+  ignore_errors: yes
+
+- name: Create results directory at host root if it does not exist
+  file:
+    path: "{{ data_server_root_path }}/results"
+    state: directory
+    mode: '0755'
+
+- name: Run "{{ data_server_image }}" with a shared results directory on the host
+  command: >- 
+    podman run
+    --detach
+    --name=data_server
+    --net=host 
+    --env DATA_SERVER_PUBLIC_HOST="{{ data_server_public_host }}"
+    --env DATA_SERVER_PORT="{{ data_server_port }}"
+    --env DATA_SERVER_LOG_LVL="{{ data_server_log_lvl }}"
+    --volume "{{ data_server_root_path }}"/results:/data_server/app/results:z
+    "{{ data_server_image }}"
