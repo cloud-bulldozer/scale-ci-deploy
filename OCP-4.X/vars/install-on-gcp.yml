@@ -72,20 +72,25 @@ dittybopper_enable: "{{ lookup('env', 'ENABLE_DITTYBOPPER')|default(true, true) 
 kubeconfig_path: "{{ lookup('env', 'KUBECONFIG_PATH')|default('~/.kube/config', true) }}"
 cerberus_config_path: "{{ lookup('env', 'CERBERUS_CONFIG_PATH')|default('~/cerberus.yaml', true) }}"
 
-
-# Enable cerberus
+# Enable Cerberus
 cerberus_enable : "{{ lookup('env', 'CERBERUS_ENABLE')|default(false, true) }}"
 # Cerberus image
 cerberus_image: "{{ lookup('env', 'CERBERUS_IMAGE')|default('quay.io/openshift-scale/cerberus:latest', true) }}"
-## If cerberus is running but not deployed by scaleci-deploy
+# If cerberus is running but not deployed by scale-ci-deploy
 # Add the url of cerberus in the format "http://1.2.3.4:8080"
 cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('http://0.0.0.0:8080') }}"
+
 # Cerberus configuration
+distribution: "{{ lookup('env', 'DISTRIBUTION')|default('openshift', true) }}"
+port: "{{ lookup('env', 'PORT')|default(8080, true) }}"
 watch_nodes: "{{ lookup('env', 'WATCH_NODES')|default(true, true) }}"
 watch_cluster_operators: "{{ lookup('env', 'WATCH_CLUSTER_OPERATORS')|default(true, true) }}"
-watch_namespaces: "{{ lookup('env', 'WATCH_NAMESPACES')|default('[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn, openshift-ovn-kubernetes]', true) }}"
+watch_url_routes: "{{ lookup('env', 'WATCH_URL_ROUTES')|default('[]', true) }}"
+watch_namespaces: "{{ lookup('env', 'WATCH_NAMESPACES')|default('[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller-manager, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn]', true) }}"
 cerberus_publish_status: "{{ lookup('env', 'CERBERUS_PUBLISH_STATUS')|default(true, true) }}"
 inspect_components: "{{ lookup('env', 'INSPECT_COMPONENTS')|default(false, true) }}"
+prometheus_url: "{{ lookup('env', 'PROMETHEUS_URL')|default('', true) }}"
+prometheus_bearer_token: "{{ lookup('env', 'PROMETHEUS_BEARER_TOKEN')|default('', true) }}"
 slack_integration: "{{ lookup('env', 'SLACK_INTEGRATION')|default(false, true) }}"
 slack_api_token: "{{ lookup('env', 'SLACK_API_TOKEN') }}"
 slack_channel: "{{ lookup('env', 'SLACK_CHANNEL') }}"
@@ -93,7 +98,10 @@ cop_slack_ID: "{{ lookup('env', 'COP_SLACK_ID')|default('{Monday: , Tuesday: , W
 slack_team_alias: "{{ lookup('env', 'SLACK_TEAM_ALIAS') }}"
 iterations: "{{ lookup('env', 'ITERATIONS')|default(5, true) }}"
 sleep_time: "{{ lookup('env', 'SLEEP_TIME')|default(60, true) }}"
+kube_api_request_chunk_size: "{{ lookup('env', 'KUBE_API_REQUEST_CHUNK_SIZE')|default(250, true) }}"
 daemon_mode: "{{ lookup('env', 'DAEMON_MODE')|default(true, true) }}"
+database_path: "{{ lookup('env', 'DATABASE_PATH')|default('/tmp/cerberus.db', true) }}"
+reuse_database: "{{ lookup('env', 'REUSE_DATABASE')|default(false, true) }}"
 
 ## Remote write details
 sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"

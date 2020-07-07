@@ -235,12 +235,28 @@ Image to be pulled to run the containerized version of cerberus.
 Default: "http://0.0.0.0:8080"
 Optional arguement for cerberus configuration if cerberus is using a different URL than the default.
 
+### DISTRIBUTION
+Default: `openshift`
+Distribution type supported by cerberus can be kubernetes or openshift.
+
+### PORT
+Default: `8080`
+http server port where cerberus status is published.
+
 ### WATCH NODES
 Default: `true`
 Set to True for the cerberus to monitor the cluster nodes.
 
+### WATCH CLUSTER OPERATORS
+Default: `true`
+Set to True for the cerberus to monitor the cluster operators.
+
+### WATCH_URL_ROUTES
+Default: `[]`
+Route url's to be monitored by cerberus.
+
 ### WATCH NAMESPACES
-Default: `'[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn, openshift-ovn-kubernetes]'`
+Default: `'[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller-manager, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn, openshift-ovn-kubernetes]'`
 List the namespaces to be monitored by cerberus.
 
 ### CERBERUS_PUBLISH_STATUS
@@ -250,6 +266,14 @@ When enabled, cerberus starts a light weight http server and publishes the statu
 ### INSPECT_COMPONENTS
 Default: `false`
 Enable it only when OpenShift client is supported to run. When enabled, cerberus collects logs, events and metrics of failed components.
+
+### PROMETHEUS_URL
+Default: `''`
+The prometheus url.
+
+### PROMETHEUS_BEARER_TOKEN
+Default: `''`
+The prometheus bearer token is needed to authenticate with prometheus.
 
 ### SLACK_INTEGRATION
 Default: `false`
@@ -279,9 +303,21 @@ Iterations to loop before stopping the watch in cerberus monitoring. It will be 
 Default: `60`
 Sleep duration between each iteration in cerberus monitoring.
 
+### KUBE_API_REQUEST_CHUNK_SIZE
+Default: `250`
+Large requests will be broken into the specified chunk size to reduce the load on API server and improve responsiveness while retrieving node and pod status in cerberus.
+
 ### DAEMON_MODE
 Default: `true`
 Iterations are set to infinity which means that the cerberus will monitor the resources forever.
+
+### DATABASE_PATH
+Default: `/tmp/cerberus.db`
+Path where cerberus database needs to be stored.
+
+### REUSE_DATABASE
+Default: `false`
+When enabled, cerberus database is reused to store the failures.
 
 ### CERBERUS_ENABLE
 Default: `false`
