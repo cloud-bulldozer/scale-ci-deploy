@@ -291,6 +291,10 @@ Large requests will be broken into the specified chunk size to reduce the load o
 Default: `true`
 Iterations are set to infinity which means that the cerberus will monitor the resources forever.
 
+### CORES_USAGE_PERCENTAGE
+Default: `0.5`
+The fraction of cores to be used for multiprocessing.
+
 ### DATABASE_PATH
 Default: `/tmp/cerberus.db`
 Path where cerberus database needs to be stored.
