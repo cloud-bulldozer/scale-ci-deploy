@@ -104,6 +104,7 @@ iterations: "{{ lookup('env', 'ITERATIONS')|default(5, true) }}"
 sleep_time: "{{ lookup('env', 'SLEEP_TIME')|default(60, true) }}"
 kube_api_request_chunk_size: "{{ lookup('env', 'KUBE_API_REQUEST_CHUNK_SIZE')|default(250, true) }}"
 daemon_mode: "{{ lookup('env', 'DAEMON_MODE')|default(true, true) }}"
+cores_usage_percentage: "{{ lookup('env', 'CORES_USAGE_PERCENTAGE')|default(0.5, true) }}"
 database_path: "{{ lookup('env', 'DATABASE_PATH')|default('/tmp/cerberus.db', true) }}"
 reuse_database: "{{ lookup('env', 'REUSE_DATABASE')|default(false, true) }}"
 
