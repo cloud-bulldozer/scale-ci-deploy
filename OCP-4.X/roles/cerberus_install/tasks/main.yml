@@ -15,13 +15,13 @@
     force: yes
 
 - name: Check if cerberus is running
-  shell: podman ps | grep -w cerberus || podman ps -a | grep -w cerberus
-  register: cerberus_status
+  shell: podman ps -a | grep cerberus | awk '{print $1;}'
+  register: cerberus_containers
   ignore_errors: yes
 
-- name: Delete cerberus container if it exists
-  shell: podman rm -f cerberus
-  when: cerberus_status.rc == 0
+- name: Delete containers associated with cerberus image
+  shell: podman rm -f "{{ item }}"
+  loop: "{{ cerberus_containers.stdout_lines }}"
 
 - name: Run containerized version of "{{ cerberus_image }}"
   command: podman run --name=cerberus --net=host -v "{{ kubeconfig_path }}":/root/.kube/config:Z -v "{{ cerberus_config_path }}":/root/cerberus/config/config.yaml:Z -d "{{ cerberus_image }}"
