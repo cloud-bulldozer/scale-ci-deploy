@@ -1,26 +1,31 @@
 ---
 #
-# Clean up GCP  IPI install
+# Clean up GCP install
 #
 
-- name: Check if a cluster is running
+- name: Check if cluster is running
+  shell: oc get clusterversion
+  ignore_errors: true
+  register: cluster_status
+
+- name: Check if scale-ci artifacts are present
   stat:
     path: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp/metadata.json"
-  register: cluster_status
+  register: cluster_artifacts
 
 - name: Cleanup GCP cluster
   shell: |
     cd {{ansible_user_dir}}/scale-ci-deploy
     export GOOGLE_CREDENTIALS={{ gcp_auth_key_file }}
     bin/openshift-install destroy cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp/
+  when: cluster_artifacts.stat.exists == True and cluster_status.rc == 0
 
-- block:
-    - name: Clean scale-ci-deploy openshift-install directories
-      become: true
-      file:
-        path: "{{item}}"
-        state: absent
-      with_items:
-        - "{{ansible_user_dir}}/scale-ci-deploy/bin"
-        - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp"
-  when: cluster_status.stat.exists == True
+- name: Clean scale-ci-deploy openshift-install directories
+  become: true
+  file:
+    path: "{{item}}"
+    state: absent
+  with_items:
+    - "{{ansible_user_dir}}/scale-ci-deploy/bin"
+    - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-gcp"
+

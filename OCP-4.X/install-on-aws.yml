@@ -25,7 +25,7 @@
     - role: cerberus
       when: cerberus_enable|bool
     - role: data_server_install
-      when: data_server_enable|bool            
+      when: data_server_enable|bool
 
 - name: (Optional) Debugging configuration of workload node
   hosts: workload
