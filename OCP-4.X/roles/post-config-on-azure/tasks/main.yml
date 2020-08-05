@@ -27,7 +27,7 @@
 
 - name: Get node network security group
   shell: |
-    az network nsg list -g {{rhcos_cluster_name.stdout}}-rg --query "[].name" -o tsv | grep "node-nsg"
+    az network nsg list -g {{rhcos_cluster_name.stdout}}-rg --query "[].name" -o tsv | grep "nsg"
   register: azure_sg
 
 - name: Create network security group rule for ICMP
@@ -36,7 +36,7 @@
 
 - name: Create network security group rule for ssh (22)
   shell: |
-    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-ssh --nsg-name {{azure_sg.stdout}} --priority 101 --access Allow --description "scale-ci allow ssh" --protocol Tcp --destination-port-ranges "22"
+    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-ssh --nsg-name {{azure_sg.stdout}} --priority 103 --access Allow --description "scale-ci allow ssh" --protocol Tcp --destination-port-ranges "22"
 
 - name: Create network security group rule for pbench-agent ssh (2022)
   shell: |
@@ -52,6 +52,10 @@
 - name: Create network security group rule for tcp,udp hostnetwork tests (32768-60999)
   shell: |
     az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-hostnet --nsg-name {{azure_sg.stdout}} --priority 106 --access Allow --description "scale-ci allow tcp,udp hostnetwork tests" --protocol "*" --destination-port-ranges "32768-60999"
+
+- name: Append a tag to the resource group to extend the lifetime of the cluster to 40 days
+  shell: |
+    az group update -n {{rhcos_cluster_name.stdout}}-rg --set tags.'openshift_expiryDate'=$(date -d "+40 days" +%F)
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
