@@ -140,3 +140,6 @@ data_server_root_path: "{{ lookup('env', 'DATA_SERVER_ROOT_PATH')|default('/root
 data_server_port: "{{ lookup('env', 'DATA_SERVER_PORT')|default(7070, true) }}"
 data_server_log_lvl: "{{ lookup('env', 'DATA_SERVER_LOG_LVL')|default(info, true) }}"
 data_server_public_host: "{{ lookup('env', 'DATA_SERVER_PUBLIC_HOST')|default(localhost, true) }}"
+
+# FIPS
+fips: "{{ lookup('env', 'FIPS')|default(false, true) }}"

@@ -3,7 +3,7 @@ baseDomain: {{ openshift_base_domain }}
 compute:
 - hyperthreading: Enabled
   name: worker
-  platform: 
+  platform:
     gcp:
       type: {{ openshift_worker_machine_type }}
   replicas: {{ openshift_worker_count }}
@@ -33,3 +33,4 @@ pullSecret: |+
   {{ openshift_install_pull_secret | to_json }}
 sshKey: |+
   {{ install_ssh_pub_key.content| b64decode }}
+fips: {{ fips }}
