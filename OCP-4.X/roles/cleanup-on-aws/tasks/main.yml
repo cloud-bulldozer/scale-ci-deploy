@@ -3,27 +3,22 @@
 # Clean up AWS install
 #
 
-- name: Check if cluster is running
-  shell: oc get clusterversion
-  ignore_errors: true
-  register: cluster_status
-
-- name: Check if scale-ci artifacts are present
+- name: Check if a cluster is running
   stat:
     path: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/metadata.json"
-  register: cluster_artifacts
+  register: cluster_status
 
-- name: Cleanup AWS cluster
-  shell: |
-    cd {{ansible_user_dir}}/scale-ci-deploy
-    bin/openshift-install destroy cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
-  when: cluster_artifacts.stat.exists == True and cluster_status.rc == 0
-
-- name: Clean scale-ci-deploy openshift-install directories
-  become: true
-  file:
-    path: "{{item}}"
-    state: absent
-  with_items:
-    - "{{ansible_user_dir}}/scale-ci-deploy/bin"
-    - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws"
+- block:
+    - name: Cleanup AWS cluster
+      shell: |
+        cd {{ansible_user_dir}}/scale-ci-deploy
+        bin/openshift-install destroy cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
+    - name: Clean scale-ci-deploy openshift-install directories
+      become: true
+      file:
+        path: "{{item}}"
+        state: absent
+      with_items:
+        - "{{ansible_user_dir}}/scale-ci-deploy/bin"
+        - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws"
+  when: cluster_status.stat.exists == True
