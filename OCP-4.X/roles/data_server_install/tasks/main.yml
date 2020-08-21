@@ -1,38 +1,106 @@
 ---
-- name: Install podman
-  package:
-    name: podman
+- name: update pip and pipx on RHEL/CentOS
+  pip: 
+    name: 
+      - pip
+      - pipx
     state: latest
+    executable: pip3
+  when: ansible_facts['distribution'] == 'RedHat' or ansible_facts['distribution'] == 'CentOS'
+
+- name: update pip and pipx on Fedora
+  pip: 
+    name: 
+      - pip
+      - pipx
+    state: latest
+    executable: pip
+  when: ansible_facts['distribution'] == 'Fedora'
+
+- name: install container engine and git
+  become: yes
+  package: 
+    name:
+      - podman
+      - git
+    state: present
+
+- name: Get snappy cli
+  command: pipx install --force git+https://github.com/openshift-scale/data-server-cli.git
+
+- name: Update path to include cli app
+  command: pipx ensurepath
+
+- name: Install snappy cli
+  command: snappy install
+
+- name: Create results directory at host root
+  file:
+    path: "{{ data_server_root_path }}/results"
+    state: directory
+    mode: '0755'
 
 - name: Pull "{{ data_server_image }}" image
   podman_image:
     name: "{{ data_server_image }}"
     force: "yes"
 
-- name: Check if data server is on the machine
-  shell: podman ps -a | grep -w snappy-data-server
-  register: data_server_status
+- name: Remove old pod
+  command: podman pod rm -f snappy
   ignore_errors: yes
 
-- name: Delete data server container if it exists
-  shell: podman rm -f data_server
-  when: data_server_status.rc == 0
+- name: Remove old postgres volume
+  command: podman volume rm pg-snappy
   ignore_errors: yes
+    
+- name: Create a new volume for postgres service
+  command: podman volume create pg-snappy
 
-- name: Create results directory at host root if it does not exist
-  file:
-    path: "{{ data_server_root_path }}/results"
-    state: directory
-    mode: '0755'
+- name: Create a pod for container communication
+  command: >-
+    podman pod create
+    --name snappy
+    --publish "{{ data_server_port }}"
 
-- name: Run "{{ data_server_image }}" with a shared results directory on the host
-  command: >- 
+- name: Run postgres service
+  command: >-
     podman run
     --detach
-    --name=data_server
-    --net=host 
+    --env POSTGRES_PASSWORD="{{ postgres_password }}"
+    --name snappy_db
+    --pod snappy
+    --volume pg-snappy:/var/lib/postgresql/data
+    docker.io/library/postgres:12.3-alpine
+
+- name: Seed database with users
+  command: >-
+    podman run
+    --detach
+    --env DATA_SERVER_LOG_LVL="{{ data_server_log_lvl }}"
     --env DATA_SERVER_PUBLIC_HOST="{{ data_server_public_host }}"
     --env DATA_SERVER_PORT="{{ data_server_port }}"
+    --env DATA_SERVER_SECRET="{{ data_server_secret }}"
+    --env FIRST_SUPERUSER="{{ first_superuser }}"
+    --env FIRST_SUPERUSER_PASSWORD="{{ first_superuser_password }}"
+    --env POSTGRES_PASSWORD="{{ postgres_password }}"
+    --env POSTGRES_PORT=5432
+    --env POSTGRES_SERVER=localhost
+    --pod snappy
+    --rm
+    "{{ data_server_image }}" ./scripts/prestart
+
+- name: Run data server
+  command: >-
+    podman run
+    --detach
     --env DATA_SERVER_LOG_LVL="{{ data_server_log_lvl }}"
-    --volume "{{ data_server_root_path }}"/results:/data_server/app/results:z
+    --env DATA_SERVER_PUBLIC_HOST="{{ data_server_public_host }}"
+    --env DATA_SERVER_PORT="{{ data_server_port }}"
+    --env DATA_SERVER_SECRET="{{ data_server_secret }}"
+    --env POSTGRES_PASSWORD="{{ postgres_password }}"
+    --env POSTGRES_PORT=5432
+    --env POSTGRES_SERVER=localhost
+    --name snappy_http
+    --pod snappy
+    --volume "{{ data_server_root_path }}"/results:/data_server/app/app/results:z
     "{{ data_server_image }}"

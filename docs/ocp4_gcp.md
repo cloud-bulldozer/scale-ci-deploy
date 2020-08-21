@@ -250,7 +250,10 @@ The prometheus url.
 ### PROMETHEUS_BEARER_TOKEN
 Default: `''`
 The prometheus bearer token is needed to authenticate with prometheus.
-
+data_server_root_path: "{{ lookup('env', 'DATA_SERVER_ROOT_PATH')|default('/root/data_server', true) }}"
+data_server_port: "{{ lookup('env', 'DATA_SERVER_PORT')|default(7070, true) }}"
+data_server_log_lvl: "{{ lookup('env', 'DATA_SERVER_LOG_LVL')|default(info, true) }}"
+data_server_public_host: "{{ lookup('env', 'DATA_SERVER_PUBLIC_HOST')|default(localhost, true) }}"
 ### SLACK_INTEGRATION
 Default: `false`
 When enabled, cerberus reports the the failed interations and sends the report for the same on a slack channel.
@@ -359,22 +362,38 @@ For use with Flexy built clusters, in which only the post-install steps are ran.
 Default: `false`
 Controls whether the data server is launched.
 
-### DATA_SERVER_ROOT_PATH
-Default: `/root/data_server`
-Absolute path to the data server's host's directory.
-
 ### DATA_SERVER_IMAGE
 Default: `quay.io/openshift-scale/snappy-data-server`
 Latest, maintained image of the snappy data server.
+
+### DATA_SERVER_LOG_LVL
+Default: `info`  
+Data server log level. Current [Uvicorn server](https://www.uvicorn.org) **options:** *'critical', 'error', 'warning', 'info', 'debug', 'trace'.
+
+### DATA_SERVER_PORT
+Default: `7070`  
+Data server service port.
 
 ### DATA_SERVER_PUBLIC_HOST
 Default: `localhost`  
 URL to public host of data server.
 
-### DATA_SERVER_PORT
-Default: `7070`  
-Service port.
+### DATA_SERVER_ROOT_PATH
+Default: `~/data_server`
+Absolute path to the data server's host's directory.
 
-### DATA_SERVER_LOG_LVL
-Default: `info`  
-Data server log level. Current [Uvicorn server](https://www.uvicorn.org) **options:** *'critical', 'error', 'warning', 'info', 'debug', 'trace'.
+### DATA_SERVER_SECRET
+Default: No default.
+Secret to encode passwords in database.
+
+### FIRST_SUPERUSER
+Default: No default.
+Username for the first super user.
+
+### FIRST_SUPERUSER_PASSWORD
+Default: No default.
+Password for the first super user.
+
+### POSTGRES_PASSWORD
+Default: No default.
+Postgresql database super user password.

@@ -391,22 +391,38 @@ For use with Flexy built clusters, in which only the post-install steps are ran
 Default: `false`
 Controls whether the data server is launched.
 
-### DATA_SERVER_ROOT_PATH
-Default: `/root/data_server`
-Absolute path to the data server's host's directory.
-
 ### DATA_SERVER_IMAGE
 Default: `quay.io/openshift-scale/snappy-data-server`
 Latest, maintained image of the snappy data server.
+
+### DATA_SERVER_LOG_LVL
+Default: `info`  
+Data server log level. Current [Uvicorn server](https://www.uvicorn.org) **options:** *'critical', 'error', 'warning', 'info', 'debug', 'trace'.
+
+### DATA_SERVER_PORT
+Default: `7070`  
+Data server service port.
 
 ### DATA_SERVER_PUBLIC_HOST
 Default: `localhost`  
 URL to public host of data server.
 
-### DATA_SERVER_PORT
-Default: `7070`  
-Service port.
+### DATA_SERVER_ROOT_PATH
+Default: `~/data_server`
+Absolute path to the data server's host's directory.
 
-### DATA_SERVER_LOG_LVL
-Default: `info`  
-Data server log level. Current [Uvicorn server](https://www.uvicorn.org) **options:** *'critical', 'error', 'warning', 'info', 'debug', 'trace'.
+### DATA_SERVER_SECRET
+Default: No default.
+Secret to encode passwords in database.
+
+### FIRST_SUPERUSER
+Default: No default.
+Username for the first super user.
+
+### FIRST_SUPERUSER_PASSWORD
+Default: No default.
+Password for the first super user.
+
+### POSTGRES_PASSWORD
+Default: No default.
+Postgresql database super user password.
