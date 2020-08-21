@@ -137,10 +137,14 @@ kubeconfig_auth_dir_path: "{{ lookup('env', 'KUBECONFIG_AUTH_DIR_PATH') }}"
 
 data_server_enable: "{{ lookup('env', 'DATA_SERVER_ENABLE')|default(false, true) }}"
 data_server_image: "{{ lookup('env', 'DATA_SERVER_IMAGE')|default('quay.io/openshift-scale/snappy-data-server:latest', true) }}"
-data_server_root_path: "{{ lookup('env', 'DATA_SERVER_ROOT_PATH')|default('/root/data_server', true) }}"
+data_server_log_lvl: "{{ lookup('env', 'DATA_SERVER_LOG_LVL')|default('info', true) }}"
 data_server_port: "{{ lookup('env', 'DATA_SERVER_PORT')|default(7070, true) }}"
-data_server_log_lvl: "{{ lookup('env', 'DATA_SERVER_LOG_LVL')|default(info, true) }}"
-data_server_public_host: "{{ lookup('env', 'DATA_SERVER_PUBLIC_HOST')|default(localhost, true) }}"
+data_server_public_host: "{{ lookup('env', 'DATA_SERVER_PUBLIC_HOST')|default('localhost', true) }}"
+data_server_root_path: "{{ lookup('env', 'DATA_SERVER_ROOT_PATH')|default('~/data_server', true) }}"
+data_server_secret: "{{ lookup('env', 'DATA_SERVER_SECRET') }}"
+first_superuser: "{{ lookup('env', 'FIRST_SUPERUSER') }}"
+first_superuser_password: "{{ lookup('env', 'FIRST_SUPERUSER_PASSWORD') }}"
+postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
 
 
 # FIPS
