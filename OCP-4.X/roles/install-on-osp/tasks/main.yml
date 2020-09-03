@@ -234,6 +234,11 @@
     - dest: "{{ansible_user_dir}}/.kube/config"
       become: false
 
+- name: Copy the install log to the root directory
+  copy:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack/.openshift_install.log"
+    dest: "{{ansible_user_dir}}/openshift-install.log"
+
 - name: Create dir to store artifacts
   file:
     path: "{{ ansible_user_dir }}/scale-ci-osp-artifacts"
