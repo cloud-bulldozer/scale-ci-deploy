@@ -52,6 +52,7 @@
       - golang-bin
       - gcc-c++
       - python-pip
+      - jq
 
 - name: Install awscli
   pip:

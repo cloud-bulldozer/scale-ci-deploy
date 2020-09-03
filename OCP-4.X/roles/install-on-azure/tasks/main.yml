@@ -55,6 +55,11 @@
       - azure-cli
       - golang
       - golang-bin
+      - gcc
+      - git
+      - gcc-c++
+      - python-pip
+      - jq
 
 - name: Use installer from a build
   block:
