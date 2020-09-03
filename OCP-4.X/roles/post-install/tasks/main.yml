@@ -13,6 +13,17 @@
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ machineset_metadata_label_prefix }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: cluster_name
 
+- name: Add Index install timings to Elasticsearch
+  copy:
+    src: index-install-data.sh
+    dest: "/tmp/index-install-data.sh"
+
+- name: Index install log
+  shell: |
+    export ELASTIC_URL={{elastic}}
+    export ELASTIC_USER={{elastic_user}}
+   /tmp/index-install-data.sh
+
 - name: Get current ready node count
   shell: oc get nodes | grep " Ready" -ic
   register: current_node_count

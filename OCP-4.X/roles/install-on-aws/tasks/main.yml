@@ -136,7 +136,7 @@
     - "{{ansible_user_dir}}/scale-ci-deploy/install-config_aws.yaml"
 
 - block:
-   - name: Fetch the openshift-install binary tarball 
+   - name: Fetch the openshift-install binary tarball
      get_url:
        url: "{{ openshift_install_binary_url }}"
        dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/"
@@ -193,6 +193,11 @@
       become: true
     - dest: "{{ansible_user_dir}}/.kube/config"
       become: false
+
+- name: Copy the install log to the root directory
+  copy:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/.openshift_install.log"
+    dest: "{{ansible_user_dir}}/openshift-install.log"
 
 - name: Create dir to store artifacts
   file:
