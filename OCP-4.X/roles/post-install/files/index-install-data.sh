@@ -17,7 +17,7 @@ CLUSTER_NAME=$($oc_command adm config get-clusters | tail -1)
 PLATFORM=$($oc_command get infrastructure cluster -o jsonpath='{.status.platformStatus.type}')
 
 masters=$($oc_command get nodes -l node-role.kubernetes.io/master --no-headers=true | wc -l)
-workers=$($oc_command get nodes -l node-role.kubernetes.io/master --no-headers=true | wc -l)
+workers=$($oc_command get nodes -l node-role.kubernetes.io/worker --no-headers=true | wc -l)
 workload=$($oc_command get nodes -l node-role.kubernetes.io/workload --no-headers=true | wc -l)
 infra=$($oc_command get nodes -l node-role.kubernetes.io/infra --no-headers=true | wc -l)
 all=$($oc_command get nodes  --no-headers=true | wc -l)
@@ -45,7 +45,7 @@ for line in $(cat ${INSTALL_LOG} | tail -n 20 | egrep "[0-9]+s\"$" | egrep -oh "
   "action": "'$action'",
   "duration": '$time',
   "timestamp": "'$timestamp'"
-  }' $ES/openshift_cluster_timings/_doc/
+  }' $ES/openshift-cluster-timings/_doc/
 done
 
 echo ""
