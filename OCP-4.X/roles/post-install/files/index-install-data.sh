@@ -13,7 +13,7 @@ fi
 oc_command=/usr/local/bin/oc
 timestamp=`date +"%Y-%m-%dT%T.%3N"`
 
-CLUSTER_NAME=$($oc_command adm config get-clusters | tail -1)
+CLUSTER_NAME=$($oc_command get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
 PLATFORM=$($oc_command get infrastructure cluster -o jsonpath='{.status.platformStatus.type}')
 
 masters=$($oc_command get nodes -l node-role.kubernetes.io/master --no-headers=true | wc -l)
