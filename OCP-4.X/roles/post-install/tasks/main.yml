@@ -22,7 +22,7 @@
   shell: |
     export ELASTIC_URL={{elastic_url}}
     export ELASTIC_USER={{elastic_user}}
-    /tmp/index-install-data.sh
+    bash /tmp/index-install-data.sh
 
 - name: Get current ready node count
   shell: oc get nodes | grep " Ready" -ic
