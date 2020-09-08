@@ -20,7 +20,7 @@
 
 - name: Index install log
   shell: |
-    export ELASTIC_URL={{elastic}}
+    export ELASTIC_URL={{elastic_url}}
     export ELASTIC_USER={{elastic_user}}
     /tmp/index-install-data.sh
 
