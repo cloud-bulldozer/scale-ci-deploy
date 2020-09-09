@@ -13,6 +13,7 @@ fi
 oc_command=/usr/local/bin/oc
 timestamp=`date +"%Y-%m-%dT%T.%3N"`
 
+CLUSTER_VERSION=$($oc_command get clusterversion -o jsonpath='{.items[0].status.history[0].version}')
 CLUSTER_NAME=$($oc_command get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
 PLATFORM=$($oc_command get infrastructure cluster -o jsonpath='{.status.platformStatus.type}')
 
@@ -41,6 +42,7 @@ for line in $(cat ${INSTALL_LOG} | tail -n 20 | egrep "[0-9]+s\"$" | egrep -oh "
   "infra_count": '$infra',
   "workload_count": '$workload',
   "total_count": '$all',
+  "cluster_version":"'$CLUSTER_VERSION'",
   "cluster_name": "'$CLUSTER_NAME'",
   "action": "'$action'",
   "duration": '$time',
