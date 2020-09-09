@@ -198,6 +198,7 @@
   copy:
     src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/.openshift_install.log"
     dest: "{{ansible_user_dir}}/openshift-install.log"
+    remote_src: yes
 
 - name: Create dir to store artifacts
   file:
