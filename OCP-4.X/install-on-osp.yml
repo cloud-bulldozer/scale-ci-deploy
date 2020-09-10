@@ -8,6 +8,7 @@
   gather_facts: true
   remote_user: "{{ orchestration_user }}"
   vars_files:
+    - vars/install-common-vars.yml
     - vars/install-on-osp.yml
   vars:
     platform: "osp"
@@ -32,6 +33,7 @@
   vars:
     kubeconfig_auth_dir_path: ""
   vars_files:
+    - vars/install-common-vars.yml
     - vars/install-on-osp.yml
   roles:
     - role: node-debug-config
@@ -89,6 +91,7 @@
   vars:
     kubeconfig_auth_dir_path: ""
   vars_files:
+    - vars/install-common-vars.yml
     - vars/install-on-osp.yml
   roles:
     - role: node-debug-config

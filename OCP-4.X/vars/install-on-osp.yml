@@ -1,44 +1,11 @@
----
-###############################################################################
-# Ansible SSH variables.
-###############################################################################
-ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
-ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
-
 # For OCP on OSP this will be the undercloud user account (usually stack)
 orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('stack', true) }}"
 public_net_name: "{{ lookup('env', 'OSP_PUBLIC_NETWORK_NAME')|default('nova', true) }}"
 osp_project_name: "{{ lookup('env', 'OSP_PROJECT_NAME')|default('shiftstack', true) }}"
-###############################################################################
-# IPI install on OSP variables.
-###############################################################################
-# Playbook flow control
-openshift_install: "{{ lookup('env', 'OPENSHIFT_INSTALL')|default(true, true)|bool }}"
-openshift_post_install: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL')|default(true, true)|bool }}"
-openshift_post_config: "{{ lookup('env', 'OPENSHIFT_POST_CONFIG')|default(true, true)|bool }}"
-openshift_debug_config: "{{ lookup('env', 'OPENSHIFT_DEBUG_CONFIG')|default(true, true)|bool }}"
 
 # Openstack resources to create
 openstack_create_flavors: "{{ lookup('env', 'OPENSTACK_CREATE_FLAVORS')|default(true, true)|bool }}"
 openstack_upload_image: "{{ lookup('env', 'OPENSTACK_UPLOAD_IMAGE')|default(true, true)|bool }}"
-
-# Installation variables
-# Check https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/ for latest client
-openshift_client_location: "{{ lookup('env', 'OPENSHIFT_CLIENT_LOCATION') }}"
-# Check https://github.com/openshift/installer/blob/master/data/data/rhcos.json for latest image
-openshift_image_location: "{{ lookup('env', 'OPENSHIFT_IMAGE_LOCATION') }}"
-# Release payload
-openshift_install_release_image_override: "{{ lookup('env', 'OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE') }}"
-# Install binary url
-openshift_install_binary_url: "{{ lookup('env', 'OPENSHIFT_INSTALL_BINARY_URL') }}"
-openshift_install_apiversion: "{{ lookup('env', 'OPENSHIFT_INSTALL_APIVERSION')|default('v1', true) }}"
-# ssh key for install-config
-openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE')|default('~/.ssh/id_rsa.pub', true) }}"
-# Secrets/Tokens for extract and installing
-openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
-openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
-openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY')|default('registry.svc.ci.openshift.org', true) }}"
-openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
 
 # Cluster configuration
 openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN')|default('example.com', true) }}"
@@ -58,53 +25,6 @@ openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, tr
 
 # Post-install configuration
 
-## Mutable Grafana
-dittybopper_enable: "{{ lookup('env', 'ENABLE_DITTYBOPPER')|default(true, true) }}"
-
-# kube config and cerberus config locations
-kubeconfig_path: "{{ lookup('env', 'KUBECONFIG_PATH')|default('~/.kube/config', true) }}"
-cerberus_config_path: "{{ lookup('env', 'CERBERUS_CONFIG_PATH')|default('~/cerberus.yaml', true) }}"
-
-# Enable Cerberus
-cerberus_enable : "{{ lookup('env', 'CERBERUS_ENABLE')|default(false, true) }}"
-# Cerberus image
-cerberus_image: "{{ lookup('env', 'CERBERUS_IMAGE')|default('quay.io/openshift-scale/cerberus:latest', true) }}"
-# If cerberus is running but not deployed by scale-ci-deploy
-# Add the url of cerberus in the format "http://1.2.3.4:8080"
-cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('http://0.0.0.0:8080') }}"
-
-# Cerberus configuration
-distribution: "{{ lookup('env', 'DISTRIBUTION')|default('openshift', true) }}"
-port: "{{ lookup('env', 'PORT')|default(8080, true) }}"
-watch_nodes: "{{ lookup('env', 'WATCH_NODES')|default(true, true) }}"
-watch_cluster_operators: "{{ lookup('env', 'WATCH_CLUSTER_OPERATORS')|default(true, true) }}"
-watch_url_routes: "{{ lookup('env', 'WATCH_URL_ROUTES')|default('[]', true) }}"
-watch_namespaces: "{{ lookup('env', 'WATCH_NAMESPACES')|default('[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller-manager, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn]', true) }}"
-cerberus_publish_status: "{{ lookup('env', 'CERBERUS_PUBLISH_STATUS')|default(true, true) }}"
-inspect_components: "{{ lookup('env', 'INSPECT_COMPONENTS')|default(false, true) }}"
-prometheus_url: "{{ lookup('env', 'PROMETHEUS_URL')|default('', true) }}"
-prometheus_bearer_token: "{{ lookup('env', 'PROMETHEUS_BEARER_TOKEN')|default('', true) }}"
-slack_integration: "{{ lookup('env', 'SLACK_INTEGRATION')|default(false, true) }}"
-slack_api_token: "{{ lookup('env', 'SLACK_API_TOKEN') }}"
-slack_channel: "{{ lookup('env', 'SLACK_CHANNEL') }}"
-watcher_slack_ID: "{{ lookup('env', 'WATCHER_SLACK_ID')|default('{Monday: , Tuesday: , Wednesday: , Thursday: , Friday: , Saturday: , Sunday: }', true) }}"
-slack_team_alias: "{{ lookup('env', 'SLACK_TEAM_ALIAS') }}"
-iterations: "{{ lookup('env', 'ITERATIONS')|default(5, true) }}"
-sleep_time: "{{ lookup('env', 'SLEEP_TIME')|default(60, true) }}"
-kube_api_request_chunk_size: "{{ lookup('env', 'KUBE_API_REQUEST_CHUNK_SIZE')|default(250, true) }}"
-daemon_mode: "{{ lookup('env', 'DAEMON_MODE')|default(true, true) }}"
-cores_usage_percentage: "{{ lookup('env', 'CORES_USAGE_PERCENTAGE')|default(0.5, true) }}"
-database_path: "{{ lookup('env', 'DATABASE_PATH')|default('/tmp/cerberus.db', true) }}"
-reuse_database: "{{ lookup('env', 'REUSE_DATABASE')|default(false, true) }}"
-
-## Remote write details
-sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"
-sincgars_cluster_name: "{{ lookup('env', 'SINCGARS_CLUSTER_NAME') }}"
-sincgars_remote_write_url: "{{ lookup('env', 'SINCGARS_REMOTE_WRITE_URL') }}"
-
-openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true)|int }}"
-openshift_toggle_infra_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_INFRA_NODE')|default(true, true)|bool }}"
-openshift_toggle_workload_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_WORKLOAD_NODE')|default(true, true)|bool }}"
 # Either machine.openshift.io or sigs.k8s.io
 machineset_metadata_label_prefix: "{{ lookup('env', 'MACHINESET_METADATA_LABEL_PREFIX')|default('machine.openshift.io', true) }}"
 openshift_infra_node_flavor: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_FLAVOR')|default('m4.xlarge', true) }}"
@@ -115,23 +35,3 @@ openshift_prometheus_storage_class: "{{ lookup('env', 'PROMETHEUS_STORAGE_CLASS'
 openshift_prometheus_storage_size: "{{ lookup('env', 'PROMETHEUS_STORAGE_SIZE')|default('10Gi', true) }}"
 openshift_alertmanager_storage_class: "{{ lookup('env', 'ALERTMANAGER_STORAGE_CLASS')|default('standard', true) }}"
 openshift_alertmanager_storage_size: "{{ lookup('env', 'ALERTMANAGER_STORAGE_SIZE')|default('2Gi', true) }}"
-
-
-data_server_enable: "{{ lookup('env', 'DATA_SERVER_ENABLE')|default(false, true) }}"
-data_server_image: "{{ lookup('env', 'DATA_SERVER_IMAGE')|default('quay.io/openshift-scale/snappy-data-server:latest', true) }}"
-data_server_log_lvl: "{{ lookup('env', 'DATA_SERVER_LOG_LVL')|default('info', true) }}"
-data_server_port: "{{ lookup('env', 'DATA_SERVER_PORT')|default(7070, true) }}"
-data_server_public_host: "{{ lookup('env', 'DATA_SERVER_PUBLIC_HOST')|default('localhost', true) }}"
-data_server_root_path: "{{ lookup('env', 'DATA_SERVER_ROOT_PATH')|default('~/data_server', true) }}"
-data_server_secret: "{{ lookup('env', 'DATA_SERVER_SECRET') }}"
-first_superuser: "{{ lookup('env', 'FIRST_SUPERUSER') }}"
-first_superuser_password: "{{ lookup('env', 'FIRST_SUPERUSER_PASSWORD') }}"
-postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
-
-
-# FIPS
-fips: "{{ lookup('env', 'FIPS')|default(false, true) }}"
-
-# Elasticsearch
-elastic_url: "{{ lookup('env', 'ELASTIC_CURL_URL')|default('https://search-cloud-perf-lqrf3jjtaqo7727m7ynd2xyt4y.us-west-2.es.amazonaws.com:80', true) }}"
-elastic_user:  "{{ lookup('env', 'ELASTIC_CURL_USER')|default('', true) }}"

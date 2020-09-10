@@ -8,6 +8,7 @@
   gather_facts: true
   remote_user: "{{orchestration_user}}"
   vars_files:
+    - vars/install-common-vars.yml
     - vars/install-on-gcp.yml
   vars:
     platform: "gcp"
@@ -32,6 +33,7 @@
   gather_facts: true
   remote_user: core
   vars_files:
+    - vars/install-common-vars.yml
     - vars/install-on-gcp.yml
   roles:
     - role: node-debug-config
@@ -87,6 +89,7 @@
   gather_facts: true
   remote_user: core
   vars_files:
+    - vars/install-common-vars.yml
     - vars/install-on-gcp.yml
   roles:
     - role: node-debug-config

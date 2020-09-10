@@ -1,0 +1,116 @@
+---
+###############################################################################
+# Ansible SSH variables.
+###############################################################################
+ansible_public_key_file: "{{ lookup('env', 'PUBLIC_KEY')|default('~/.ssh/id_rsa.pub', true) }}"
+ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rsa', true) }}"
+
+orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true) }}"
+###############################################################################
+# IPI install on Cloud variables.
+###############################################################################
+# Playbook flow control
+openshift_cleanup: "{{ lookup('env', 'OPENSHIFT_CLEANUP')|default(false, true) }}"
+openshift_install: "{{ lookup('env', 'OPENSHIFT_INSTALL')|default(true, true) }}"
+openshift_post_install: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL')|default(true, true) }}"
+openshift_post_config: "{{ lookup('env', 'OPENSHIFT_POST_CONFIG')|default(true, true) }}"
+openshift_debug_config: "{{ lookup('env', 'OPENSHIFT_DEBUG_CONFIG')|default(false, true) }}"
+
+# Installation variables
+# Check https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/ for latest client
+openshift_client_location: "{{ lookup('env', 'OPENSHIFT_CLIENT_LOCATION') }}"
+# Release payload
+openshift_install_release_image_override: "{{ lookup('env', 'OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE') }}"
+# Install binary url
+openshift_install_binary_url: "{{ lookup('env', 'OPENSHIFT_INSTALL_BINARY_URL') }}"
+openshift_install_apiversion: "{{ lookup('env', 'OPENSHIFT_INSTALL_APIVERSION')|default('v1', true) }}"
+# ssh key for install-config
+openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB_KEY_FILE')|default('~/.ssh/id_rsa.pub', true) }}"
+# Secrets/Tokens for extract and installing
+openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
+openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
+openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY')|default('registry.svc.ci.openshift.org', true) }}"
+openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
+# Not recommended, however you can build the installer from source. (You run the risk of using a mismatched binary vs install payload)
+openshift_install_installer_from_source: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE')|default(false, true) }}"
+openshift_install_installer_from_source_version: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE_VERSION')|default('master', true) }}"
+gopath: "{{ lookup('env', 'GOPATH')|default('/root/.go', true) }}"
+
+# Cluster Configuration
+openshift_cidr: "{{ lookup('env', 'OPENSHIFT_CIDR')|default('10.128.0.0/14', true) }}"
+openshift_machine_cidr: "{{ lookup('env', 'OPENSHIFT_MACHINE_CIDR')|default('10.0.0.0/16', true) }}"
+openshift_service_network: "{{ lookup('env', 'OPENSHIFT_SERVICE_NETWORK')|default('172.30.0.0/16', true) }}"
+openshift_host_prefix: "{{ lookup('env', 'OPENSHIFT_HOST_PREFIX')|default(23, true) }}"
+openshift_network_type: "{{ lookup('env', 'OPENSHIFT_NETWORK_TYPE')|default('OpenShiftSDN', true) }}"
+
+# Post-install configuration
+openshift_post_install_poll_attempts: "{{ lookup('env', 'OPENSHIFT_POST_INSTALL_POLL_ATTEMPTS')|default(600, true) }}"
+openshift_toggle_infra_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_INFRA_NODE')|default(true, true) }}"
+openshift_toggle_workload_node: "{{ lookup('env', 'OPENSHIFT_TOGGLE_WORKLOAD_NODE')|default(true, true) }}"
+
+## Mutable Grafana
+dittybopper_enable: "{{ lookup('env', 'ENABLE_DITTYBOPPER')|default(true, true) }}"
+
+# kube config and cerberus config locations
+kubeconfig_path: "{{ lookup('env', 'KUBECONFIG_PATH')|default('~/.kube/config', true) }}"
+cerberus_config_path: "{{ lookup('env', 'CERBERUS_CONFIG_PATH')|default('~/cerberus.yaml', true) }}"
+
+# Enable Cerberus
+cerberus_enable : "{{ lookup('env', 'CERBERUS_ENABLE')|default(false, true) }}"
+# Cerberus image
+cerberus_image: "{{ lookup('env', 'CERBERUS_IMAGE')|default('quay.io/openshift-scale/cerberus:latest', true) }}"
+# If cerberus is running but not deployed by scale-ci-deploy
+# Add the url of cerberus in the format "http://1.2.3.4:8080"
+cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('http://0.0.0.0:8080') }}"
+
+# Cerberus configuration
+distribution: "{{ lookup('env', 'DISTRIBUTION')|default('openshift', true) }}"
+port: "{{ lookup('env', 'PORT')|default(8080, true) }}"
+watch_nodes: "{{ lookup('env', 'WATCH_NODES')|default(true, true) }}"
+watch_cluster_operators: "{{ lookup('env', 'WATCH_CLUSTER_OPERATORS')|default(true, true) }}"
+watch_url_routes: "{{ lookup('env', 'WATCH_URL_ROUTES')|default('[]', true) }}"
+watch_namespaces: "{{ lookup('env', 'WATCH_NAMESPACES')|default('[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller-manager, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn]', true) }}"
+cerberus_publish_status: "{{ lookup('env', 'CERBERUS_PUBLISH_STATUS')|default(true, true) }}"
+inspect_components: "{{ lookup('env', 'INSPECT_COMPONENTS')|default(false, true) }}"
+prometheus_url: "{{ lookup('env', 'PROMETHEUS_URL')|default('', true) }}"
+prometheus_bearer_token: "{{ lookup('env', 'PROMETHEUS_BEARER_TOKEN')|default('', true) }}"
+slack_integration: "{{ lookup('env', 'SLACK_INTEGRATION')|default(false, true) }}"
+slack_api_token: "{{ lookup('env', 'SLACK_API_TOKEN') }}"
+slack_channel: "{{ lookup('env', 'SLACK_CHANNEL') }}"
+watcher_slack_ID: "{{ lookup('env', 'COP_SLACK_ID')|default('{Monday: , Tuesday: , Wednesday: , Thursday: , Friday: , Saturday: , Sunday: }', true) }}"
+slack_team_alias: "{{ lookup('env', 'SLACK_TEAM_ALIAS') }}"
+iterations: "{{ lookup('env', 'ITERATIONS')|default(5, true) }}"
+sleep_time: "{{ lookup('env', 'SLEEP_TIME')|default(60, true) }}"
+kube_api_request_chunk_size: "{{ lookup('env', 'KUBE_API_REQUEST_CHUNK_SIZE')|default(250, true) }}"
+daemon_mode: "{{ lookup('env', 'DAEMON_MODE')|default(true, true) }}"
+cores_usage_percentage: "{{ lookup('env', 'CORES_USAGE_PERCENTAGE')|default(0.5, true) }}"
+database_path: "{{ lookup('env', 'DATABASE_PATH')|default('/tmp/cerberus.db', true) }}"
+reuse_database: "{{ lookup('env', 'REUSE_DATABASE')|default(false, true) }}"
+
+## Remote write details
+sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"
+sincgars_cluster_name: "{{ lookup('env', 'SINCGARS_CLUSTER_NAME') }}"
+sincgars_remote_write_url: "{{ lookup('env', 'SINCGARS_REMOTE_WRITE_URL') }}"
+
+## To specify an alternate auth dir containing kubeconfig, e.g. from AWS cluster installed by Flexy,
+## use only when NOT using the default auth dir located in "${GOPATH}/src/github.com/openshift/installer"
+kubeconfig_auth_dir_path: "{{ lookup('env', 'KUBECONFIG_AUTH_DIR_PATH') }}"
+
+
+data_server_enable: "{{ lookup('env', 'DATA_SERVER_ENABLE')|default(false, true) }}"
+data_server_image: "{{ lookup('env', 'DATA_SERVER_IMAGE')|default('quay.io/openshift-scale/snappy-data-server:latest', true) }}"
+data_server_log_lvl: "{{ lookup('env', 'DATA_SERVER_LOG_LVL')|default('info', true) }}"
+data_server_port: "{{ lookup('env', 'DATA_SERVER_PORT')|default(7070, true) }}"
+data_server_public_host: "{{ lookup('env', 'DATA_SERVER_PUBLIC_HOST')|default('localhost', true) }}"
+data_server_root_path: "{{ lookup('env', 'DATA_SERVER_ROOT_PATH')|default('~/data_server', true) }}"
+data_server_secret: "{{ lookup('env', 'DATA_SERVER_SECRET') }}"
+first_superuser: "{{ lookup('env', 'FIRST_SUPERUSER') }}"
+first_superuser_password: "{{ lookup('env', 'FIRST_SUPERUSER_PASSWORD') }}"
+postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
+
+# FIPS
+fips: "{{ lookup('env', 'FIPS')|default(false, true) }}"
+
+# Elasticsearch
+elastic_url: "{{ lookup('env', 'ELASTIC_CURL_URL')|default('https://search-cloud-perf-lqrf3jjtaqo7727m7ynd2xyt4y.us-west-2.es.amazonaws.com:80', true) }}"
+elastic_user:  "{{ lookup('env', 'ELASTIC_CURL_USER')|default('', true) }}"
