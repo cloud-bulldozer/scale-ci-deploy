@@ -1,0 +1,18 @@
+---
+#
+# intall cerberus and datasever on shiftstack
+#
+
+- name: post install tasks on OSP
+  hosts: orchestration
+  gather_facts: true
+  remote_user: "{{ orchestration_user }}"
+  vars_files:
+    - vars/post-install-on-osp.yml
+  roles:
+    - role: cerberus_install
+      when: cerberus_enable|bool
+    - role: cerberus
+      when: cerberus_enable|bool
+    - role: data_server_install
+      when: data_server_enable|bool
