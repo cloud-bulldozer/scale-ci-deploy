@@ -13,6 +13,14 @@ fi
 oc_command=/usr/local/bin/oc
 timestamp=`date +"%Y-%m-%dT%T.%3N"`
 
+rm -rf metadata-collector
+git clone http://github.com/cloud-bulldozer/metadata-collector/
+cd metadata-collector
+url=$(echo $ELASTIC_SERVER | cut -d ":" -f 1)
+port=$(echo $ELASTIC_SERVER | cut -d ":" -f 2)
+./run_backpack.sh -s ${url} -p ${port} -x -u ${UUID}
+cd
+
 CLUSTER_NAME=$($oc_command get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
 PLATFORM=$($oc_command get infrastructure cluster -o jsonpath='{.status.platformStatus.type}')
 
