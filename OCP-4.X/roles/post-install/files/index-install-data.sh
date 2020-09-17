@@ -3,6 +3,7 @@
 export UUID=$(uuidgen)
 export INSTALL_LOG=${LOG:-/root/openshift-install.log}
 export ES=${ELASTIC_URL:-http://elastic:9200}
+export ES_SERVER=${ELASTIC_SERVER:-elastic:9200}
 export USER=$ELASTIC_USER
 if [[ -z $USER ]]; then
   export ESUSER=""
@@ -16,8 +17,8 @@ timestamp=`date +"%Y-%m-%dT%T.%3N"`
 rm -rf metadata-collector
 git clone http://github.com/cloud-bulldozer/metadata-collector/
 cd metadata-collector
-url=$(echo $ELASTIC_SERVER | cut -d ":" -f 1)
-port=$(echo $ELASTIC_SERVER | cut -d ":" -f 2)
+url=$(echo $ES_SERVER | cut -d ":" -f 1)
+port=$(echo $ES_SERVER | cut -d ":" -f 2)
 ./run_backpack.sh -s ${url} -p ${port} -x -u ${UUID}
 cd
 
