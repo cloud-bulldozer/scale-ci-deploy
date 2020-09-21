@@ -60,7 +60,7 @@ items:
             tags:
             - {{cluster_name.stdout}}-worker
             userDataSecret:
-              name: worker-user-data
+              name: {{ user_data_secret }}
             zone: {{ gcp_region }}-a
   status:
     replicas: 1
@@ -124,7 +124,7 @@ items:
             tags:
             - {{cluster_name.stdout}}-worker
             userDataSecret:
-              name: worker-user-data
+              name: {{ user_data_secret }}
             zone: {{ gcp_region }}-b
   status:
     replicas: 1
@@ -188,7 +188,7 @@ items:
             tags:
             - {{cluster_name.stdout}}-worker
             userDataSecret:
-              name: worker-user-data
+              name: {{ user_data_secret }}
             zone: {{ gcp_region }}-c
   status:
     replicas: 1

@@ -13,6 +13,14 @@
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ machineset_metadata_label_prefix }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: cluster_name
 
+- name: Get cluster version
+  command: {%raw%}oc get clusterversion version -o go-template --template="{{.status.desired.version}}"{%endraw%}
+  register: ocp_version
+
+- name: Set userDataSecret name
+  set_fact:
+    user_data_secret: {% if ocp_version is version('4.6', '>=')%}worker-user-data-managed{% else %}worker-user-data{% endif %}
+
 - name: Add Index install timings to Elasticsearch
   copy:
     src: index-install-data.sh

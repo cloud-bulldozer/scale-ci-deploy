@@ -61,7 +61,7 @@ items:
             sshPublicKey: ""
             subnet: {{cluster_name.stdout}}-worker-subnet
             userDataSecret:
-              name: worker-user-data
+              name: {{ user_data_secret }}
             vmSize: {{openshift_infra_node_vm_size}}
             vnet: {{cluster_name.stdout}}-vnet
             zone: "1"
@@ -128,7 +128,7 @@ items:
             sshPublicKey: ""
             subnet: {{cluster_name.stdout}}-worker-subnet
             userDataSecret:
-              name: worker-user-data
+              name: {{ user_data_secret }}
             vmSize: {{openshift_infra_node_vm_size}}
             vnet: {{cluster_name.stdout}}-vnet
             zone: "2"
@@ -195,7 +195,7 @@ items:
             sshPublicKey: ""
             subnet: {{cluster_name.stdout}}-worker-subnet
             userDataSecret:
-              name: worker-user-data
+              name: {{ user_data_secret }}
             vmSize: {{openshift_infra_node_vm_size}}
             vnet: {{cluster_name.stdout}}-vnet
             zone: "3"

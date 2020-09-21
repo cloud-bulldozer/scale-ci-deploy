@@ -57,7 +57,7 @@ items:
             - openshiftClusterID={{cluster_name.stdout}}
             trunk: true
             userDataSecret:
-              name: worker-user-data
+              name: {{ user_data_secret }}
         versions:
           kubelet: ""
   status:
