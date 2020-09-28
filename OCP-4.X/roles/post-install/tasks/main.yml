@@ -20,7 +20,7 @@
 
 - name: Set userDataSecret name
   set_fact:
-    user_data_secret: "{% if ocp_version is version('4.6', '>=')%}worker-user-data-managed{% else %}worker-user-data{% endif %}"
+    user_data_secret: "{% if ocp_version.stdout is version('4.6', '>=')%}worker-user-data-managed{% else %}worker-user-data{% endif %}"
 
 - name: Add Index install timings to Elasticsearch
   copy:
