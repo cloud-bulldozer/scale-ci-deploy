@@ -1,0 +1,5 @@
+[orchestration]
+# The server to host the build status
+
+[cluster_host]
+# The server that is expected to host the oc client and kubeconfig

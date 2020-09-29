@@ -107,3 +107,19 @@
             force: yes
           when: not job_status.content | b64decode | trim | bool
       when: job_status_file.stat.exists == True
+
+    - name: check if the cluster is running
+      shell: oc get clusterversion
+      register: cluster_version
+      ignore_errors: yes
+      delegate_to: "{{ groups['cluster_host'][0] }}"
+
+    - name: set cluster status as fact
+      set_fact: 
+        cluster_status: "{% if cluster_version.rc == 0 %}true{% else %}false{% endif %}"
+
+    - name: update the cluster status
+      copy:
+        content: "{{ cluster_status }}"
+        dest: "{{ build_info_destination }}/cluster.status"
+        force: yes
