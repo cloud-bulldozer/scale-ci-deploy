@@ -20,7 +20,12 @@ proto="$(echo $ELASTIC_URL | grep :// | sed -e's,^\(.*://\).*,\1,g')"
 ELASTIC_URL="$(echo ${ELASTIC_URL/$proto/})"
 server=$(echo $ELASTIC_URL | cut -d ":" -f 1)
 port=$(echo $ELASTIC_URL | cut -d ":" -f 2)
-./run_backpack.sh -s ${server} -p ${port} -x -u ${UUID}
+if [[ -z $USER ]]
+then
+  ./run_backpack.sh -s ${server} -p ${port} -x -u ${UUID}
+else
+  ./run_backpack.sh -s ${USER}@${server} -p ${port} -x -u ${UUID}
+fi
 cd
 
 CLUSTER_NAME=$($oc_command get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
