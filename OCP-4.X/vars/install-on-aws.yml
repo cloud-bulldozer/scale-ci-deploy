@@ -100,7 +100,7 @@ prometheus_bearer_token: "{{ lookup('env', 'PROMETHEUS_BEARER_TOKEN')|default(''
 slack_integration: "{{ lookup('env', 'SLACK_INTEGRATION')|default(false, true) }}"
 slack_api_token: "{{ lookup('env', 'SLACK_API_TOKEN') }}"
 slack_channel: "{{ lookup('env', 'SLACK_CHANNEL') }}"
-cop_slack_ID: "{{ lookup('env', 'COP_SLACK_ID')|default('{Monday: , Tuesday: , Wednesday: , Thursday: , Friday: , Saturday: , Sunday: }', true) }}"
+cop_slack_ID: "{{ lookup('env', 'WATCHER_SLACK_ID')|default('{Monday: , Tuesday: , Wednesday: , Thursday: , Friday: , Saturday: , Sunday: }', true) }}"
 slack_team_alias: "{{ lookup('env', 'SLACK_TEAM_ALIAS') }}"
 iterations: "{{ lookup('env', 'ITERATIONS')|default(5, true) }}"
 sleep_time: "{{ lookup('env', 'SLEEP_TIME')|default(60, true) }}"

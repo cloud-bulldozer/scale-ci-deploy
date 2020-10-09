@@ -11,9 +11,9 @@ cerberus:
     prometheus_url: {{ prometheus_url }}                            # The prometheus url/route is automatically obtained in case of OpenShift, please set it when the distribution is Kubernetes.
     prometheus_bearer_token: {{ prometheus_bearer_token }}          # The bearer token is automatically obtained in case of OpenShift, please set it when the distribution is Kubernetes. This is needed to authenticate with prometheus.
     slack_integration: {{ slack_integration }}                      # When enabled, cerberus reports the failed iterations in the slack channel
-                                                                    # When slack_integration is enabled, a cop can be assigned for each day. The cop of the day is tagged while reporting failures in the slack channel. Values are slack member ID's.
-    cop_slack_ID: {{ cop_slack_ID }}                                # (NOTE: Defining the cop id's is optional and when the cop slack id's are not defined, the slack_team_alias tag is used if it is set else no tag is used while reporting failures in the slack channel.)
-    slack_team_alias: {{ slack_team_alias }}                        # The slack team alias to be tagged while reporting failures in the slack channel when no cop is assigned
+                                                                    # When slack_integration is enabled, a watcher can be assigned for each day. The watcher of the day is tagged while reporting failures in the slack channel. Values are slack member ID's.
+    cop_slack_ID: {{ cop_slack_ID }}                                # (NOTE: Defining the watcher id's is optional and when the watcher slack id's are not defined, the slack_team_alias tag is used if it is set else no tag is used while reporting failures in the slack channel.)
+    slack_team_alias: {{ slack_team_alias }}                        # The slack team alias to be tagged while reporting failures in the slack channel when no watcher is assigned
 
 tunings:
     iterations: {{ iterations }}                                    # Iterations to loop before stopping the watch, it will be replaced with infinity when the daemon mode is enabled

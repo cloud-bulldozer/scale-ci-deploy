@@ -267,13 +267,13 @@ It refers to Bot User OAuth Access Token used for cerberus.
 Default: No default.
 It refers to the slack channel ID the user wishes to receive the notifications for cerberus failures.
 
-### COP_SLACK_ID
+### WATCHER_SLACK_ID
 Default: `'{Monday: , Tuesday: , Wednesday: , Thursday: , Friday: , Saturday: , Sunday: }'`
-When slack_integration is enabled, a cop can be assigned for each day. The cop of the day is tagged while reporting failures in a slack channel. Values are slack member ID's.
+When slack_integration is enabled, a watcher can be assigned for each day. The watcher of the day is tagged while reporting failures in a slack channel. Values are slack member ID's.
 
 ### SLACK_TEAM_ALIAS
 Default: No default.
-The slack team alias to be tagged while reporting failures in the slack channel when no cop is assigned.
+The slack team alias to be tagged while reporting failures in the slack channel when no watcher is assigned.
 
 ### ITERATIONS
 Default: `5`
