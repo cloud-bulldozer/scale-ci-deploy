@@ -8,6 +8,7 @@
   yum:
     name: podman
     state: latest
+  become: true
 
 - name: Pull "{{ cerberus_image }}" image
   podman_image:
