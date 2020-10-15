@@ -7,6 +7,8 @@ ansible_private_key_file: "{{ lookup('env', 'PRIVATE_KEY')|default('~/.ssh/id_rs
 
 # For OCP on OSP this will be the undercloud user account (usually stack)
 orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('stack', true) }}"
+public_net_name: "{{ lookup('env', 'OSP_PUBLIC_NETWORK_NAME')|default('nova', true) }}"
+osp_project_name: "{{ lookup('env', 'OSP_PROJECT_NAME')|default('shiftstack', true) }}"
 ###############################################################################
 # IPI install on OSP variables.
 ###############################################################################
