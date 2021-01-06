@@ -3,6 +3,7 @@ set -x
 export UUID=$(uuidgen)
 export INSTALL_LOG=${LOG:-/root/openshift-install.log}
 export ES=${ELASTIC_URL:-http://elastic:9200}
+export SSL=${ES_SSL:-True}
 export USER=$ELASTIC_USER
 if [[ -z $USER ]]; then
   export ESUSER=""
@@ -22,9 +23,9 @@ server=$(echo $ELASTIC_URL | cut -d ":" -f 1)
 port=$(echo $ELASTIC_URL | cut -d ":" -f 2)
 if [[ -z $USER ]]
 then
-  ./run_backpack.sh -s ${server} -p ${port} -x -u ${UUID}
+  ./run_backpack.sh -a ${SSL} -s ${server} -p ${port} -x -u ${UUID}
 else
-  ./run_backpack.sh -s ${USER}@${server} -p ${port} -x -u ${UUID}
+  ./run_backpack.sh -a ${SSL} -s ${USER}@${server} -p ${port} -x -u ${UUID}
 fi
 cd
 
