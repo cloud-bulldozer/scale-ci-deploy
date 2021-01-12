@@ -5,8 +5,9 @@
 
 - name: Uninstall OCP 4 on OSP and cleanup OSP resources
   hosts: orchestration
+  become: true
   gather_facts: true
-  remote_user: "{{ ORCHESTRATION_USER | default('stack') }}"
+  remote_user: "{{ orchestration_user | default('stack') }}"
   vars_files:
     - vars/clean-on-osp.yml
   roles:
