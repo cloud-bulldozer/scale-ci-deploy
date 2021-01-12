@@ -5,7 +5,6 @@
 
 - name: Perform IPI install OCP 4 on Google cloud
   hosts: orchestration
-  become: true
   gather_facts: true
   remote_user: "{{orchestration_user}}"
   vars_files:
@@ -32,7 +31,6 @@
 - name: (Optional) Debugging configuration of workload node
   hosts: workload
   gather_facts: true
-  become: true
   remote_user: core
   vars_files:
     - vars/install-common-vars.yml
@@ -89,7 +87,6 @@
 - name: (Optional) Debugging configuration of initially deployed nodes
   hosts: master, infra, worker
   gather_facts: true
-  become: true
   remote_user: core
   vars_files:
     - vars/install-common-vars.yml

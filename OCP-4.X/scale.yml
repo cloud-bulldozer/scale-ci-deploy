@@ -6,7 +6,6 @@
 - name: Adjust the scale of a RHCOS cluster
   hosts: orchestration
   gather_facts: false
-  become: true
   remote_user: "{{orchestration_user}}"
   vars_files:
     - vars/scale.yml
