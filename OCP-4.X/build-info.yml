@@ -1,6 +1,5 @@
 ---
 - hosts: orchestration
-  become: true
   remote_user: "{{ orchestration_user }}"
   vars_files:
     - vars/build-info.yml
