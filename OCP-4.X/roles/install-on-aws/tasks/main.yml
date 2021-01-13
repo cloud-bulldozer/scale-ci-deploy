@@ -125,6 +125,7 @@
   slurp:
     src: "{{openshift_install_ssh_pub_key_file}}"
   delegate_to: localhost
+  become: false
   register: install_ssh_pub_key
 
 - name: Setup install-config.yaml
