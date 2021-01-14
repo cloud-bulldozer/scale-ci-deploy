@@ -53,12 +53,6 @@
       - gcc-c++
       - python-pip
       - jq
-      - bc
-      - podman
-      - python3
-      - pipenv
-      - figlet
-      - parallel
 
 - name: Install awscli
   pip:
