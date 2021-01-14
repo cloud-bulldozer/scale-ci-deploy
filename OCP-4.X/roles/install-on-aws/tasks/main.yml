@@ -59,6 +59,7 @@
       - pipenv
       - figlet
       - parallel
+      - tmux
 
 - name: Install awscli
   pip:
