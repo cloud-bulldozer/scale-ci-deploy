@@ -171,28 +171,34 @@
     bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/
   when: openshift_install_release_image_override == "" and openshift_install_binary_url == ""
 
-- name: ensure that .kube dir exists
-  become: "{{item.become}}"
+- name: Ensure that .kube dir exists
   file:
     path: "{{item.path}}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
     state: directory
   with_items:
     - path: /root/.kube
-      become: true
-    - path: "{{ansible_user_dir}}/.kube"
-      become: false
+      owner: root
+      group: root
+    - path: "/home/{{orchestration_user}}/.kube"
+      owner: "{{orchestration_user}}"
+      group: "{{orchestration_user}}"
 
 - name: Copy the kubeconfig to .kube directories
-  become: "{{item.become}}"
   copy:
     src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/auth/kubeconfig"
-    dest: "{{item.dest}}"
+    dest: "{{item.path}}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
     remote_src: true
   with_items:
-    - dest: /root/.kube/config
-      become: true
-    - dest: "{{ansible_user_dir}}/.kube/config"
-      become: false
+    - path: /root/.kube/config
+      owner: "{{orchestration_user}}"
+      group: "{{orchestration_user}}"
+    - path: "/home/{{orchestration_user}}/.kube/config"
+      owner: "{{orchestration_user}}"
+      group: "{{orchestration_user}}"
 
 - name: Copy the install log to the root directory
   copy:
@@ -205,6 +211,7 @@
     path: "{{ playbook_dir }}/scale-ci-aws-artifacts"
     state: directory
   delegate_to: localhost
+  become: false
 
 - name: Copy the install log to the artifacts dir
   fetch:
