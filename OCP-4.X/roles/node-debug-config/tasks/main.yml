@@ -4,56 +4,67 @@
 #
 
 - name: Ensure that .kube dir exists
-  become: "{{item.become}}"
   file:
-    path: "{{ item.path }}"
+    path: "{{item.path}}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
     state: directory
   with_items:
     - path: /home/core/.kube
-      become: false
+      owner: core
+      group: core
     - path: /root/.kube
-      become: true
+      owner: root
+      group: root
 
 - name: Copy the kubeconfig to a node
-  become: "{{item.become}}"
   copy:
     src: "{{playbook_dir}}/kubeconfig"
-    dest: "{{ item.dest }}"
+    dest: "{{item.dest}}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
   with_items:
     - dest: /home/core/.kube/config
-      become: false
+      owner: core
+      group: core
     - dest: /root/.kube/config
-      become: true
+      owner: root
+      group: root
   when:
     - kubeconfig_auth_dir_path == ""
 
 # Handle case where kubeconfig is in another specified dir
 - name: Copy the kubeconfig to node from specific directory
-  become: "{{item.become}}"
   copy:
     src: "{{ kubeconfig_auth_dir_path }}/auth/kubeconfig"
     dest: "{{ item.dest }}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
   with_items:
     - dest: /home/core/.kube/config
-      become: false
+      owner: core
+      group: core
     - dest: /root/.kube/config
-      become: true
+      owner: root
+      group: root
   when:
     - kubeconfig_auth_dir_path != ""
 
 - name: Ensure that ssh dir exists
-  become: "{{item.become}}"
   file:
     path: "{{ item.path }}"
     state: directory
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
   with_items:
     - path: /home/core/.ssh
-      become: false
+      owner: core
+      group: core
     - path: /root/.ssh
-      become: true
+      owner: root
+      group: root
 
 - name: Copy authorized keys
-  become: true
   copy:
     src: /home/core/.ssh/authorized_keys
     dest: /root/.ssh/authorized_keys
@@ -62,26 +73,27 @@
     group: root
 
 - name: Copy private key to a node
-  become: "{{item.become}}"
   copy:
     src: "{{ansible_ssh_private_key_file}}"
     dest: "{{ item.dest }}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
     mode: 0600
   with_items:
     - dest: /home/core/.ssh/id_rsa
-      become: false
+      owner: core
+      group: core
     - dest: /root/.ssh/id_rsa
-      become: true
+      owner: root
+      group: root
 
 - name: Permit root login
-  become: true
   lineinfile:
     path: /etc/ssh/sshd_config
     regexp: "PermitRootLogin no"
     line: "PermitRootLogin yes"
 
 - name: Restart sshd
-  become: true
   systemd:
     name: sshd
     state: restarted

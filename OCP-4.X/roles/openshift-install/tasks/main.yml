@@ -1,0 +1,271 @@
+---
+#
+# Tasks to install OCP on the given platform
+#
+# Flow:
+# * Setup directories and oc/kubectl client
+# * Either extract install binary or build from source
+# * Install cloud tools and authentication
+# * Install cluster
+#
+
+- name: Create scale-ci-deploy directories
+  file:
+    path: "{{item}}"
+    state: directory
+  with_items:
+    - "{{ansible_user_dir}}/scale-ci-deploy/"
+    - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}"
+    - "{{ansible_user_dir}}/scale-ci-deploy/logs"
+    - "{{ansible_user_dir}}/scale-ci-deploy/bin"
+    - "{{ansible_user_dir}}/.docker"
+
+- name: Download oc client tools
+  get_url:
+    url: "{{openshift_client_location}}"
+    dest: "{{ansible_user_dir}}/scale-ci-deploy/{{openshift_client_location | basename}}"
+
+- name: Untar and install oc client tools
+  shell: |
+    set -o pipefail
+    cd {{ansible_user_dir}}/scale-ci-deploy/
+    tar xzf {{ansible_user_dir}}/scale-ci-deploy/{{openshift_client_location | basename}}
+    cp {{ansible_user_dir}}/scale-ci-deploy/oc /usr/local/bin/oc
+    cp {{ansible_user_dir}}/scale-ci-deploy/kubectl /usr/local/bin/kubectl
+
+- name: Setup config for container registry
+  template:
+    src: registry_auth.j2
+    dest: "{{ansible_user_dir}}/.docker/config.json"
+
+- name: Install dependencies
+  package:
+    name: "{{ packages }}"
+    state: latest
+    lock_timeout: 180
+  vars:
+    packages:
+      - golang
+      - gcc
+      - git
+      - golang-bin
+      - gcc-c++
+      - python-pip
+      - jq
+      - bc
+      - podman
+      - python3
+      - pipenv
+      - figlet
+      - parallel
+      - tmux
+
+- name: Install awscli
+  pip:
+    name: awscli
+
+- name: Use installer from a build
+  block:
+  
+  - name: Extract openshift-install binary from the payload
+    shell: |
+      set -o pipefail
+      cd {{ansible_user_dir}}/scale-ci-deploy/bin
+      oc adm release extract --tools {{openshift_install_release_image_override}}
+      ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
+      chmod +x openshift-install
+
+  when: not openshift_install_installer_from_source|bool and openshift_install_binary_url == ""
+
+- name: Build installer from source
+  block:
+
+  - name: create gopath dir
+    file:
+      path: "{{ gopath }}"
+      state: directory
+
+  - name: set workdir
+    set_fact:
+      workdir: "{{ gopath }}/src/github.com/openshift/installer"
+
+  - name: cleanup installer code if it exists
+    file:
+      path: "{{ workdir }}"
+      state: absent
+
+  - name: get the installer bits
+    git:
+      repo: 'https://github.com/openshift/installer.git'
+      dest: "{{ workdir }}"
+      version: "{{ openshift_install_installer_from_source_version }}"
+
+  - name: build installer binary
+    shell: |
+      cd {{ workdir }}
+      hack/build.sh
+    environment:
+      GOPATH: "{{ gopath }}"
+
+  - name: Copy installer into expected directory
+    copy:
+      src: "{{ workdir }}/bin/openshift-install"
+      dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/openshift-install"
+      remote_src: true
+      mode: 0744
+
+  when: openshift_install_installer_from_source|bool
+
+- name: Read contents local ssh public key
+  slurp:
+    src: "{{openshift_install_ssh_pub_key_file}}"
+  delegate_to: localhost
+  become: false
+  register: install_ssh_pub_key
+
+- name: Create platform dir
+  file:
+    path: "{{ ansible_user_dir }}/.{{platform}}"
+    state: directory
+
+- name: Setting up AWS
+  block:
+
+  - name: AWS config
+    template:
+       src: config.j2
+       dest: "{{ ansible_user_dir }}/.aws/config"
+  
+  - name: AWS credentials
+    template:
+       src: credentials.j2
+       dest: "{{ ansible_user_dir }}/.aws/credentials"
+
+  when: platform == "aws"
+
+- name: Setting up Azure
+  block:
+
+  - name: Install dependencies
+    package:
+      name: "{{ item }}"
+      state: latest
+      lock_timeout: 180
+    loop:
+      - azure-cli
+
+  - name: Setup MS Azure CLI Repos
+    shell: |
+      rpm --import https://packages.microsoft.com/keys/microsoft.asc
+      echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo
+
+  when: platform == "azure"
+
+- name: Setting up GCP
+  block:
+
+  - name: Setup google cloud sdk repo
+    copy:
+      src: "{{ role_path }}/files/google-cloud-sdk.repo"
+      dest: /etc/yum.repos.d/
+      remote_src: false
+
+  - name: Install dependencies
+    package:
+      name: "{{ item }}"
+      state: latest
+      lock_timeout: 180
+    loop:
+      - google-cloud-sdk
+
+  - name: Login GCP account via service account (For GCP CLI interactions) and set the default project
+    shell: gcloud auth activate-service-account {{ gcp_service_account }} --key-file={{ gcp_auth_key_file }} --project={{ gcp_project }}
+
+  when: platform == "gcp"
+
+- block:
+
+   - name: Fetch the openshift-install binary tarball
+     get_url:
+       url: "{{ openshift_install_binary_url }}"
+       dest: "{{ansible_user_dir}}/scale-ci-deploy/bin/"
+
+   - name: Extract openshift-install binary
+     shell: |
+       set -o pipefail
+       cd {{ansible_user_dir}}/scale-ci-deploy/bin
+       ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
+       chmod +x openshift-install
+
+  when: openshift_install_binary_url != ""
+
+- name: Setup install-config.yaml
+  template:
+    src: install-config-{{platform}}.yaml.j2
+    dest: "{{item}}"
+  with_items:
+    - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}/install-config.yaml"
+    - "{{ansible_user_dir}}/scale-ci-deploy/install-config_{{platform}}.yaml"
+
+- name: Run openshift installer
+  shell: |
+    set -o pipefail
+    cd {{ansible_user_dir}}/scale-ci-deploy
+    export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
+    export GOOGLE_CREDENTIALS={{ gcp_auth_key_file }}
+    bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}/
+  when: openshift_install_release_image_override != "" and openshift_install_binary_url == ""
+
+- name: Ensure that .kube dir exists
+  file:
+    path: "{{item.path}}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
+    state: directory
+  with_items:
+    - path: /root/.kube
+      owner: root
+      group: root
+    - path: "/home/{{orchestration_user}}/.kube"
+      owner: "{{orchestration_user}}"
+      group: "{{orchestration_user}}"
+
+- name: Copy the kubeconfig to .kube directories
+  copy:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}/auth/kubeconfig"
+    dest: "{{item.path}}"
+    owner: "{{item.owner}}"
+    group: "{{item.group}}"
+    remote_src: true
+  with_items:
+    - path: /root/.kube/config
+      owner: "{{orchestration_user}}"
+      group: "{{orchestration_user}}"
+    - path: "/home/{{orchestration_user}}/.kube/config"
+      owner: "{{orchestration_user}}"
+      group: "{{orchestration_user}}"
+
+- name: Copy the install log to the root directory
+  copy:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}/.openshift_install.log"
+    dest: "{{ansible_user_dir}}/openshift-install.log"
+    remote_src: yes
+
+- name: Create dir to store artifacts
+  file:
+    path: "{{ playbook_dir }}/scale-ci-{{platform}}-artifacts"
+    state: directory
+  delegate_to: localhost
+  become: false
+
+- name: Copy the install log to the artifacts dir
+  fetch:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}/.openshift_install.log"
+    dest: "{{ playbook_dir }}/scale-ci-{{platform}}-artifacts/openshift_install.log"
+    flat: yes
+
+- name: Copy the kubeconfig to the artifacts dir
+  fetch:
+    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}/auth/kubeconfig"
+    dest: "{{ playbook_dir }}/scale-ci-{{platform}}-artifacts/kubeconfig"
+    flat: yes

@@ -19,7 +19,7 @@ $ cd scale-ci-deploy
 $ cp OCP-4.X/inventory.example inventory
 $ # Edit inventory and add your expected orchestration host
 $ # Edit deployment variables (Ex vi OCP-4.X/vars/install-on-aws.yml) or define env variables
-$ ansible-playbook -v -i inventory OCP-4.X/install-on-aws.yml
+$ ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml
 ```
 
 The orchestration host can be `localhost` or a remote machine already provisioned on the cloud in which the cluster will be deployed on.  If executing from Jenkins, `localhost` should be used.
