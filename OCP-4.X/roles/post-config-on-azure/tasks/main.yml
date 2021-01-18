@@ -59,7 +59,7 @@
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
-    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-azure/auth/kubeconfig"
+    src: "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-azure/auth/kubeconfig"
     dest: "{{playbook_dir}}/kubeconfig"
     flat: true
   when:

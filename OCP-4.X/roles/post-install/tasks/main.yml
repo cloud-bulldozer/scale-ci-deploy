@@ -56,10 +56,10 @@
       when: item.toggle|bool
       with_items:
         - src: aws-infra-node-machineset.yml.j2
-          dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/scale-ci-deploy/infra-node-machineset.yml"
           toggle: "{{openshift_toggle_infra_node}}"
         - src: aws-workload-node-machineset.yml.j2
-          dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/scale-ci-deploy/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
   when: platform == "aws"
 
@@ -82,10 +82,10 @@
       when: item.toggle|bool
       with_items:
         - src: azure-infra-node-machineset.yml.j2
-          dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/scale-ci-deploy/infra-node-machineset.yml"
           toggle: "{{openshift_toggle_infra_node}}"
         - src: azure-workload-node-machineset.yml.j2
-          dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/scale-ci-deploy/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
   when: platform == "azure"
 
@@ -98,20 +98,20 @@
       when: item.toggle|bool
       with_items:
         - src: gcp-infra-node-machineset.yml.j2
-          dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/scale-ci-deploy/infra-node-machineset.yml"
           toggle: "{{openshift_toggle_infra_node}}"
         - src: gcp-workload-node-machineset.yml.j2
-          dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/scale-ci-deploy/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
         - src: gcp-ssd-sc.yml.j2
-          dest: "{{ansible_user_dir}}/scale-ci-deploy/pd-ssd-sc.yml"
+          dest: "{{ ansible_user_dir }}/scale-ci-deploy/pd-ssd-sc.yml"
           toggle: true
 
     - name: (GCP) Create faster ssd sc
       shell: |
         oc create -f {{ item.sc }}
       with_items:
-        - sc: "{{ansible_user_dir}}/scale-ci-deploy/pd-ssd-sc.yml"
+        - sc: "{{ ansible_user_dir }}/scale-ci-deploy/pd-ssd-sc.yml"
 
   when: platform == "gcp"
 
@@ -121,10 +121,10 @@
     dest: "{{item.dest}}"
   with_items:
     - src: osp-infra-node-machineset.yml.j2
-      dest: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+      dest: "{{ ansible_user_dir }}/scale-ci-deploy/infra-node-machineset.yml"
       toggle: "{{openshift_toggle_infra_node}}"
     - src: osp-workload-node-machineset.yml.j2
-      dest: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+      dest: "{{ ansible_user_dir }}/scale-ci-deploy/workload-node-machineset.yml"
       toggle: "{{openshift_toggle_workload_node}}"
   when:
     - item.toggle|bool
@@ -135,9 +135,9 @@
     oc create -f {{item.ms}}
   when: item.toggle|bool
   with_items:
-    - ms: "{{ansible_user_dir}}/scale-ci-deploy/infra-node-machineset.yml"
+    - ms: "{{ ansible_user_dir }}/scale-ci-deploy/infra-node-machineset.yml"
       toggle: "{{openshift_toggle_infra_node}}"
-    - ms: "{{ansible_user_dir}}/scale-ci-deploy/workload-node-machineset.yml"
+    - ms: "{{ ansible_user_dir }}/scale-ci-deploy/workload-node-machineset.yml"
       toggle: "{{openshift_toggle_workload_node}}"
 
 - name: Set expected node count
@@ -189,12 +189,12 @@
 - name: Copy new cluster-monitoring-config
   template:
     src: cluster-monitoring-config.yml.j2
-    dest: "{{ansible_user_dir}}/scale-ci-deploy/cluster-monitoring-config.yml"
+    dest: "{{ ansible_user_dir }}/scale-ci-deploy/cluster-monitoring-config.yml"
   when: openshift_toggle_infra_node|bool
 
 - name: Replace the cluster-monitoring-config ConfigMap
   shell: |
-    oc create -f {{ansible_user_dir}}/scale-ci-deploy/cluster-monitoring-config.yml
+    oc create -f {{ ansible_user_dir }}/scale-ci-deploy/cluster-monitoring-config.yml
   ignore_errors: yes
   when: openshift_toggle_infra_node|bool
 
@@ -282,19 +282,19 @@
     - name: clone sincgars
       git:
         repo: 'https://github.com/aakarshg/sincgars.git'
-        dest: "{{ansible_user_dir}}/sincgars"
+        dest: "{{ ansible_user_dir }}/sincgars"
         force: yes
 
     - name: (sincgars_cluster_name not provided) run sincgars
       command: python deploy.py -c {{ cluster_name.stdout }} -u {{ sincgars_remote_write_url }}
       args:
-        chdir: "{{ansible_user_dir}}/sincgars"
+        chdir: "{{ ansible_user_dir }}/sincgars"
       when: sincgars_cluster_name == ""
 
     - name: (sincgars_cluster_name provided) run sincgars
       command: python deploy.py -c {{ sincgars_cluster_name }} -u {{ sincgars_remote_write_url }}
       args:
-        chdir: "{{ansible_user_dir}}/sincgars"
+        chdir: "{{ ansible_user_dir }}/sincgars"
       when: sincgars_cluster_name != ""
   when: sincgars_enable and sincgars_remote_write_url != ""
 
@@ -303,11 +303,11 @@
     - name: clone dittybopper
       git:
         repo: 'https://github.com/cloud-bulldozer/performance-dashboards.git'
-        dest: "{{ansible_user_dir}}/performance-dashboards"
+        dest: "{{ ansible_user_dir }}/performance-dashboards"
         force: yes
 
     - name: Deploy mutable Grafana
       command: ./deploy.sh
       args:
-        chdir: "{{ansible_user_dir}}/performance-dashboards/dittybopper"
+        chdir: "{{ ansible_user_dir }}/performance-dashboards/dittybopper"
   when: dittybopper_enable
