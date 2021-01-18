@@ -214,7 +214,6 @@
     export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
     bin/openshift-install create cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-{{platform}}/
-  when: openshift_install_release_image_override != "" and openshift_install_binary_url == ""
 
 - name: Ensure that .kube dir exists
   file:
