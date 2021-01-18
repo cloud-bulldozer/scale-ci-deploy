@@ -113,4 +113,3 @@ fips: "{{ lookup('env', 'FIPS')|default(false, true) }}"
 
 # Elasticsearch
 elastic_url: "{{ lookup('env', 'ELASTIC_CURL_URL')|default('https://search-cloud-perf-lqrf3jjtaqo7727m7ynd2xyt4y.us-west-2.es.amazonaws.com:80', true) }}"
-elastic_user:  "{{ lookup('env', 'ELASTIC_CURL_USER')|default('', true) }}"
