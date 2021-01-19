@@ -26,17 +26,12 @@
   set_fact:
     user_data_secret: "worker-user-data"
 
-- name: Add Index install timings to Elasticsearch
-  copy:
-    src: index-install-data.sh
-    dest: "/tmp/index-install-data.sh"
-  environment:
-    INSTALL_LOG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/.openshift_install.log"
-
 - name: Index install log
-  shell: |
-    export ELASTIC_URL={{elastic_url}}
-    bash /tmp/index-install-data.sh
+  script:
+    cmd: index-install-data.sh
+  environment:
+    ELASTIC_URL: "{{ elastic_url }}"
+    INSTALL_LOG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/.openshift_install.log"
 
 - name: Get current ready node count
   shell: oc get nodes | grep " Ready" -ic
