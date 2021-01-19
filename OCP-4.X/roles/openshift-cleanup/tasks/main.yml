@@ -5,21 +5,22 @@
 
 - name: Check if a cluster is running
   stat:
-    path: "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-{{ platform }}/metadata.json"
+    path: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/metadata.json"
   register: cluster_status
 
 - block:
     - name: Cleanup cluster
       shell: |
-        cd {{ ansible_user_dir }}/scale-ci-deploy
+        cd {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/
         export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
-        bin/openshift-install destroy cluster --log-level=debug --dir={{ ansible_user_dir }}/scale-ci-deploy/scale-ci-{{ platform }}/
+        bin/openshift-install destroy cluster --log-level=debug
+
     - name: Clean scale-ci-deploy openshift-install directories
       become: true
       file:
         path: "{{item}}"
         state: absent
       with_items:
-        - "{{ ansible_user_dir }}/scale-ci-deploy/bin"
-        - "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-{{ platform }}"
+        - "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin/"
+        - "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}"
   when: cluster_status.stat.exists == True

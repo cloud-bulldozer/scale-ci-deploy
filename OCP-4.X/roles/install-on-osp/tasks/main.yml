@@ -9,30 +9,27 @@
 # * Install cluster
 #
 
-- name: Create scale-ci-deploy directories
+- name: Create scale-ci-{{ openshift_cluster_name }}-{{ platform }} directories
   file:
     path: "{{item}}"
     state: directory
   with_items:
-    - "{{ ansible_user_dir }}/scale-ci-deploy/"
-    - "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-openstack"
-    - "{{ ansible_user_dir }}/scale-ci-deploy/logs"
-    - "{{ ansible_user_dir }}/scale-ci-deploy/bin"
+    - "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin"
     - "{{ ansible_user_dir }}/.docker"
 
 - name: Download oc client tools
   get_url:
     url: "{{openshift_client_location}}"
-    dest: "{{ ansible_user_dir }}/scale-ci-deploy/{{openshift_client_location | basename}}"
+    dest: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin/{{openshift_client_location | basename}}"
 
 - name: Untar and install oc client tools
   become: true
   shell: |
     set -o pipefail
-    cd {{ ansible_user_dir }}/scale-ci-deploy/
-    tar xzf {{ ansible_user_dir }}/scale-ci-deploy/{{openshift_client_location | basename}}
-    cp {{ ansible_user_dir }}/scale-ci-deploy/oc /usr/local/bin/oc
-    cp {{ ansible_user_dir }}/scale-ci-deploy/kubectl /usr/local/bin/kubectl
+    cd {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin
+    tar xzf {{ openshift_client_location | basename }}
+    cp oc /usr/local/bin/oc
+    cp kubectl /usr/local/bin/kubectl
 
 - name: Setup config for container registry
   template:
@@ -42,7 +39,7 @@
 - name: Extract openshift-install binary from the payload
   shell: |
     set -o pipefail
-    cd {{ ansible_user_dir }}/scale-ci-deploy/bin
+    cd {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin
     oc adm release extract --tools {{openshift_install_release_image_override}}
     ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
     chmod +x openshift-install
@@ -93,23 +90,23 @@
 - name: Create clouds.yml
   template:
     src: clouds.yml.j2
-    dest: "{{ ansible_user_dir }}/scale-ci-deploy/clouds.yml"
+    dest: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/clouds.yml"
 
 - name: Download image
   get_url:
     url: "{{openshift_image_location}}"
-    dest: "{{ ansible_user_dir }}/scale-ci-deploy/{{openshift_image_location | basename}}"
+    dest: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/{{openshift_image_location | basename}}"
   when: openstack_upload_image|bool
 
 - name: Converting qcow2 image to raw format
   shell: |
-    qemu-img convert -f qcow2 -O raw {{ ansible_user_dir }}/scale-ci-deploy/{{openshift_image_location | basename}} {{ ansible_user_dir }}/scale-ci-deploy/{{ (openshift_image_location | basename | splitext)[0] }}.raw
+    qemu-img convert -f qcow2 -O raw {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/{{openshift_image_location | basename}} {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/{{ (openshift_image_location | basename | splitext)[0] }}.raw
   when: openstack_upload_image|bool
 
 - name: Upload image into glance
   shell: |
     . {{ ansible_user_dir }}/overcloudrc
-    openstack image create --disk-format raw --container-format bare --file {{ ansible_user_dir }}/scale-ci-deploy/{{ (openshift_image_location | basename | splitext)[0] }}.raw rhcos --format value -c id
+    openstack image create --disk-format raw --container-format bare --file {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/{{ (openshift_image_location | basename | splitext)[0] }}.raw rhcos --format value -c id
   register: glance_image_id
   when: openstack_upload_image|bool
 
@@ -179,37 +176,30 @@
     src: install-config.yaml.j2
     dest: "{{item}}"
   with_items:
-    - "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-openstack/install-config.yaml"
-    - "{{ ansible_user_dir }}/scale-ci-deploy/install-config_openstack.yaml"
+    - "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/install-config.yaml"
 
 - block:
    - name: Fetch the openshift-install binary tarball
      get_url:
        url: "{{ openshift_install_binary_url }}"
-       dest: "{{ ansible_user_dir }}/scale-ci-deploy/bin/"
+       dest: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin/"
 
    - name: Extract openshift-install binary
      shell: |
        set -o pipefail
-       cd {{ ansible_user_dir }}/scale-ci-deploy/bin
+       cd {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
        chmod +x openshift-install
-   - name: Run openshift installer on aws using the provided binary
-     shell: |
-       set -o pipefail
-       cd {{ ansible_user_dir }}/scale-ci-deploy
-       bin/openshift-install create cluster --log-level=debug --dir={{ ansible_user_dir }}/scale-ci-deploy/scale-ci-openstack/
   when: openshift_install_binary_url != ""
 
 - name: Run openshift-install on OSP using the image override
   shell: |
     set -o pipefail
-    cd {{ ansible_user_dir }}/scale-ci-deploy
+    cd {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}
     export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export _OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
-    export OS_CLIENT_CONFIG_FILE={{ ansible_user_dir }}/scale-ci-deploy/clouds.yml
-    bin/openshift-install create cluster --log-level=debug --dir={{ ansible_user_dir }}/scale-ci-deploy/scale-ci-openstack/
-  when: openshift_install_release_image_override != "" and openshift_install_binary_url == ""
+    export OS_CLIENT_CONFIG_FILE={{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/clouds.yml
+    bin/openshift-install create cluster --log-level=debug
 
 - name: ensure that .kube dir exists
   become: "{{item.become}}"
@@ -225,7 +215,7 @@
 - name: Copy the kubeconfig to .kube directories
   become: "{{item.become}}"
   copy:
-    src: "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-openstack/auth/kubeconfig"
+    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
     dest: "{{item.dest}}"
     remote_src: true
   with_items:
@@ -236,24 +226,24 @@
 
 - name: Copy the install log to the root directory
   copy:
-    src: "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-openstack/.openshift_install.log"
+    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/.openshift_install.log"
     dest: "{{ ansible_user_dir }}/openshift-install.log"
     remote_src: yes
 
 - name: Create dir to store artifacts
   file:
-    path: "{{ ansible_user_dir }}/scale-ci-osp-artifacts"
+    path: "{{ ansible_user_dir }}/scale-ci-osp-artifacts-{{ openshift_cluster_name }}"
     state: directory
   delegate_to: localhost
 
 - name: Copy the install log to the artifacts dir
   fetch:
-    src: "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-osp/.openshift_install.log"
-    dest: "{{ playbook_dir }}/scale-ci-osp-artifacts/openshift_install.log"
+    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/.openshift_install.log"
+    dest: "{{ playbook_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}-artifacts/openshift_install.log"
     flat: yes
 
 - name: Copy the kubeconfig to the artifacts dir
   fetch:
-    src: "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-osp/auth/kubeconfig"
-    dest: "{{ playbook_dir }}/scale-ci-osp-artifacts/kubeconfig"
+    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    dest: "{{ playbook_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}-artifacts/kubeconfig" 
     flat: yes
