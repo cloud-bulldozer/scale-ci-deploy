@@ -206,35 +206,6 @@
     export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
     bin/openshift-install create cluster --log-level=debug
 
-- name: Ensure that .kube dir exists
-  file:
-    path: "{{ item.path }}"
-    owner: "{{ item.owner }}"
-    group: "{{ item.group }}"
-    state: directory
-  with_items:
-    - path: /root/.kube
-      owner: root
-      group: root
-    - path: "/home/{{ orchestration_user }}/.kube"
-      owner: "{{ orchestration_user }}"
-      group: "{{ orchestration_user }}"
-
-- name: Copy the kubeconfig to .kube directories
-  copy:
-    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
-    dest: "{{ item.path }}"
-    owner: "{{ item.owner }}"
-    group: "{{ item.group }}"
-    remote_src: true
-  with_items:
-    - path: /root/.kube/config
-      owner: "{{ orchestration_user }}"
-      group: "{{ orchestration_user }}"
-    - path: "/home/{{ orchestration_user }}/.kube/config"
-      owner: "{{ orchestration_user }}"
-      group: "{{ orchestration_user }}"
-
 - name: Create dir to store artifacts
   file:
     path: "{{ playbook_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}-artifacts"

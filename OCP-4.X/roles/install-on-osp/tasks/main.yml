@@ -201,35 +201,6 @@
     export OS_CLIENT_CONFIG_FILE={{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/clouds.yml
     bin/openshift-install create cluster --log-level=debug
 
-- name: ensure that .kube dir exists
-  become: "{{item.become}}"
-  file:
-    path: "{{item.path}}"
-    state: directory
-  with_items:
-    - path: /root/.kube
-      become: true
-    - path: "{{ ansible_user_dir }}/.kube"
-      become: false
-
-- name: Copy the kubeconfig to .kube directories
-  become: "{{item.become}}"
-  copy:
-    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
-    dest: "{{item.dest}}"
-    remote_src: true
-  with_items:
-    - dest: /root/.kube/config
-      become: true
-    - dest: "{{ ansible_user_dir }}/.kube/config"
-      become: false
-
-- name: Copy the install log to the root directory
-  copy:
-    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/.openshift_install.log"
-    dest: "{{ ansible_user_dir }}/openshift-install.log"
-    remote_src: yes
-
 - name: Create dir to store artifacts
   file:
     path: "{{ ansible_user_dir }}/scale-ci-osp-artifacts-{{ openshift_cluster_name }}"

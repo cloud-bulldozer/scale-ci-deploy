@@ -16,11 +16,7 @@
         bin/openshift-install destroy cluster --log-level=debug
 
     - name: Clean scale-ci-deploy openshift-install directories
-      become: true
       file:
-        path: "{{item}}"
+        path: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}"
         state: absent
-      with_items:
-        - "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/bin/"
-        - "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}"
   when: cluster_status.stat.exists == True
