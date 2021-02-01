@@ -149,7 +149,7 @@ Optional arguement for cerberus configuration if cerberus is using a different U
 Default: `openshift`
 Distribution type supported by cerberus can be kubernetes or openshift.
 
-### PORT
+### CERBERUS_PORT
 Default: `8080`
 http server port where cerberus status is published.
 

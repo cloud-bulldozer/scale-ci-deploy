@@ -13,11 +13,15 @@
   shell: |
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{machineset_metadata_label_prefix}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: rhcos_cluster_name
+  environment:
+    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
 
 - block:
     - name: Get public ip of the workload node
       shell: oc get nodes -l node-role.kubernetes.io/workload= -o wide | awk 'NR>1 {print $7}'
       register: workload_public_ip
+      environment:
+        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
 
     - name: Add workload node to group
       add_host:
@@ -74,7 +78,7 @@
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
-    src: "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-aws/auth/kubeconfig"
+    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
     dest: "{{playbook_dir}}/kubeconfig"
     flat: true
   when:

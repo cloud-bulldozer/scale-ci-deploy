@@ -65,7 +65,7 @@ cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('http://0.0.0.0:8080') }
 
 # Cerberus configuration
 distribution: "{{ lookup('env', 'DISTRIBUTION')|default('openshift', true) }}"
-port: "{{ lookup('env', 'PORT')|default(8080, true) }}"
+cerberus_port: "{{ lookup('env', 'CERBERUS_PORT')|default(8080, true) }}"
 watch_nodes: "{{ lookup('env', 'WATCH_NODES')|default(true, true) }}"
 watch_cluster_operators: "{{ lookup('env', 'WATCH_CLUSTER_OPERATORS')|default(true, true) }}"
 watch_url_routes: "{{ lookup('env', 'WATCH_URL_ROUTES')|default('[]', true) }}"
