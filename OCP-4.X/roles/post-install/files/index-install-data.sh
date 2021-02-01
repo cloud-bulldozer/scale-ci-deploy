@@ -2,7 +2,7 @@
 set -x
 export UUID=$(uuidgen)
 export INSTALL_LOG=${LOG:-/root/openshift-install.log}
-export ES=${ELASTIC_URL:-http://elastic:9200}
+export ES=${ES_SERVER:-http://elastic:9200}
 export SSL=${ES_SSL:-True}
 
 oc_command=/usr/local/bin/oc
@@ -11,7 +11,7 @@ timestamp=`date +"%Y-%m-%dT%T.%3N"`
 rm -rf metadata-collector
 git clone http://github.com/cloud-bulldozer/metadata-collector/
 cd metadata-collector
-./run_backpack.sh -a ${SSL} -s ${server} -x -u ${UUID}
+./run_backpack.sh -a ${SSL} -s ${ES} -x -u ${UUID}
 cd
 
 CLUSTER_NAME=$($oc_command get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
