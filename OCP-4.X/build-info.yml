@@ -3,6 +3,8 @@
   remote_user: "{{ orchestration_user }}"
   vars_files:
     - vars/build-info.yml
+  environment:
+    KUBECONFIG: "{{ kubeconfig_file }}"
   tasks:
     - name: Fetch the build info content from the provided location
       uri:
