@@ -301,6 +301,8 @@
      #   object: deployment.apps/kibana
      #   patch: |
      #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
+  environment:
+    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
   when: openshift_toggle_infra_node|bool
 
 - name: Use sincgars to enable remote write
@@ -336,4 +338,6 @@
       command: ./deploy.sh
       args:
         chdir: "{{ ansible_user_dir }}/performance-dashboards/dittybopper"
+      environment:
+        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
   when: dittybopper_enable
