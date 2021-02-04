@@ -13,7 +13,7 @@
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{machineset_metadata_label_prefix}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: rhcos_cluster_name
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 - block:
     - name: Get public ip of the workload node
@@ -61,7 +61,7 @@
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
-    src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    src: "{{ kubeconfig_path }}"
     dest: "{{playbook_dir}}/kubeconfig"
     flat: true
   when:

@@ -224,3 +224,7 @@
     src: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
     dest: "{{ playbook_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}-artifacts/kubeconfig"
     flat: yes
+    
+- name: Set kubeconfig path
+  set_fact:
+    kubeconfig_path: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
