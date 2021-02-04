@@ -20,7 +20,7 @@
       shell: oc get nodes -l 'node-role.kubernetes.io/workload=' -o json | jq -r '.items[0].metadata.annotations | .["machine.openshift.io/machine"]'
       register: workload_machine_annotation
       environment:
-        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     - name: Add FIP to workload machine
       shell: |

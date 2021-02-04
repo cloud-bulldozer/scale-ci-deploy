@@ -13,14 +13,14 @@
     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ machineset_metadata_label_prefix }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
   register: cluster_name
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 - name: Get cluster version
   command: |
     {%raw%}oc get clusterversion version -o go-template --template="{{.status.desired.version}}"{%endraw%}
   register: ocp_version
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 - name: Set userDataSecret name
   set_fact:
@@ -37,7 +37,7 @@
   shell: oc get nodes | grep " Ready" -ic
   register: current_node_count
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 - name: AWS Block of tasks
   block:
@@ -46,14 +46,14 @@
         {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.ami.id}}'{%endraw%}
       register: ami_id
       environment:
-        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     - name: (AWS) Get cluster region
       shell: |
         {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.placement.region}}'{%endraw%}
       register: aws_region
       environment:
-        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     - name: (AWS) Template out machineset yamls
       template:
@@ -76,14 +76,14 @@
         {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.ami.id}}'{%endraw%}
       register: ami_id
       environment:
-        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     - name: (Azure) Get cluster location (region)
       shell: |
         {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.location}}'{%endraw%}
       register: azure_location
       environment:
-        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     - name: (Azure) Template out machineset yamls
       template:
@@ -123,7 +123,7 @@
       with_items:
         - sc: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/pd-ssd-sc.yml"
       environment:
-        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
   when: platform == "gcp"
 
@@ -151,7 +151,7 @@
     - ms: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/workload-node-machineset.yml"
       toggle: "{{openshift_toggle_workload_node}}"
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   when: item.toggle|bool
 
 - name: Set expected node count
@@ -175,28 +175,28 @@
   delay: 1
   retries: "{{openshift_post_install_poll_attempts|int}}"
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   when: (openshift_toggle_infra_node|bool == true or openshift_toggle_workload_node|bool == true)
 
 - name: Relabel the infra nodes
   shell: |
     oc label nodes --overwrite -l 'node-role.kubernetes.io/infra=' node-role.kubernetes.io/worker-
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_infra_node|bool
 
 - name: Relabel the workload node
   shell: |
     oc label nodes --overwrite -l 'node-role.kubernetes.io/workload=' node-role.kubernetes.io/worker-
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_workload_node|bool
 
 - name: Add additional label to worker nodes to provide ablity to isolate workloads on workers
   shell: |
     oc label nodes --overwrite -l 'node-role.kubernetes.io/worker=' computenode=true
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 # Due to upgrade testing we will no longer disable the CVO
 # - name: Disable CVO to prevent squashed configuration changes to cluster operators
@@ -207,7 +207,7 @@
   shell: |
     oc adm taint node -l node-role.kubernetes.io/workload= role=workload:NoSchedule --overwrite=true
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_workload_node|bool
 
 - name: Copy new cluster-monitoring-config
@@ -221,7 +221,7 @@
     oc create -f {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/cluster-monitoring-config.yml
   ignore_errors: yes
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_infra_node|bool
 
 # Need this to steer cluster-monitoring-operator onto the infra nodes
@@ -302,7 +302,7 @@
      #   patch: |
      #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
   environment:
-    KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_infra_node|bool
 
 - name: Use sincgars to enable remote write
@@ -339,5 +339,5 @@
       args:
         chdir: "{{ ansible_user_dir }}/performance-dashboards/dittybopper"
       environment:
-        KUBECONFIG: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/auth/kubeconfig"
+        KUBECONFIG: "{{ kubeconfig_path }}"
   when: dittybopper_enable
