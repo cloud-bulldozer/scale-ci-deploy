@@ -3,20 +3,24 @@
 # Clean up cluster
 #
 
+- name: Get scale_ci_deploy directory
+  set_fact:
+    scale_ci_deploy_diretory: "{{ lookup('env', 'dynamic_deploy_path') | default('{{ ansible_user_dir }}/scale-ci-deploy', true) }}"
+
 - name: Check if a cluster is running
   stat:
-    path: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/metadata.json"
+    path: "{{ scale_ci_deploy_diretory }}/metadata.json"
   register: cluster_status
 
 - block:
     - name: Cleanup cluster
       shell: |
-        cd {{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}/
+        cd {{ scale_ci_deploy_diretory }}/
         export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
         bin/openshift-install destroy cluster --log-level=debug
 
     - name: Clean scale-ci-deploy openshift-install directories
       file:
-        path: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}"
+        path: "{{ scale_ci_deploy_diretory }}"
         state: absent
   when: cluster_status.stat.exists == True
