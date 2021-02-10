@@ -11,25 +11,29 @@
 
 - name: Create dynamic scale-ci-deploy path
   set_fact:
-    dynamic_deploy_path: "{{ ansible_user_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}"
+    dynamic_deploy_path: "scale-ci-{{ openshift_cluster_name }}-{{ platform }}"
+
+- name: Set kubeconfig path
+  set_fact:
+    kubeconfig_path: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/auth/kubeconfig"
 
 - name: Create scale-ci-deploy directories
   file:
     path: "{{ item }}"
     state: directory
   with_items:
-    - "{{ dynamic_deploy_path }}/bin"
+    - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
     - "{{ ansible_user_dir }}/.docker"
 
 - name: Download oc client tools
   get_url:
     url: "{{ openshift_client_location }}"
-    dest: "{{ dynamic_deploy_path }}/bin/{{ openshift_client_location | basename }}"
+    dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/{{ openshift_client_location | basename }}"
 
 - name: Untar and install oc client tools
   shell: |
     set -o pipefail
-    cd {{ dynamic_deploy_path }}/bin
+    cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin
     tar xzf "{{ openshift_client_location | basename }}"
     cp oc /usr/local/bin/oc
     cp kubectl /usr/local/bin/kubectl
@@ -71,7 +75,7 @@
   - name: Extract openshift-install binary from the payload
     shell: |
       set -o pipefail
-      cd {{ dynamic_deploy_path }}/bin
+      cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin
       oc adm release extract --tools {{ openshift_install_release_image_override }}
       ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
       chmod +x openshift-install
@@ -111,7 +115,7 @@
   - name: Copy installer into expected directory
     copy:
       src: "{{ workdir }}/bin/openshift-install"
-      dest: "{{ dynamic_deploy_path }}/bin/openshift-install"
+      dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/openshift-install"
       remote_src: true
       mode: 0744
 
@@ -197,12 +201,12 @@
    - name: Fetch the openshift-install binary tarball
      get_url:
        url: "{{ openshift_install_binary_url }}"
-       dest: "{{ dynamic_deploy_path }}/bin/"
+       dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/"
 
    - name: Extract openshift-install binary
      shell: |
        set -o pipefail
-       cd {{ dynamic_deploy_path }}/bin/
+       cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
        chmod +x openshift-install
 
@@ -213,35 +217,31 @@
     src: install-config-{{ platform }}.yaml.j2
     dest: "{{item}}"
   with_items:
-    - "{{ dynamic_deploy_path }}/install-config.yaml"
+    - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/install-config.yaml"
 
 - name: Run openshift installer
   shell: |
     set -o pipefail
-     cd {{ dynamic_deploy_path }}
+     cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
     export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
     bin/openshift-install create cluster --log-level=debug
 
 - name: Create dir to store artifacts
   file:
-    path: "{{ playbook_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}-artifacts"
+    path: "{{ playbook_dir }}/{{ dynamic_deploy_path }}-artifacts"
     state: directory
   delegate_to: localhost
   become: false
 
 - name: Copy the install log to the artifacts dir
   fetch:
-    src: "{{ dynamic_deploy_path }}/.openshift_install.log"
-    dest: "{{ playbook_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}-artifacts/openshift_install.log"
+    src: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/.openshift_install.log"
+    dest: "{{ playbook_dir }}/{{ dynamic_deploy_path }}-artifacts/openshift_install.log"
     flat: yes
 
 - name: Copy the kubeconfig to the artifacts dir
   fetch:
-    src: "{{ dynamic_deploy_path }}/auth/kubeconfig"
-    dest: "{{ playbook_dir }}/scale-ci-{{ openshift_cluster_name }}-{{ platform }}-artifacts/kubeconfig"
+    src: "{{ kubeconfig_path }}"
+    dest: "{{ playbook_dir }}/{{ dynamic_deploy_path }}-artifacts/kubeconfig"
     flat: yes
-    
-- name: Set kubeconfig path
-  set_fact:
-    kubeconfig_path: "{{ dynamic_deploy_path }}/auth/kubeconfig"
