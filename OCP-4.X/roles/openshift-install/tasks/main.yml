@@ -71,6 +71,8 @@
       oc adm release extract --tools {{ openshift_install_release_image_override }}
       ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
       chmod +x openshift-install
+      cp oc /usr/local/bin/oc
+      cp kubectl /usr/local/bin/kubectl
 
   when: not openshift_install_installer_from_source|bool and openshift_install_binary_url == ""
 
