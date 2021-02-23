@@ -137,6 +137,10 @@
 
 - name: Setting up Azure
   block:
+  - name: Setup MS Azure CLI Repos
+    shell: |
+      rpm --import https://packages.microsoft.com/keys/microsoft.asc
+      echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo
 
   - name: Install dependencies
     package:
@@ -146,10 +150,19 @@
     loop:
       - azure-cli
 
-  - name: Setup MS Azure CLI Repos
+  - name: Create .azure dir
+    file:
+      path: "{{ ansible_user_dir }}/.azure"
+      state: directory
+
+  - name: Setup Azure installer credentials
+    template:
+      src: osServicePrincipal.json.j2
+      dest: "{{ ansible_user_dir }}/.azure/osServicePrincipal.json"
+
+  - name: Login local Azure account via service principal (For Azure CLI interactions)
     shell: |
-      rpm --import https://packages.microsoft.com/keys/microsoft.asc
-      echo -e "[azure-cli]\nname=Azure CLI\nbaseurl=https://packages.microsoft.com/yumrepos/azure-cli\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azure-cli.repo
+      az login --service-principal --username {{azure_service_principal_client_id}} --password {{azure_service_principal_client_secret}} --tenant {{azure_tenant_id}}
 
   when: platform == "azure"
 
