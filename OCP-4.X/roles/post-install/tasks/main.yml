@@ -10,7 +10,7 @@
 
 - name: Get scale-ci-deploy directory
   set_fact:
-    scale_ci_deploy_diretory: "{{ lookup('env', 'dynamic_deploy_path') | default('scale-ci-deploy', true) }}"
+    scale_ci_deploy_directory: "{{ lookup('env', 'dynamic_deploy_path') | default('scale-ci-deploy', true) }}"
 
 - name: Get cluster name
   shell: |
@@ -35,7 +35,7 @@
     cmd: index-install-data.sh
   environment:
     ES_SERVER: "{{ es_server }}"
-    INSTALL_LOG: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/.openshift_install.log"
+    INSTALL_LOG: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/.openshift_install.log"
 
 - name: Get current ready node count
   shell: oc get nodes | grep " Ready" -ic
@@ -66,10 +66,10 @@
       when: item.toggle|bool
       with_items:
         - src: aws-infra-node-machineset.yml.j2
-          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/infra-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/infra-node-machineset.yml"
           toggle: "{{openshift_toggle_infra_node}}"
         - src: aws-workload-node-machineset.yml.j2
-          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/workload-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
   when: platform == "aws"
 
@@ -96,10 +96,10 @@
       when: item.toggle|bool
       with_items:
         - src: azure-infra-node-machineset.yml.j2
-          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/infra-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/infra-node-machineset.yml"
           toggle: "{{openshift_toggle_infra_node}}"
         - src: azure-workload-node-machineset.yml.j2
-          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/workload-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
   when: platform == "azure"
 
@@ -112,20 +112,20 @@
       when: item.toggle|bool
       with_items:
         - src: gcp-infra-node-machineset.yml.j2
-          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/infra-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/infra-node-machineset.yml"
           toggle: "{{openshift_toggle_infra_node}}"
         - src: gcp-workload-node-machineset.yml.j2
-          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/workload-node-machineset.yml"
+          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
         - src: gcp-ssd-sc.yml.j2
-          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/pd-ssd-sc.yml"
+          dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/pd-ssd-sc.yml"
           toggle: true
 
     - name: (GCP) Create faster ssd sc
       shell: |
         oc create -f {{ item.sc }}
       with_items:
-        - sc: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/pd-ssd-sc.yml"
+        - sc: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/pd-ssd-sc.yml"
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
 
@@ -137,10 +137,10 @@
     dest: "{{item.dest}}"
   with_items:
     - src: osp-infra-node-machineset.yml.j2
-      dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/infra-node-machineset.yml"
+      dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/infra-node-machineset.yml"
       toggle: "{{openshift_toggle_infra_node}}"
     - src: osp-workload-node-machineset.yml.j2
-      dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/workload-node-machineset.yml"
+      dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/workload-node-machineset.yml"
       toggle: "{{openshift_toggle_workload_node}}"
   when:
     - item.toggle|bool
@@ -150,9 +150,9 @@
   shell: |
     oc create -f {{item.ms}}
   with_items:
-    - ms: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/infra-node-machineset.yml"
+    - ms: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/infra-node-machineset.yml"
       toggle: "{{openshift_toggle_infra_node}}"
-    - ms: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/workload-node-machineset.yml"
+    - ms: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/workload-node-machineset.yml"
       toggle: "{{openshift_toggle_workload_node}}"
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
@@ -217,12 +217,12 @@
 - name: Copy new cluster-monitoring-config
   template:
     src: cluster-monitoring-config.yml.j2
-    dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/cluster-monitoring-config.yml"
+    dest: "{{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/cluster-monitoring-config.yml"
   when: openshift_toggle_infra_node|bool
 
 - name: Replace the cluster-monitoring-config ConfigMap
   shell: |
-    oc create -f {{ ansible_user_dir }}/{{ scale_ci_deploy_diretory }}/cluster-monitoring-config.yml
+    oc create -f {{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/cluster-monitoring-config.yml
   ignore_errors: yes
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
