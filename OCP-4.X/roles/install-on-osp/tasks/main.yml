@@ -9,9 +9,9 @@
 # * Install cluster
 #
 
-- name: Get scale_ci_deploy directory
+- name: Get scale-ci-deploy directory
   set_fact:
-    scale_ci_deploy_directory: "{{ lookup('env', 'dynamic_deploy_path') | default('scale-ci-deploy', true) }}"
+    scale_ci_deploy_directory: "{{ dynamic_deploy_path|default(lookup('env', 'dynamic_deploy_path')) | default('scale-ci-deploy', true) }}"
 
 - name: Create {{ scale_ci_deploy_directory }} directories
   file:
