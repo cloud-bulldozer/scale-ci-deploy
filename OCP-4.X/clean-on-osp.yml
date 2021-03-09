@@ -3,9 +3,9 @@
 # Playbook to uninstall OCP 4 on OSP and clean OSP environment
 #
 
-- name: Get scale_ci_deploy directory
+- name: Get scale-ci-deploy directory
   set_fact:
-    scale_ci_deploy_directory: "{{ lookup('env', 'dynamic_deploy_path') | default('scale-ci-deploy', true) }}"
+    scale_ci_deploy_directory: "{{ dynamic_deploy_path|default(lookup('env', 'dynamic_deploy_path')) | default('scale-ci-deploy', true) }}"
 
 - name: Uninstall OCP 4 on OSP and cleanup OSP resources
   hosts: orchestration
