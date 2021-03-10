@@ -13,6 +13,7 @@ fi
 
 chmod +x CI/properties_files/${_platform}_openshift_installer.sh 
 source CI/properties_files/${_platform}_openshift_installer.sh       #to initialize the required env variables
+
 export PLATFORM=$_platform
 source CI/common.sh                          # to check if all environment variables are set accordingly
 
