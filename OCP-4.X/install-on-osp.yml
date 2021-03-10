@@ -12,6 +12,27 @@
     - vars/install-on-osp.yml
   vars:
     platform: "osp"
+  pre_tasks:
+
+    - name: Include platform variables
+      include_vars:
+        file: "vars/install-on-{{ platform }}.yml"
+
+    - name: Set dynamic scale-ci-deploy path
+      set_fact:
+        dynamic_deploy_path: "{% if lookup('env', 'DYNAMIC_DEPLOY_PATH') %}{{ lookup('env', 'DYNAMIC_DEPLOY_PATH') }}{% else %}scale-ci-{{ openshift_cluster_name }}-{{ platform }}{% endif %}"
+
+    - name: Create scale-ci-deploy directories
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
+        - "{{ ansible_user_dir }}/.docker"
+
+    - name: Set kubeconfig path
+      set_fact:
+        kubeconfig_path: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/auth/kubeconfig"
   roles:
     - role: install-on-osp
       when: openshift_install|bool

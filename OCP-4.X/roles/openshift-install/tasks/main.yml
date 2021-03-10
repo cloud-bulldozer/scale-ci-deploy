@@ -9,22 +9,6 @@
 # * Install cluster
 #
 
-- name: Create dynamic scale-ci-deploy path
-  set_fact:
-    dynamic_deploy_path: "scale-ci-{{ openshift_cluster_name }}-{{ platform }}"
-
-- name: Set kubeconfig path
-  set_fact:
-    kubeconfig_path: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/auth/kubeconfig"
-
-- name: Create scale-ci-deploy directories
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-    - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
-    - "{{ ansible_user_dir }}/.docker"
-
 - name: Download oc client tools
   get_url:
     url: "{{ openshift_client_location }}"
