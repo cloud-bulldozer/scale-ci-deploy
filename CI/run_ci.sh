@@ -38,7 +38,7 @@ echo -e "======================================================================\
 echo "[orchestration]" > inventory
 echo "${ORCHESTRATION_HOST}" >> inventory
   
-#ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=${_platform} 
+ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=${_platform} 
 
 EXIT_STATUS=$?
 if [ "$EXIT_STATUS" -eq "0" ]                         #to check if the test exits successfully or not
