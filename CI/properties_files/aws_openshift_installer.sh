@@ -84,9 +84,9 @@ export SLEEP_TIME=60
 export DAEMON_MODE=true
 
 #elasticsearch
-export ELASTIC_CURL_URL= #required field
-export ELASTIC_CURL_USER= #required field
-export ELASTIC_SERVER=  #required field
+export ELASTIC_CURL_URL= 
+export ELASTIC_CURL_USER= 
+export ELASTIC_SERVER=  
 export ES_SERVER= #required field
 
 

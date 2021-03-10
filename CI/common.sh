@@ -58,8 +58,8 @@ if [[ -z $OPENSHIFT_INSTALL_REGISTRY_TOKEN ]];then
     exit 1
 fi
 
-if [[ -z $ES_SERVER || -z $ELASTIC_CURL_USER || -z $ELASTIC_SERVER || -z $ELASTIC_CURL_URL ]]; then
-  echo 'one or more variables for elastic search are undefined, exiting!'
+if [[ -z $ES_SERVER ]]; then
+  echo 'ES_SERVER undefined, exiting!'
   exit 1
 fi
 

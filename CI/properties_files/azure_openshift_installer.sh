@@ -88,9 +88,9 @@ export AZURE_REGION="centralus"
 
 #elasticsearch
 export ES_SERVER= #required field
-export ELASTIC_CURL_URL= #required field
-export ELASTIC_CURL_USER= #required field
-export ELASTIC_SERVER= #required field
+export ELASTIC_CURL_URL= 
+export ELASTIC_CURL_USER= 
+export ELASTIC_SERVER= 
 
 # credentials
 export SSHKEY_TOKEN= #required field

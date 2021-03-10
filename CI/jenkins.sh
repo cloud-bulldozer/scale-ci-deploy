@@ -11,6 +11,7 @@ echo $Platform
 
 #configured properties files are stored at : http://dell-r510-01.perf.lab.eng.rdu2.redhat.com/scale-ci-deploy-CI
 
+yum install wget -y 
 wget -O CI/properties_files/${Platform}_openshift_installer.sh "http://dell-r510-01.perf.lab.eng.rdu2.redhat.com/scale-ci-deploy-CI/${Platform}/${Platform}_openshift_installer.sh"
 chmod +x CI/properties_files/${Platform}_openshift_installer.sh 
 
