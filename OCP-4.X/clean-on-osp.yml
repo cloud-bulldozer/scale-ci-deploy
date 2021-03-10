@@ -3,10 +3,6 @@
 # Playbook to uninstall OCP 4 on OSP and clean OSP environment
 #
 
-- name: Get scale-ci-deploy directory
-  set_fact:
-    scale_ci_deploy_directory: "{{ dynamic_deploy_path|default(lookup('env', 'dynamic_deploy_path')) | default('scale-ci-deploy', true) }}"
-
 - name: Uninstall OCP 4 on OSP and cleanup OSP resources
   hosts: orchestration
   gather_facts: true
@@ -22,8 +18,8 @@
     - name: Destroy OCP cluster using openshift-install on OSP
       shell: |
         set -o pipefail
-        cd {{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/
-        export OS_CLIENT_CONFIG_FILE={{ ansible_user_dir }}/{{ scale_ci_deploy_directory }}/clouds.yml
+        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/
+        export OS_CLIENT_CONFIG_FILE={{ ansible_user_dir }}/{{ dynamic_deploy_path }}/clouds.yml
         bin/openshift-install destroy cluster --log-level=debug
       ignore_errors: true
 
