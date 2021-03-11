@@ -17,7 +17,7 @@
 
     - name: Get contents from bin directory
       find:
-        paths: "{{ ansible_user_dir }}/scale-ci-deploy/bin"
+        paths: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
       register: bin_content
 
     - name: Clean scale-ci-deploy openshift-install directories
