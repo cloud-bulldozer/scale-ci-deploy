@@ -24,6 +24,6 @@
       file:
         path: "{{ item.path }}"
         state: absent
-      with_items: "{{ bin_content }}"
+      with_items: "{{ bin_content.files }}"
 
   when: cluster_status.stat.exists == True

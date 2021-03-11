@@ -67,7 +67,7 @@
       file:
         path: "{{ item.path }}"
         state: absent
-      with_items: "{{ bin_content }}"
+      with_items: "{{ bin_content.files }}"
 
     - name: Remove old entries from /etc/hosts
       become: true
