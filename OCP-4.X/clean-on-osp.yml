@@ -57,14 +57,17 @@
       ignore_errors: true
       when: delete_image|bool
 
+    - name: Get contents from bin directory
+      find:
+        paths: "{{ ansible_user_dir }}/scale-ci-deploy/bin"
+      register: bin_content
+
     - name: Clean scale-ci-deploy openshift-install directories
       become: true
       file:
-        path: "{{item}}"
+        path: "{{ item.path }}"
         state: absent
-      with_items:
-        - "{{ ansible_user_dir }}/scale-ci-deploy/bin"
-        - "{{ ansible_user_dir }}/scale-ci-deploy/scale-ci-openstack"
+      with_items: "{{ bin_content }}"
 
     - name: Remove old entries from /etc/hosts
       become: true
