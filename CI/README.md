@@ -7,7 +7,7 @@ Initialise the environment variables in bash script in CI/properties_files [here
 $ ./CI/run_ci.sh platform
 ```
 
-Where platform can be either `aws`, `azure` or `gcp`.
+Where platform can be either `aws`, `azure`,`gcp` or `osp`.
 
 The orchestration host can be `localhost` or a remote machine already provisioned on the cloud in which the cluster will be deployed on.  If executing on a local machine or from Jenkins, `localhost` should be used.
 
