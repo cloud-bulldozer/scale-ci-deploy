@@ -2,7 +2,6 @@
 
 set -o pipefail
 set -eu
-#set -x
 
 _platform=$@                                  #to accept the platform as input from command line
 
