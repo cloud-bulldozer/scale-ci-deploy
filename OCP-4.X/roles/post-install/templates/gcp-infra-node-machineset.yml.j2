@@ -40,7 +40,7 @@ items:
             disks:
             - autoDelete: false
               boot: true
-              image: {{cluster_name.stdout}}-rhcos-image
+              image: {{worker_machineset_image.stdout}}
               labels: null
               sizeGb: {{openshift_infra_node_volume_size}}
               type: {{openshift_infra_node_volume_type}}
@@ -104,7 +104,7 @@ items:
             disks:
             - autoDelete: false
               boot: true
-              image: {{cluster_name.stdout}}-rhcos-image
+              image: {{worker_machineset_image.stdout}}
               labels: null
               sizeGb: {{openshift_infra_node_volume_size}}
               type: {{openshift_infra_node_volume_type}}
@@ -168,7 +168,7 @@ items:
             disks:
             - autoDelete: false
               boot: true
-              image: {{cluster_name.stdout}}-rhcos-image
+              image: {{worker_machineset_image.stdout}}
               labels: null
               sizeGb: {{openshift_infra_node_volume_size}}
               type: {{openshift_infra_node_volume_type}}
