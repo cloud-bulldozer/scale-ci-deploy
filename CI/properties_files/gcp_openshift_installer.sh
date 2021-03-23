@@ -9,7 +9,7 @@ export OPENSHIFT_DEBUG_CONFIG=false
 # cluster version
 export OPENSHIFT_CLIENT_LOCATION= #required field
 export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=
-export OPENSHIFT_INSTALL_BINARY_URL=
+export OPENSHIFT_INSTALL_BINARY_URL=#required field
 
 # install
 export OPENSHIFT_BASE_DOMAIN= #required field
