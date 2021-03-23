@@ -87,6 +87,8 @@ export GCP_PROJECT= #required field
 export GCP_SERVICE_ACCOUNT= #required field
 export GCP_SERVICE_ACCOUNT_EMAIL= #required field
 export GCP_AUTH_KEY_FILE= #required field
+export GOOGLE_CREDENTIALS=${GCP_AUTH_KEY_FILE}
+
 
 
 #elasticsearch
