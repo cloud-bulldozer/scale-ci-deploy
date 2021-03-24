@@ -44,7 +44,7 @@ for test in ${test_list[@]}; do
   echo "${ORCHESTRATION_HOST}" >> inventory
 
   export ANSIBLE_FORCE_COLOR=true 
-  #ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=${test} 
+  ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=${test} 
 
   EXIT_STATUS=$?
   if [ "$EXIT_STATUS" -eq "0" ]                                    #to check if the test exits successfully or not
