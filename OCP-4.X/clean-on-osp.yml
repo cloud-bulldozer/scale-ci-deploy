@@ -18,33 +18,33 @@
     - name: Destroy OCP cluster using openshift-install on OSP
       shell: |
         set -o pipefail
-        cd {{ansible_user_dir}}/scale-ci-deploy
-        export OS_CLIENT_CONFIG_FILE={{ansible_user_dir}}/scale-ci-deploy/clouds.yml
-        bin/openshift-install destroy cluster --log-level=debug --dir={{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack/
+        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/
+        export OS_CLIENT_CONFIG_FILE={{ ansible_user_dir }}/{{ dynamic_deploy_path }}/clouds.yml
+        bin/openshift-install destroy cluster --log-level=debug
       ignore_errors: true
 
     - name: Get all the floating ip addresses
       shell: |
-        source {{ansible_user_dir}}/overcloudrc
+        source {{ ansible_user_dir }}/overcloudrc
         openstack floating ip list --format value -c 'Floating IP Address'
       register: floating_ips
 
     - name: Delete the all floating ip addresses
       shell: |
-        source {{ansible_user_dir}}/overcloudrc
+        source {{ ansible_user_dir }}/overcloudrc
         openstack floating ip delete {{ item }}
       with_items: "{{ floating_ips.stdout_lines }}"
 
     - name: Get all the flavor ids
       shell: |
-        source {{ansible_user_dir}}/overcloudrc
+        source {{ ansible_user_dir }}/overcloudrc
         openstack flavor list --format value -c ID
       register: flavors
       when: delete_flavors|bool
 
     - name: Delete all the flavors
       shell: |
-        source {{ansible_user_dir}}/overcloudrc
+        source {{ ansible_user_dir }}/overcloudrc
         openstack flavor delete {{ item }}
       with_items: "{{ flavors.stdout_lines }}"
       ignore_errors: true
@@ -52,19 +52,22 @@
 
     - name: Delete the existing RHCOS image in OSP
       shell: |
-        source {{ansible_user_dir}}/overcloudrc
+        source {{ ansible_user_dir }}/overcloudrc
         openstack image delete rhcos
       ignore_errors: true
       when: delete_image|bool
 
+    - name: Get contents from bin directory
+      find:
+        paths: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
+      register: bin_content
+
     - name: Clean scale-ci-deploy openshift-install directories
       become: true
       file:
-        path: "{{item}}"
+        path: "{{ item.path }}"
         state: absent
-      with_items:
-        - "{{ansible_user_dir}}/scale-ci-deploy/bin"
-        - "{{ansible_user_dir}}/scale-ci-deploy/scale-ci-openstack"
+      with_items: "{{ bin_content.files }}"
 
     - name: Remove old entries from /etc/hosts
       become: true

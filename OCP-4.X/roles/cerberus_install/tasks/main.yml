@@ -25,11 +25,11 @@
   loop: "{{ cerberus_containers.stdout_lines }}"
 
 - name: Run containerized version of "{{ cerberus_image }}"
-  command: podman run --name=cerberus --net=host -v "{{ kubeconfig_path }}":/root/.kube/config:Z -v "{{ cerberus_config_path }}":/root/cerberus/config/config.yaml:Z -d "{{ cerberus_image }}"
+  command: podman run --name=cerberus-{{ openshift_cluster_name }}-{{ platform }} --net=host -v "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/auth/kubeconfig":/root/.kube/config:Z -v "{{ cerberus_config_path }}":/root/cerberus/config/config.yaml:Z -d "{{ cerberus_image }}"
   when: not slack_integration | bool
 
 - name: Run containerized version of "{{ cerberus_image }}" with slack integration
-  command: podman run --name=cerberus --net=host -v "{{ kubeconfig_path }}":/root/.kube/config:Z -v "{{ cerberus_config_path }}":/root/cerberus/config/config.yaml:Z --env SLACK_API_TOKEN="{{ slack_api_token }}" --env SLACK_CHANNEL="{{ slack_channel }}" -d "{{ cerberus_image }}"
+  command: podman run --name=cerberus-{{ openshift_cluster_name }}-{{ platform }} --net=host -v "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/auth/kubeconfig":/root/.kube/config:Z -v "{{ cerberus_config_path }}":/root/cerberus/config/config.yaml:Z --env SLACK_API_TOKEN="{{ slack_api_token }}" --env SLACK_CHANNEL="{{ slack_channel }}" -d "{{ cerberus_image }}"
   when: slack_integration | bool
 
 - name: Pause for cerberus to finish the first iteration after which it exposes the go/no-go signal

@@ -12,17 +12,19 @@
 - block:
     - name: Create FIP for workload node
       shell: |
-        . {{ansible_user_dir}}/{{osp_project_name}}rc
+        . {{ ansible_user_dir }}/{{osp_project_name}}rc
         openstack floating ip create {{ public_net_name }} --format value -c floating_ip_address
       register: public_workload_fip
 
     - name: Get workload machine openstack name
       shell: oc get nodes -l 'node-role.kubernetes.io/workload=' -o json | jq -r '.items[0].metadata.annotations | .["machine.openshift.io/machine"]'
       register: workload_machine_annotation
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     - name: Add FIP to workload machine
       shell: |
-        . {{ansible_user_dir}}/{{osp_project_name}}rc
+        . {{ ansible_user_dir }}/{{osp_project_name}}rc
         openstack server add floating ip {{workload_machine_annotation.stdout.split('/')[1] }} {{public_workload_fip.stdout}}
 
     - name: Add workload node to group
@@ -33,13 +35,13 @@
 
 - name: Get security groups for OCP 4 cluster
   shell: |
-    . {{ansible_user_dir}}/{{osp_project_name}}rc
+    . {{ ansible_user_dir }}/{{osp_project_name}}rc
     openstack security group list --project ${OS_PROJECT_NAME} --format value -c ID -c Name | grep {{openshift_cluster_name}} | awk '{print $1}'
   register: security_groups
 
 - name: Allow traffic over tcp port (2022)
   shell: |
-    . {{ansible_user_dir}}/{{osp_project_name}}rc
+    . {{ ansible_user_dir }}/{{osp_project_name}}rc
     openstack security group rule create --ingress --protocol tcp --dst-port 2022 {{item}}
   with_items: "{{security_groups.stdout_lines}}"
 
@@ -48,7 +50,7 @@
 # See pbench issue #1238 - https://github.com/distributed-system-analysis/pbench/issues/1238
 - name: Allow traffic over tcp/udp ports (20000-20109, 32768-60999) for HostNetwork Network Tests
   shell: |
-    . {{ansible_user_dir}}/{{osp_project_name}}rc
+    . {{ ansible_user_dir }}/{{osp_project_name}}rc
     openstack security group rule create --ingress --protocol tcp --dst-port 20000:20109 {{item}}
     openstack security group rule create --ingress --protocol udp --dst-port 20000:20109 {{item}}
     openstack security group rule create --ingress --protocol tcp --dst-port 32768:60999 {{item}}

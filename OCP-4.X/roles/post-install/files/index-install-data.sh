@@ -2,14 +2,8 @@
 set -x
 export UUID=$(uuidgen)
 export INSTALL_LOG=${LOG:-/root/openshift-install.log}
-export ES=${ELASTIC_URL:-http://elastic:9200}
+export ES=${ES_SERVER:-http://elastic:9200}
 export SSL=${ES_SSL:-True}
-export USER=$ELASTIC_USER
-if [[ -z $USER ]]; then
-  export ESUSER=""
-else
-  export ESUSER="--user ${USER}"
-fi
 
 oc_command=/usr/local/bin/oc
 timestamp=`date +"%Y-%m-%dT%T.%3N"`
@@ -17,16 +11,7 @@ timestamp=`date +"%Y-%m-%dT%T.%3N"`
 rm -rf metadata-collector
 git clone http://github.com/cloud-bulldozer/metadata-collector/
 cd metadata-collector
-proto="$(echo $ELASTIC_URL | grep :// | sed -e's,^\(.*://\).*,\1,g')"
-ELASTIC_URL="$(echo ${ELASTIC_URL/$proto/})"
-server=$(echo $ELASTIC_URL | cut -d ":" -f 1)
-port=$(echo $ELASTIC_URL | cut -d ":" -f 2)
-if [[ -z $USER ]]
-then
-  ./run_backpack.sh -a ${SSL} -s ${server} -p ${port} -x -u ${UUID}
-else
-  ./run_backpack.sh -a ${SSL} -s ${USER}@${server} -p ${port} -x -u ${UUID}
-fi
+./run_backpack.sh -a ${SSL} -s ${ES} -x -u ${UUID}
 cd
 
 CLUSTER_NAME=$($oc_command get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
@@ -49,7 +34,7 @@ for line in $(cat ${INSTALL_LOG} | tail -n 20 | egrep "[0-9]+s\"$" | egrep -oh "
     min=$(echo $time | awk -F'm' '{print $1}')
   fi
   time=$(echo $(echo $min*60|bc)+$sec | bc)
-  curl $ESUSER -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{
+  curl -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{
   "uuid" : "'$UUID'",
   "platform": "'$PLATFORM'",
   "master_count": '$masters',

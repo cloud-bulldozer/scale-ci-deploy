@@ -1,7 +1,7 @@
 ---
 - name: update pip and pipx on RHEL/CentOS
-  pip: 
-    name: 
+  pip:
+    name:
       - pip
       - pipx
     state: latest
@@ -9,8 +9,8 @@
   when: ansible_facts['distribution'] == 'RedHat' or ansible_facts['distribution'] == 'CentOS'
 
 - name: update pip and pipx on Fedora
-  pip: 
-    name: 
+  pip:
+    name:
       - pip
       - pipx
     state: latest

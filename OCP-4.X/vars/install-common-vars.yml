@@ -65,7 +65,7 @@ cerberus_url: "{{ lookup('env', 'CERBERUS_URL')|default('http://0.0.0.0:8080') }
 
 # Cerberus configuration
 distribution: "{{ lookup('env', 'DISTRIBUTION')|default('openshift', true) }}"
-port: "{{ lookup('env', 'PORT')|default(8080, true) }}"
+cerberus_port: "{{ lookup('env', 'CERBERUS_PORT')|default(8080, true) }}"
 watch_nodes: "{{ lookup('env', 'WATCH_NODES')|default(true, true) }}"
 watch_cluster_operators: "{{ lookup('env', 'WATCH_CLUSTER_OPERATORS')|default(true, true) }}"
 watch_url_routes: "{{ lookup('env', 'WATCH_URL_ROUTES')|default('[]', true) }}"
@@ -112,5 +112,4 @@ postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
 fips: "{{ lookup('env', 'FIPS')|default(false, true) }}"
 
 # Elasticsearch
-elastic_url: "{{ lookup('env', 'ELASTIC_CURL_URL')|default('https://search-cloud-perf-lqrf3jjtaqo7727m7ynd2xyt4y.us-west-2.es.amazonaws.com:80', true) }}"
-elastic_user:  "{{ lookup('env', 'ELASTIC_CURL_USER')|default('', true) }}"
+es_server: "{{ lookup('env', 'ES_SERVER')|default('https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443', true) }}"

@@ -1,0 +1,29 @@
+---
+#
+# Clean up cluster
+#
+
+- name: Check if a cluster is running
+  stat:
+    path: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/metadata.json"
+  register: cluster_status
+
+- block:
+    - name: Cleanup cluster
+      shell: |
+        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/
+        export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
+        bin/openshift-install destroy cluster --log-level=debug
+
+    - name: Get contents from bin directory
+      find:
+        paths: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
+      register: bin_content
+
+    - name: Clean scale-ci-deploy openshift-install directories
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ bin_content.files }}"
+
+  when: cluster_status.stat.exists == True
