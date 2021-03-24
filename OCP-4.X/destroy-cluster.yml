@@ -1,0 +1,15 @@
+# To auto-clean clusters created by the ci
+#usage : ansible-playbook -v -i inventory OCP-4.X/destroy-cluster.yml -e platform=aws/gcp/azure
+
+- name: Cleanup old cluster
+  hosts: orchestration
+  gather_facts: true
+  become: true
+  remote_user: root
+  pre_tasks:
+
+    - name: Include platform variables
+      include_vars:
+        file: "vars/install-on-{{ platform }}.yml"
+  roles:
+    - openshift-cleanup
