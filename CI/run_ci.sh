@@ -61,11 +61,11 @@ for test in ${test_list[@]}; do
   echo "${test}                            | ${result} | ${duration}" >> results.markdown
 
   #Destroying cluster
-  cd /root/scale-ci-$OPENSHIFT_CLUSTER_NAME-$test/          
-  echo $PWD                                                
-  ./bin/openshift-install destroy cluster     # comment out this code block to prevent deleting cluster
-  cd /root/scale-ci-deploy/ 
-  echo $PWD 
+  #cd /root/scale-ci-$OPENSHIFT_CLUSTER_NAME-$test/          
+  #echo $PWD                                                
+  #./bin/openshift-install destroy cluster     # comment out this code block to prevent deleting cluster
+  #cd /root/scale-ci-deploy/ 
+  #echo $PWD 
 
 done 
 
