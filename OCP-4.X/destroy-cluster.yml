@@ -13,5 +13,9 @@
     - name: Include platform variables
       include_vars:
         file: "vars/install-on-{{ platform }}.yml"
+    - name: Set dynamic scale-ci-deploy path
+      set_fact:
+        dynamic_deploy_path: "{% if lookup('env', 'DYNAMIC_DEPLOY_PATH') %}{{ lookup('env', 'DYNAMIC_DEPLOY_PATH') }}{% else %}scale-ci-{{ openshift_cluster_name }}-{{ platform }}{% endif %}"
+
   roles:
     - openshift-cleanup
