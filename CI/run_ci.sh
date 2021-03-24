@@ -3,7 +3,7 @@
 set -o pipefail
 set -eu
 
-export PLATFORM=$@                                  #to accept the platform as input from command line
+export PLATFORM=$@                                                 #to accept the platform as input from command line
 
 if [[ ${PLATFORM} == '' ]]; then
   echo -e "Wrong usage, please enter a platform choice: aws/azure/gcp"
@@ -29,9 +29,9 @@ test_rc=0
 for test in ${test_list[@]}; do
 
   chmod +x CI/properties_files/${test}_openshift_installer.sh 
-  source CI/properties_files/${test}_openshift_installer.sh       #to initialize the required env variables
-  export _PLATFORM=$test                       #needed to check the platform in common.sh
-  source CI/common.sh                          # to check if all environment variables are set accordingly
+  source CI/properties_files/${test}_openshift_installer.sh        #to initialize the required env variables
+  export _PLATFORM=$test                                           #needed to check the platform in common.sh
+  source CI/common.sh                                              # to check if all environment variables are set accordingly
     
   start_time=`date`
   
@@ -47,7 +47,7 @@ for test in ${test_list[@]}; do
   ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=${test} 
 
   EXIT_STATUS=$?
-  if [ "$EXIT_STATUS" -eq "0" ]                         #to check if the test exits successfully or not
+  if [ "$EXIT_STATUS" -eq "0" ]                                    #to check if the test exits successfully or not
   then
       result="PASS"
   else
@@ -60,12 +60,24 @@ for test in ${test_list[@]}; do
   
   echo "${test}                            | ${result} | ${duration}" >> results.markdown
 
-  #Destroying cluster
-  #cd /root/scale-ci-$OPENSHIFT_CLUSTER_NAME-$test/          
-  #echo $PWD                                                
-  #./bin/openshift-install destroy cluster     # comment out this code block to prevent deleting cluster
-  #cd /root/scale-ci-deploy/ 
-  #echo $PWD 
+  ##Destroy cluster, auto cleanup##
+  
+  start_time=`date`
+  
+  ansible-playbook -v -i inventory OCP-4.X/destroy-cluster.yml -e platform=$test  
+   
+  EXIT_STATUS=$?
+  if [ "$EXIT_STATUS" -eq "0" ]                                    #to check if the test exits successfully or not
+  then
+      result="PASS"
+  else
+      result="FAIL"
+  fi
+
+  end_time=`date`
+  duration=`date -ud@$(($(date -ud"$end_time" +%s)-$(date -ud"$start_time" +%s))) +%T`
+  
+  echo "Destroy ${test} cluster            | ${result} | ${duration}" >> results.markdown
 
 done 
 
