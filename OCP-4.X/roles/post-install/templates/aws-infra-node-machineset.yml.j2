@@ -15,7 +15,7 @@ items:
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}a
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}a
     template:
       metadata:
         creationTimestamp: null
@@ -23,7 +23,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}a
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}a
       spec:
         metadata:
           creationTimestamp: null
@@ -86,7 +86,7 @@ items:
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}b
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}b
     template:
       metadata:
         creationTimestamp: null
@@ -94,7 +94,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}b
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}b
       spec:
         metadata:
           creationTimestamp: null
@@ -157,7 +157,7 @@ items:
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}c
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}c
     template:
       metadata:
         creationTimestamp: null
@@ -165,7 +165,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{aws_region.stdout}}c
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}c
       spec:
         metadata:
           creationTimestamp: null

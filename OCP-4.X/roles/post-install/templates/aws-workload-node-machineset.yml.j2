@@ -8,14 +8,14 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-    name: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}d
+    name: workload-{{aws_region.stdout}}d
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}d
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}d
     template:
       metadata:
         creationTimestamp: null
@@ -23,7 +23,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-workload-{{aws_region.stdout}}d
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}d
       spec:
         metadata:
           creationTimestamp: null
