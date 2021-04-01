@@ -4,6 +4,6 @@
     url: "{{ cerberus_url }}"
     return_content: yes
   register: result
-  until : "'True' not in result.content"
+  until : "'True' in result.content"
   retries: 10
   delay: 60
