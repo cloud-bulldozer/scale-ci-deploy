@@ -1,15 +1,5 @@
-export ORCHESTRATION_USER= #required field
-export ORCHESTRATION_HOST= #required field
-export OPENSHIFT_CLEANUP=true
-export OPENSHIFT_INSTALL=true
-export OPENSHIFT_POST_INSTALL=true
-export OPENSHIFT_POST_CONFIG=true
-export OPENSHIFT_DEBUG_CONFIG=false
 
-# cluster version
-export OPENSHIFT_CLIENT_LOCATION= #required field
-export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=
-export OPENSHIFT_INSTALL_BINARY_URL=#required field
+
 
 # install
 export OPENSHIFT_BASE_DOMAIN= #required field
@@ -50,36 +40,7 @@ export OPENSHIFT_PROMETHEUS_STORAGE_SIZE=500Gi
 export OPENSHIFT_ALERTMANAGER_STORAGE_CLASS=standard
 export OPENSHIFT_ALERTMANAGER_STORAGE_SIZE=20Gi
 
-# post install
-export ENABLE_DITTYBOPPER=true
-export ENABLE_REMOTE_WRITE=false
-export SINCGARS_REMOTE_WRITE_URL=
-export KUBECONFIG_AUTH_DIR_PATH=
-export SCALE_CI_BUILD_TRIGGER=true
-export SCALE_CI_BUILD_TRIGGER_URL= #required field
-export CERBERUS_ENABLE=false
-export KUBECONFIG_PATH=/root/.kube/config #required field
-export JOB_ITERATIONS=1
-export JENKINS_USER=
-export JENKINS_API_TOKEN=
-export JENKINS_ES_SERVER= 
 
-export CERBERUS_CONFIG_PATH=/root/cerberus.yml
-export CERBERUS_IMAGE=quay.io/openshift-scale/cerberus:latest
-export CERBERUS_URL=http://0.0.0.0:8080
-export WATCH_NODES=true
-export WATCH_CLUSTER_OPERATORS=true
-export WATCH_NAMESPACES=[openshift-etcd, openshift-apiserver, openshift-kube-apiserver, openshift-monitoring, openshift-kube-controller-manager, openshift-machine-api, openshift-kube-scheduler, openshift-ingress, openshift-sdn]
-export CERBERUS_PUBLISH_STATUS=true
-export INSPECT_COMPONENTS=false
-export SLACK_INTEGRATION=false
-export SLACK_API_TOKEN=
-export SLACK_CHANNEL=
-export WATCHER_SLACK_ID={Monday: , Tuesday: , Wednesday: , Thursday: , Friday: , Saturday: , Sunday: }
-export SLACK_TEAM_ALIAS=
-export ITERATIONS=5
-export SLEEP_TIME=60
-export DAEMON_MODE=true
 
 # gcp specific
 export GCP_REGION= #required field
@@ -91,18 +52,5 @@ export GOOGLE_CREDENTIALS=${GCP_AUTH_KEY_FILE}
 
 
 
-#elasticsearch
-export ES_SERVER= #required field
-export ELASTIC_CURL_URL= 
-export ELASTIC_CURL_USER= 
-export ELASTIC_SERVER= 
 
-# credentials
-export SSHKEY_TOKEN= #required field
-export OPENSHIFT_INSTALL_PULL_SECRET= #required field
-export OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN= #required field
-export OPENSHIFT_INSTALL_IMAGE_REGISTRY= #required field
-export OPENSHIFT_INSTALL_REGISTRY_TOKEN= #required field
-export OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE=false
-export OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE_VERSION=
-export JOB_ITERATIONS=1
+

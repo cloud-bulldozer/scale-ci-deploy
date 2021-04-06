@@ -24,6 +24,7 @@ Platform                       | Result | Runtime  |
 -------------------------------|--------|----------| 
 EOF
 
+source CI/properties_files/common_vars.sh 
 test_rc=0  
 
 for test in ${test_list[@]}; do
@@ -62,23 +63,26 @@ for test in ${test_list[@]}; do
 
   ##Destroy cluster, auto cleanup##
   
-  start_time=`date`
+  if [[ ${DESTROY_CLUSTER} == "true" ]]; then
   
-  ansible-playbook -v -i inventory OCP-4.X/destroy-cluster.yml -e platform=$test  
+    start_time=`date`
+  
+    ansible-playbook -v -i inventory OCP-4.X/destroy-cluster.yml -e platform=$test  
    
-  EXIT_STATUS=$?
-  if [ "$EXIT_STATUS" -eq "0" ]                                    #to check if the test exits successfully or not
-  then
+    EXIT_STATUS=$?
+    if [ "$EXIT_STATUS" -eq "0" ]                                    #to check if the test exits successfully or not
+    then
       result="PASS"
-  else
+    else
       result="FAIL"
-  fi
+    fi
 
-  end_time=`date`
-  duration=`date -ud@$(($(date -ud"$end_time" +%s)-$(date -ud"$start_time" +%s))) +%T`
+    end_time=`date`
+    duration=`date -ud@$(($(date -ud"$end_time" +%s)-$(date -ud"$start_time" +%s))) +%T`
   
-  echo "Destroy ${test} cluster            | ${result} | ${duration}" >> results.markdown
+    echo "Destroy ${test} cluster            | ${result} | ${duration}" >> results.markdown
 
+  fi
 done 
 
 cat results.markdown
