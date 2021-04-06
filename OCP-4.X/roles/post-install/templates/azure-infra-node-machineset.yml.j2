@@ -8,14 +8,14 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}1
+    name: infra-{{azure_location.stdout}}1
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}1
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{azure_location.stdout}}1
     template:
       metadata:
         creationTimestamp: null
@@ -23,7 +23,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}1
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{azure_location.stdout}}1
       spec:
         metadata:
           creationTimestamp: null
@@ -75,14 +75,14 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}2
+    name: infra-{{azure_location.stdout}}2
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}2
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{azure_location.stdout}}2
     template:
       metadata:
         creationTimestamp: null
@@ -90,7 +90,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}2
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{azure_location.stdout}}2
       spec:
         metadata:
           creationTimestamp: null
@@ -142,14 +142,14 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}3
+    name: infra-{{azure_location.stdout}}3
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}3
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{azure_location.stdout}}3
     template:
       metadata:
         creationTimestamp: null
@@ -157,7 +157,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: {{cluster_name.stdout}}-infra-{{azure_location.stdout}}3
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{azure_location.stdout}}3
       spec:
         metadata:
           creationTimestamp: null
