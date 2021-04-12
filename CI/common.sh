@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 export TERM=screen-256color
 bold=$(tput bold)
 uline=$(tput smul)
