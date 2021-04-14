@@ -186,14 +186,14 @@
    - name: Check for install payload
      shell: |
        echo {{ openshift_install_binary_url }} | sed -e 's/\(.*\)openshift-install.*/\1/'
-     register: var
+     register: BINARY_BASE_URL
 
    - name: print base url
-     shell: echo {{ var.stdout }}
+     shell: echo {{ BINARY_BASE_URL.stdout }}
 
    - name: Pause play until BASE URL is reachable
      uri:
-       url: "{{ var.stdout }}"
+       url: "{{ BINARY_BASE_URL.stdout }}"
        follow_redirects: none
        method: GET
      register: _result
