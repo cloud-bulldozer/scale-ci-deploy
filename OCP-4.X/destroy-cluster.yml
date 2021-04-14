@@ -1,0 +1,22 @@
+# To auto-clean clusters created by the ci
+#usage : ansible-playbook -v -i inventory OCP-4.X/destroy-cluster.yml -e platform=aws/gcp/azure
+
+- name: Cleanup old cluster
+  hosts: orchestration
+  gather_facts: true
+  become: true
+  remote_user: root
+  vars_files:
+    - vars/install-common-vars.yml
+  pre_tasks:
+
+    - name: Include platform variables
+      include_vars:
+        file: "vars/install-on-{{ platform }}.yml"
+    - name: Set dynamic scale-ci-deploy path
+      set_fact:
+        dynamic_deploy_path: "{% if lookup('env', 'DYNAMIC_DEPLOY_PATH') %}{{ lookup('env', 'DYNAMIC_DEPLOY_PATH') }}{% else %}scale-ci-{{ openshift_cluster_name }}-{{ platform }}{% endif %}"
+
+  roles:
+    - role: openshift-cleanup
+      when: openshift_cleanup|bool
