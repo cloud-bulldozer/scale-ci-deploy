@@ -183,6 +183,23 @@
   when: platform == "gcp"
 
 - block:
+   - name: Check for install payload
+     shell: |
+       echo {{ openshift_install_binary_url }} | sed -e 's/\(.*\)openshift-install.*/\1/'
+     register: var
+
+   - name: print base url
+     shell: echo {{ var.stdout }}
+
+   - name: Pause play until BASE URL is reachable
+     uri:
+       url: "{{ var.stdout }}"
+       follow_redirects: none
+       method: GET
+     register: _result
+     until: _result.status == 200
+     retries: 60
+     delay: 5
 
    - name: Fetch the openshift-install binary tarball
      get_url:
