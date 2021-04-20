@@ -9,6 +9,22 @@
 # * Install cluster
 #
 
+- name: Check for oc client tools install payload
+  shell: |
+    echo {{ openshift_client_location }} | sed -e 's/\(.*\)openshift-client.*/\1/'
+  register: CLIENT_BASE_URL
+
+- name: Pause play until CLIENT URL is reachable
+  uri:
+    url: "{{ CLIENT_BASE_URL.stdout }}"
+    follow_redirects: none
+    method: GET
+  register: _result
+  until: _result.status == 200
+  retries: 60
+  delay: 5
+
+
 - name: Download oc client tools
   get_url:
     url: "{{ openshift_client_location }}"
