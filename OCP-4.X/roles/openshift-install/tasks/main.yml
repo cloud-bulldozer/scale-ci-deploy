@@ -81,6 +81,9 @@
       chmod +x openshift-install
       cp oc /usr/local/bin/oc
       cp kubectl /usr/local/bin/kubectl
+    register: command_result
+    failed_when: "'error:' in command_result.stderr"
+
 
   when: not openshift_install_installer_from_source|bool and openshift_install_binary_url == ""
 
@@ -225,6 +228,8 @@
        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
        chmod +x openshift-install
+     register: command_result
+     failed_when: "'error:' in command_result.stderr"
 
   when: openshift_install_binary_url != ""
 
