@@ -74,8 +74,7 @@
   
   - name: Extract openshift-install binary from the payload
     shell: |
-      set -o pipefail
-      set -e
+      set -eo pipefail
       cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin
       oc adm release extract --tools {{ openshift_install_release_image_override }}
       ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
@@ -222,8 +221,7 @@
 
    - name: Extract openshift-install binary
      shell: |
-       set -o pipefail
-       set -e
+       set -eo pipefail
        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
        chmod +x openshift-install
