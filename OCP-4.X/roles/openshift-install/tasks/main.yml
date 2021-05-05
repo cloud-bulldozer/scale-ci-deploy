@@ -82,8 +82,6 @@
       chmod +x openshift-install
       cp oc /usr/local/bin/oc
       cp kubectl /usr/local/bin/kubectl
-    
-
 
   when: not openshift_install_installer_from_source|bool and openshift_install_binary_url == ""
 
@@ -228,8 +226,7 @@
        set -e
        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
-       chmod +x openshift-install
-     
+       chmod +x openshift-install     
 
   when: openshift_install_binary_url != ""
 
