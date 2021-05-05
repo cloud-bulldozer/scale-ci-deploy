@@ -226,8 +226,8 @@
        set -e
        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
-       chmod +x openshift-install     
-
+       chmod +x openshift-install
+       
   when: openshift_install_binary_url != ""
 
 - name: Setup install-config.yaml
