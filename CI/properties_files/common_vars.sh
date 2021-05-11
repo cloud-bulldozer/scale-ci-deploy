@@ -36,6 +36,7 @@ export CERBERUS_PORT=8080
 export WATCH_NODES=true
 export WATCH_CLUSTER_OPERATORS=true
 export WATCH_NAMESPACES=[openshift-etcd,openshift-apiserver,openshift-kube-apiserver,openshift-monitoring,openshift-kube-controller-manager,openshift-machine-api,openshift-kube-scheduler,openshift-ingress,openshift-sdn]
+export watch_master_schedulable='{enabled: True, label: node-role.kubernetes.io/master}'
 export CERBERUS_PUBLISH_STATUS=true
 export INSPECT_COMPONENTS=false
 export SLACK_INTEGRATION=false
