@@ -9,6 +9,10 @@ data:
       nodeSelector:
         node-role.kubernetes.io/infra: ""
     prometheusK8s:
+      externalLabels:
+        openshift_cluster_name: {{cluster_name.stdout}}
+      remoteWrite:
+        - url: http://thanos-receive-thanos.apps.keith-cluster.perfscale.devcluster.openshift.com/api/v1/receive
       retention: {{openshift_prometheus_retention_period}}
       baseImage: openshift/prometheus
       nodeSelector:
