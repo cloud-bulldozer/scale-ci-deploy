@@ -81,7 +81,7 @@ set -eux
 echo "[orchestration]" > inventory
 echo "${ORCHESTRATION_HOST}" >> inventory
 
-ansible-playbook -vv -i inventory OCP-4.X/install-on-aws.yml
+ansible-playbook -vv -i inventory -e OCP-4.X/deploy-cluster.yml -e platform=aws
 
 ####################################################################################################
 # Post Jenkins Build Clean up:
