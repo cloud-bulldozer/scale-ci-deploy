@@ -5,7 +5,7 @@
   hosts: orchestration
   gather_facts: true
   become: true
-  remote_user: root
+  remote_user: "{{orchestration_user}}"
   vars_files:
     - vars/install-common-vars.yml
   pre_tasks:
