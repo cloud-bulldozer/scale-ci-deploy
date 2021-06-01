@@ -71,7 +71,7 @@
 
 - name: Use installer from a build
   block:
-  
+
   - name: Extract openshift-install binary from the payload
     shell: |
       set -eo pipefail
@@ -82,7 +82,7 @@
       cp oc /usr/local/bin/oc
       cp kubectl /usr/local/bin/kubectl
 
-  when: not openshift_install_installer_from_source|bool and openshift_install_binary_url == ""
+  when: not openshift_install_installer_from_source|bool or openshift_install_binary_url == ""
 
 - name: Build installer from source
   block:
@@ -137,7 +137,7 @@
     template:
        src: config.j2
        dest: "{{ ansible_user_dir }}/.aws/config"
-  
+
   - name: AWS credentials
     template:
        src: credentials.j2
@@ -225,7 +225,7 @@
        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
        chmod +x openshift-install
-       
+
   when: openshift_install_binary_url != ""
 
 - name: Setup install-config.yaml
