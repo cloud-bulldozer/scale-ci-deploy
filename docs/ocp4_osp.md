@@ -1,6 +1,6 @@
 # OpenShift 4 IPI OpenStack Install Documentation
 
-The OpenShift 4 IPI OpenStack install playbook is `OCP-4.X/install-on-osp.yml` and will deploy a cluster on OpenStack. In addition to installing a cluster, the playbook can also perform day 2 operations to include deploying three infra nodes and deploying a workload node to isolate workload driver pods from [openshift-scale/workloads](https://github.com/openshift-scale/workloads) repo.
+The OpenShift 4 IPI OpenStack variable file can be found at `OCP-4.X/vars/install-on-osp.yml`. It will configure the deployment playbook at `OCP-4.X/deploy-cluster.yml` to perform a cluster installation on OpenStack. In addition to installing a cluster, the playbook can also perform day 2 operations to include deploying three infra nodes and deploying a workload node to isolate workload driver pods from [openshift-scale/workloads](https://github.com/openshift-scale/workloads) repo.
 
 The OpenStack cloud in which this has been tested with and on is a Red Hat OpenStack Platform 13 cloud installed via tripleo. The install orchestration used to deploy the cloud is [openshift-scale/scale-ci-tripleo](https://github.com/openshift-scale/scale-ci-tripleo).
 
@@ -12,7 +12,7 @@ Running from the CLI:
 $ cp OCP-4.X/inventory.example inventory
 $ # Edit inventory and add your undercloud machine as the orchestration host
 $ # Edit deployment variables (Ex vi OCP-4.X/vars/install-on-osp.yml) or define env variables
-$ ansible-playbook -v -i inventory OCP-4.X/install-on-osp.yml
+$ ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=osp
 ```
 
 Note that for Tripleo OpenStack Clouds, the Undercloud machine is used as the orchestration host as it will be easier to setup/coordinate any sort of lab specific networking on this machine (Usually).
