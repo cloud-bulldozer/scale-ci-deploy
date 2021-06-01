@@ -71,7 +71,7 @@
 
 - name: Use installer from a build
   block:
-  
+
   - name: Extract openshift-install binary from the payload
     shell: |
       set -eo pipefail
@@ -133,11 +133,16 @@
 - name: Setting up AWS
   block:
 
+  - name: Create .aws dir
+    file:
+      path: "{{ ansible_user_dir }}/.aws"
+      state: directory
+
   - name: AWS config
     template:
        src: config.j2
        dest: "{{ ansible_user_dir }}/.aws/config"
-  
+
   - name: AWS credentials
     template:
        src: credentials.j2
@@ -225,7 +230,7 @@
        cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
        chmod +x openshift-install
-       
+
   when: openshift_install_binary_url != ""
 
 - name: Setup install-config.yaml
