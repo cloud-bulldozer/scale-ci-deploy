@@ -1,6 +1,6 @@
 # OpenShift 4 IPI OpenStack Install Documentation
 
-The OpenShift 4 IPI OpenStack variable file can be found at `OCP-4.X/vars/install-on-osp.yml`. It will configure the deployment playbook at `OCP-4.X/deploy-cluster.yml` to perform a cluster installation on OpenStack. In addition to installing a cluster, the playbook can also perform day 2 operations to include deploying three infra nodes and deploying a workload node to isolate workload driver pods from [openshift-scale/workloads](https://github.com/openshift-scale/workloads) repo.
+The OpenShift 4 IPI OpenStack install playbook is `OCP-4.X/install-on-osp.yml` and will deploy a cluster on OpenStack. In addition to installing a cluster, the playbook can also perform day 2 operations to include deploying three infra nodes and deploying a workload node to isolate workload driver pods from [openshift-scale/workloads](https://github.com/openshift-scale/workloads) repo.
 
 The OpenStack cloud in which this has been tested with and on is a Red Hat OpenStack Platform 13 cloud installed via tripleo. The install orchestration used to deploy the cloud is [openshift-scale/scale-ci-tripleo](https://github.com/openshift-scale/scale-ci-tripleo).
 
