@@ -1,6 +1,6 @@
 # OpenShift 4 IPI AWS Install Documentation
 
-The OpenShift 4 IPI AWS variable file is `OCP-4.X/vars/install-on-aws.yml` and will configure the deployment playbook at `OCP-4.X/deploy-cluster.yml` to perform a cluster installation on AWS. In addition to installing a cluster, the playbook can also perform day 2 operations to include deploying three infra nodes and deploying a workload node to isolate workload driver pods from [openshift-scale/workloads](https://github.com/openshift-scale/workloads) repo.
+The OpenShift 4 IPI AWS variable file can be found at `OCP-4.X/vars/install-on-aws.yml`. It will configure the deployment playbook at `OCP-4.X/deploy-cluster.yml` to perform a cluster installation on AWS. In addition to installing a cluster, the playbook can also perform day 2 operations to include deploying three infra nodes and deploying a workload node to isolate workload driver pods from [openshift-scale/workloads](https://github.com/openshift-scale/workloads) repo.
 
 ## Usage
 
@@ -10,7 +10,7 @@ Running from the CLI:
 $ cp OCP-4.X/inventory.example inventory
 $ # Edit inventory and add your expected orchestration host
 $ # Edit deployment variables (Ex vi OCP-4.X/vars/install-on-aws.yml) or define env variables
-$ ansible-playbook -v -i inventory OCP-4.X/deploy-cluster -e platform=aws
+$ ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=aws
 ```
 
 ## Example
