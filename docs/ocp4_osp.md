@@ -12,7 +12,7 @@ Running from the CLI:
 $ cp OCP-4.X/inventory.example inventory
 $ # Edit inventory and add your undercloud machine as the orchestration host
 $ # Edit deployment variables (Ex vi OCP-4.X/vars/install-on-osp.yml) or define env variables
-$ ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=osp
+$ ansible-playbook -v -i inventory OCP-4.X/install-on-osp.yml
 ```
 
 Note that for Tripleo OpenStack Clouds, the Undercloud machine is used as the orchestration host as it will be easier to setup/coordinate any sort of lab specific networking on this machine (Usually).
