@@ -22,6 +22,13 @@
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
 
+- name: Get cluster release stream
+  command: |
+    {%raw%}oc get clusterversion version -o go-template --template="{{.spec.channel}}"{%endraw%}
+  register: ocp_release_stream
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+
 - name: Set userDataSecret name
   set_fact:
     user_data_secret: "worker-user-data"
