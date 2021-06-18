@@ -14,7 +14,6 @@ data:
         openshift_network_type: {{openshift_network_type}}
         openshift_version: {{ocp_version.stdout}}
         openshift_platform: {{platform}}
-        openshift_release_stream: {{ocp_release_stream.stdout}}
       remoteWrite:
         - url: http://thanos-receive-thanos.apps.keith-cluster.perfscale.devcluster.openshift.com/api/v1/receive
       retention: {{openshift_prometheus_retention_period}}
