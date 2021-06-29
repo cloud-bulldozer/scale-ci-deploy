@@ -156,6 +156,28 @@
     - item.toggle|bool
     - platform == "osp"
 
+- name: Scale CVO Down for OVNKubernetes image patching
+  command: oc scale -n openshift-cluster-version deployment.apps/cluster-version-operator --replicas=0
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  when: openshift_toggle_ovn_patch|bool
+
+- name: Patch new OVNKubernetes Image
+  command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}}
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  when: openshift_toggle_ovn_patch|bool
+
+- name: Pause the rollout to begin
+  pause:
+    seconds: 10
+
+- name: See if OVNK new images have rolled out
+  shell: oc rollout status -n openshift-ovn-kubernetes ds/ovnkube-node
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  when: openshift_toggle_ovn_patch|bool
+
 - name: Create machinesets
   shell: |
     oc create -f {{item.ms}}
@@ -355,3 +377,5 @@
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
   when: dittybopper_enable
+
+
