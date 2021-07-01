@@ -118,3 +118,6 @@ es_server: "{{ lookup('env', 'ES_SERVER')|default('https://search-perfscale-dev-
 # OVNKubernetes image patch
 openshift_toggle_ovn_patch: "{{ lookup('env', 'OVN_PATCH')|default(false, true) }}"
 openshift_ovn_image: "{{ lookup('env', 'OVN_IMAGE')|default('', true) }}"
+
+# RHACS
+rhacs_enable: "{{ lookup('env', 'RHACS_ENABLE')|default(false, true) }}"
