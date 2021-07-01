@@ -38,6 +38,8 @@
       when: openshift_install|bool
     - role: post-install
       when: openshift_post_install|bool
+    - role: rhacs_install
+      when: rhacs_enable|bool
     - role: cerberus_install
       when: cerberus_enable|bool
     - role: post-config-on-aws
