@@ -7,10 +7,8 @@
     cluster_name: "perf-test"
 
 - name: Add rhacs chart repo
-  kubernetes.core.helm_repository:
-    repo_name: rhacs
-    repo_state: present
-    repo_url: "https://mirror.openshift.com/pub/rhacs/charts"
+  shell: |
+    helm repo add rhacs https://mirror.openshift.com/pub/rhacs/charts
 
 - set_fact:
     central_pass: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
@@ -18,22 +16,15 @@
     msg: "{{ central_pass }}"
 
 - name: Install central services
-  kubernetes.core.helm:
-    release_name: stackrox-central-services
-    release_namespace: stackrox
-    create_namespace: true
-    chart_ref: rhacs/central-services
-    kubeconfig_path: "{{ kubeconfig_path }}"
-    values:
-      imagePullSecrets:
-        allowNone: true
-      central:
-        exposure:
-          route:
-            enabled: true
-        exposeMonitoring: true
-        adminPassword:
-          value: "{{ central_pass }}"
+  shell: |
+    helm install -n stackrox \
+      --create-namespace stackrox-central-services rhacs/central-services \
+      --set imagePullSecrets.allowNone=true \
+      --set central.exposure.route.enabled=true \
+      --set central.adminPassword.value={{ central_pass }} \
+      --set central.exposeMonitoring=true
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 - name: Get route to central
   shell: |
@@ -59,23 +50,18 @@
 
 - name: Get secure cluster bundle
   shell: |
-    if ! [[ -f perf-bundle.yml ]]; then
-      roxctl -e https://{{ central_route.stdout }}:443 -p "{{ central_pass }}" central init-bundles generate {{ cluster_name }} --output perf-bundle.yml
-    fi
+    roxctl -e https://{{ central_route.stdout }}:443 -p "{{ central_pass }}" central init-bundles generate {{ cluster_name }} \
+      --output perf-bundle.yml
   environment:
     PATH: "{{ lookup('env', 'PATH') }}:{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
 
 - name: Install secured cluster services
-  kubernetes.core.helm:
-    release_name: stackrox-secured-cluster-services
-    release_namespace: stackrox
-    create_namespace: true
-    chart_ref: rhacs/secured-cluster-services
-    kubeconfig_path: "{{ kubeconfig_path }}"
-    values_files:
-    - "perf-bundle.yml"
-    values:
-      imagePullSecrets:
-        allowNone: true
-      clusterName: "{{ cluster_name }}"
-      exposeMonitoring: true
+  shell: |
+    helm install -n stackrox \
+      --create-namespace stackrox-secured-cluster-services rhacs/secured-cluster-services \
+      -f perf-bundle.yml \
+      --set imagePullSecrets.allowNone=true \
+      --set clusterName={{ cluster_name }} \
+      --set exposeMonitoring=true
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
