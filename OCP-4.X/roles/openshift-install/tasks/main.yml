@@ -53,7 +53,7 @@
     set -o pipefail
     cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin
     tar xvzf "{{ helm_binary | basename }}"
-    cp linux-386/helm /usr/local/bin/helm
+    cp linux-amd64/helm /usr/local/bin/helm
     helm version
 
 - name: Install dependencies
