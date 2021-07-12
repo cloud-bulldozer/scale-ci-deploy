@@ -43,6 +43,19 @@
     src: registry_auth.j2
     dest: "{{ ansible_user_dir }}/.docker/config.json"
 
+- name: Download helm
+  get_url:
+    url: "{{ helm_binary }}"
+    dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/{{ helm_binary | basename }}"
+
+- name: Untar and install helm
+  shell: |
+    set -o pipefail
+    cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin
+    tar xvzf "{{ helm_binary | basename }}"
+    cp linux-386/helm /usr/local/bin/helm
+    helm version
+
 - name: Install dependencies
   package:
     name: "{{ packages }}"
