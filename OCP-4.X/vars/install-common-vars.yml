@@ -35,7 +35,7 @@ openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_
 openshift_install_installer_from_source: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE')|default(false, true) }}"
 openshift_install_installer_from_source_version: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE_VERSION')|default('master', true) }}"
 gopath: "{{ lookup('env', 'GOPATH')|default('/root/.go', true) }}"
-helm_binary: "{{ lookup('env', 'HELM_BINARY')|default('https://get.helm.sh/helm-v3.6.2-linux-386.tar.gz', true) }}"
+helm_binary: "{{ lookup('env', 'HELM_BINARY')|default('https://get.helm.sh/helm-v3.6.2-linux-amd64.tar.gz', true) }}"
 
 # Cluster Configuration
 openshift_cidr: "{{ lookup('env', 'OPENSHIFT_CIDR')|default('10.128.0.0/14', true) }}"
