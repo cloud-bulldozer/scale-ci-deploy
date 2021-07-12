@@ -64,7 +64,6 @@
       - figlet
       - parallel
       - tmux
-      - helm
 
 - name: Install awscli
   pip:
