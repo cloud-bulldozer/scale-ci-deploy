@@ -50,6 +50,7 @@
 
 - name: Get secure cluster bundle
   shell: |
+    rm -f perf-bundle.yml
     roxctl -e https://{{ central_route.stdout }}:443 -p "{{ central_pass }}" central init-bundles generate {{ cluster_name }} \
       --output perf-bundle.yml
   environment:
