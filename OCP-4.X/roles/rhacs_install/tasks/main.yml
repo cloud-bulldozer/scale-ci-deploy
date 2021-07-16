@@ -48,9 +48,13 @@
     dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/"
     mode: 0755
 
+- name: Cleanup previous run
+  file:
+    path: perf-bundle.yml
+    state: absent
+
 - name: Get secure cluster bundle
   shell: |
-    rm -f perf-bundle.yml
     roxctl -e https://{{ central_route.stdout }}:443 -p "{{ central_pass }}" central init-bundles generate {{ cluster_name }} \
       --output perf-bundle.yml
   environment:
