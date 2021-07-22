@@ -15,7 +15,7 @@ items:
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}d
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
     template:
       metadata:
         creationTimestamp: null
@@ -23,7 +23,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}d
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
       spec:
         metadata:
           creationTimestamp: null
@@ -49,7 +49,7 @@ items:
             metadata:
               creationTimestamp: null
             placement:
-              availabilityZone: {{aws_region.stdout}}d
+              availabilityZone: {{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
               region: {{aws_region.stdout}}
             publicIp: true
             securityGroups:
