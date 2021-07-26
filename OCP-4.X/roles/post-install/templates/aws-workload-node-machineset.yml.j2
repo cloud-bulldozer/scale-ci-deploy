@@ -8,7 +8,7 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-    name: workload-{{aws_region.stdout}}d
+    name: workload-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
     namespace: openshift-machine-api
   spec:
     replicas: 1
@@ -61,7 +61,7 @@ items:
               filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-public-{{aws_region.stdout}}d
+                - {{cluster_name.stdout}}-public-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
             tags:
             - name: kubernetes.io/cluster/{{cluster_name.stdout}}
               value: owned
