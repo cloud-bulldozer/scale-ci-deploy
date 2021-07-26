@@ -150,3 +150,8 @@ The storage class for the alertmanager servers.
 
 ### OPENSHIFT_ALERTMANAGER_STORAGE_SIZE
 Default: `2Gi`
+
+### WORKLOAD_AWS_AZ_SUFFIX
+Default: `d`
+Default EC2 availability zone(AZ) is set to `d`, but some regions do not have the AZ `d`, in that case you can set this to some other letter.
+E.g. for `us-east-2`, you can request `us-east-2a/b/c` as `us-east-2d` does not exist.
