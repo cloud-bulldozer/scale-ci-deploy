@@ -122,3 +122,9 @@ openshift_ovn_image: "{{ lookup('env', 'OVN_IMAGE')|default('', true) }}"
 
 # RHACS
 rhacs_enable: "{{ lookup('env', 'RHACS_ENABLE')|default(false, true) }}"
+
+
+# Thanos
+thanos_enable: "{{ lookup('env', 'THANOS_ENABLE')|default(false, true) }}"
+thanos_receiver_url: "{{ lookup('env', 'THANOS_RECEIVER_URL')|default('http://thanos-receive-thanos.apps.keith-cluster.perfscale.devcluster.openshift.com/api/v1/receive', true) }}"
+

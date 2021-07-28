@@ -9,13 +9,15 @@ data:
       nodeSelector:
         node-role.kubernetes.io/infra: ""
     prometheusK8s:
+{%- if thanos_enable and thanos_receiver_url != "" %}
       externalLabels:
-        openshift_cluster_name: {{cluster_name.stdout}}
-        openshift_network_type: {{openshift_network_type}}
-        openshift_version: {{ocp_version.stdout}}
-        openshift_platform: {{platform}}
+        openshift_cluster_name: {{ cluster_name.stdout }}
+        openshift_network_type: {{ openshift_network_type }}
+        openshift_version: {{ ocp_version.stdout }}
+        openshift_platform: {{ platform }}
       remoteWrite:
-        - url: http://thanos-receive-thanos.apps.keith-cluster.perfscale.devcluster.openshift.com/api/v1/receive
+        - url: {{ thanos_receiver_url }}
+{%- endif %}
       retention: {{openshift_prometheus_retention_period}}
       baseImage: openshift/prometheus
       nodeSelector:
