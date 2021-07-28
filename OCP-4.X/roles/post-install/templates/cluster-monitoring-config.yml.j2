@@ -9,7 +9,7 @@ data:
       nodeSelector:
         node-role.kubernetes.io/infra: ""
     prometheusK8s:
-{%- if thanos_enable and thanos_receiver_url != "" %}
+{% if thanos_enable %}
       externalLabels:
         openshift_cluster_name: {{ cluster_name.stdout }}
         openshift_network_type: {{ openshift_network_type }}
@@ -17,7 +17,7 @@ data:
         openshift_platform: {{ platform }}
       remoteWrite:
         - url: {{ thanos_receiver_url }}
-{%- endif %}
+{% endif %}
       retention: {{openshift_prometheus_retention_period}}
       baseImage: openshift/prometheus
       nodeSelector:
