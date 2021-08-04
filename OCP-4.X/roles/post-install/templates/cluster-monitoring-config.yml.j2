@@ -18,8 +18,8 @@ data:
       remoteWrite:
         - url: {{ thanos_receiver_url }}
           write_relabel_configs:
-          - source_labels: [pod, name, namespace]
-            regex: ".*cluster-density.*|.*node-density.*|.*perfapp.*"
+          - source_labels: [prometheus_replica]
+            regex: "prometheus-k8s-1"
             action: drop
 {% endif %}
       retention: {{openshift_prometheus_retention_period}}
