@@ -17,10 +17,6 @@ data:
         openshift_platform: {{ platform }}
       remoteWrite:
         - url: {{ thanos_receiver_url }}
-          write_relabel_configs:
-          - source_labels: [pod, name, namespace]
-            regex: ".*cluster-density.*|.*node-density.*|.*perfapp.*"
-            action: drop
 {% endif %}
       retention: {{openshift_prometheus_retention_period}}
       baseImage: openshift/prometheus
