@@ -280,3 +280,10 @@ Password for the first super user.
 ### POSTGRES_PASSWORD
 Default: No default.
 Postgresql database super user password.
+
+### THANOS_ENABLE
+Default: False
+Turn on remote_write to a thanos instance
+
+### THANOS_RECEIVER_URL
+URL for the receiver to remote_write to. 
