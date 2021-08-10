@@ -19,7 +19,11 @@
   shell: |
     helm install -n stackrox \
       --create-namespace stackrox-central-services rhacs/central-services \
-      --set imagePullSecrets.allowNone=true \
+      --set imagePullSecrets.allowNone={{ (rhacs_image_pull_secret_username == "") }} \
+      {{  (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
+      {{  (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
+      {{  (rhacs_image_main_registry == "" )        | ternary("", "--set central.image.registry=" + rhacs_image_main_registry) }} \
+      {{  (rhacs_image_main_tag == "" )             | ternary("", "--set central.image.tag=" + rhacs_image_main_tag) }} \
       --set central.exposure.route.enabled=true \
       --set central.adminPassword.value={{ central_pass }} \
       --set central.exposeMonitoring=true
@@ -65,7 +69,11 @@
     helm install -n stackrox \
       --create-namespace stackrox-secured-cluster-services rhacs/secured-cluster-services \
       -f perf-bundle.yml \
-      --set imagePullSecrets.allowNone=true \
+      --set imagePullSecrets.allowNone={{ (rhacs_image_pull_secret_username == "") }} \
+      {{  (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
+      {{  (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
+      {{  (rhacs_image_main_registry == "" )        | ternary("", "--set image.main.registry=" + rhacs_image_main_registry) }} \
+      {{  (rhacs_image_main_tag == "" )             | ternary("", "--set image.main.tag=" + rhacs_image_main_tag) }} \
       --set clusterName={{ cluster_name }} \
       --set exposeMonitoring=true
   environment:
