@@ -281,6 +281,30 @@ Password for the first super user.
 Default: No default.
 Postgresql database super user password.
 
+### RHACS_ENABLE
+Default: False
+An option to enable installation of ACS.
+
+### RHACS_IMAGE_MAIN_REGISTRY
+Default: ''
+Specify the image source when installing ACS. The most recent public release is
+the default install.
+
+### RHACS_IMAGE_MAIN_TAG
+Default: ''
+Specify the image tag when installing ACS. The most recent public release is the
+default install.
+
+### RHACS_IMAGE_PULL_SECRET_USERNAME
+Default: ''
+The username to allow access to a registry that requires authentication when
+installing ACS.
+
+### RHACS_IMAGE_PULL_SECRET_PASSWORD
+Default: ''
+The passowrd to allow access to a registry that requires authentication when
+installing ACS.
+
 ### THANOS_ENABLE
 Default: False
 Turn on remote_write to a thanos instance
