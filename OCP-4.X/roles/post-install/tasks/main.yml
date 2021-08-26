@@ -390,6 +390,7 @@
         helm repo add grafana https://grafana.github.io/helm-charts 
         helm repo update
         oc create namespace loki || true
+        oc adm policy add-scc-to-group privileged system:authenticated
         helm upgrade --install promtail --namespace=loki grafana/promtail -f {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/promtail.yaml
       ignore_errors: yes
       environment:
