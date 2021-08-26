@@ -1,0 +1,15 @@
+securityContext: 
+  privileged: true
+  allowPrivilegeEscalation: true
+containerSecurityContext:
+  privileged: true
+  allowPrivilegeEscalation: true
+config:
+  lokiAddress: {{ loki_receiver_url }}
+  snippets:
+    extraClientConfigs: |-
+      external_labels:
+        openshift_cluster_name: {{ cluster_name.stdout }}
+        openshift_network_type: {{ openshift_network_type }}
+        openshift_version: {{ ocp_version.stdout }}
+        openshift_platform: {{ platform }}

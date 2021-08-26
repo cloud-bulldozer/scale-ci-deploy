@@ -379,3 +379,20 @@
   when: dittybopper_enable
 
 
+- name: Deploy promtail
+  block:
+    - name: Template Promtail Values
+      template:
+        src: promtail-values.yml.j2
+        dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/promtail.yaml"
+    - name: Install Promtail
+      shell: |
+        helm repo add grafana https://grafana.github.io/helm-charts 
+        helm repo update
+        oc create namespace loki || true
+        helm upgrade --install promtail --namespace=loki grafana/promtail -f {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/promtail.yaml
+      ignore_errors: yes
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+  
