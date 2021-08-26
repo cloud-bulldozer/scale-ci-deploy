@@ -394,5 +394,6 @@
       ignore_errors: yes
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
+  when: loki_enable
 
   
