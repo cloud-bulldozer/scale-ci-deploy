@@ -131,3 +131,7 @@ rhacs_image_main_tag: "{{ lookup('env', 'RHACS_IMAGE_MAIN_TAG')|default('', true
 thanos_enable: "{{ lookup('env', 'THANOS_ENABLE')|default(false, true) }}"
 thanos_receiver_url: "{{ lookup('env', 'THANOS_RECEIVER_URL')|default('http://thanos-receive-thanos.apps.keith-cluster.perfscale.devcluster.openshift.com/api/v1/receive', true) }}"
 
+# Loki
+loki_enable: "{{ lookup('env', 'LOKI_ENABLE')|default(false, true) }}"
+loki_receiver_url: "{{ lookup('env', 'LOKI_RECEIVER_URL')|default('http://loki-loki.apps.keith-cluster.perfscale.devcluster.openshift.com/loki/api/v1/push', true) }}"
+
