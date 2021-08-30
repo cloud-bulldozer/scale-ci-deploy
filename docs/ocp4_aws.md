@@ -151,6 +151,18 @@ The storage class for the alertmanager servers.
 ### OPENSHIFT_ALERTMANAGER_STORAGE_SIZE
 Default: `2Gi`
 
+### OPENSHIFT_TOGGLE_OVN_RELAY
+Default: `false`
+Toggle the deployment of the OVN SBSB relay.
+
+### OVN_PATCH
+Default: `false`
+Toggle to patch and replace the default OVN deployment image.
+
+### OVN_IMAGE
+Default: `nil`
+The OVN image that we will use to replace the default, requires `OVN_PATCH` to be `true`.
+
 ### WORKLOAD_AWS_AZ_SUFFIX
 Default: `d`
 Default EC2 availability zone(AZ) is set to `d`, but some regions do not have the AZ `d`, in that case you can set this to some other letter.
