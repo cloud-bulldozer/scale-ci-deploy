@@ -156,24 +156,35 @@
     - item.toggle|bool
     - platform == "osp"
 
-- name: Scale CVO Down for OVNKubernetes image patching
-  command: oc scale -n openshift-cluster-version deployment.apps/cluster-version-operator --replicas=0
-  environment:
-    KUBECONFIG: "{{ kubeconfig_path }}"
-  when: openshift_toggle_ovn_patch|bool
-
-- name: Patch new OVNKubernetes Image
-  command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}}
-  environment:
-    KUBECONFIG: "{{ kubeconfig_path }}"
-  when: openshift_toggle_ovn_patch|bool
-
-- name: Pause the rollout to begin
-  pause:
-    seconds: 10
-
-- name: See if OVNK new images have rolled out
-  shell: oc rollout status -n openshift-ovn-kubernetes ds/ovnkube-node
+- name: OVN block
+  block:
+  - name: Scale CVO Down for OVNKubernetes image patching
+    command: oc scale -n openshift-cluster-version deployment.apps/cluster-version-operator --replicas=0
+  
+  - name: Patch new OVNKubernetes Image
+    command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}}
+  
+  - name: Pause the rollout to begin
+    pause:
+      seconds: 10
+  
+  - name: Wait for OVNK new node images to roll out
+    command: oc rollout status -n {{ ovn_namespace }} ds/ovnkube-node
+  
+  - name: Wait for OVNK new master images to roll out
+    command: oc rollout status -n {{ ovn_namespace }} ds/ovnkube-master
+  
+  - name: OVN SBDB block
+    block:
+    - name: Deploy ovnkube-sbdb-relay
+      script: sbdb-relay.sh deploy
+    
+    - name: Wait for OVNK sbdb-relay images to roll out
+      command: oc rollout status -n {{ ovn_namespace }} deployment.apps/ovnkube-sbdb-relay
+    
+    - name: Verify ovnkube-sbdb-relay connectivity
+      script: sbdb-relay.sh verify
+    when: openshift_toggle_ovn_relay|bool
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_ovn_patch|bool
@@ -246,18 +257,22 @@
     KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_workload_node|bool
 
-- name: Copy new cluster-monitoring-config
-  template:
-    src: cluster-monitoring-config.yml.j2
-    dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/cluster-monitoring-config.yml"
-  when: openshift_toggle_infra_node|bool
+- block:
+  - name: Copy new cluster-monitoring-config
+    template:
+      src: cluster-monitoring-config.yml.j2
+      dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/cluster-monitoring-config.yml"
+    register: copy_yaml
+  
+  - set_fact:
+      cluster_monitoring_yaml_path: "{{ copy_yaml.dest }}"
 
-- name: Replace the cluster-monitoring-config ConfigMap
-  shell: |
-    oc create -f {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/cluster-monitoring-config.yml
-  ignore_errors: yes
-  environment:
-    KUBECONFIG: "{{ kubeconfig_path }}"
+  - name: Replace the cluster-monitoring-config ConfigMap
+    shell: |
+      oc create -f {{ cluster_monitoring_yaml_path }}
+    ignore_errors: yes
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_infra_node|bool
 
 # Need this to steer cluster-monitoring-operator onto the infra nodes
