@@ -392,7 +392,6 @@
         oc create namespace loki || true
         oc adm policy add-scc-to-group privileged system:authenticated
         helm upgrade --install promtail --namespace=loki grafana/promtail -f {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/promtail.yaml
-      ignore_errors: yes
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
   when: loki_enable
