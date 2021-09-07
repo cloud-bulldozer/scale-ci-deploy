@@ -44,6 +44,10 @@ The resource group in which the base domain is located.
 Default: No default.
 The Azure region to install on to. Example: `centralus`
 
+### AZURE_CLUSTER_EXPIRY
+Default: 7
+The cluster will expire after 7 days by setting `openshift_expiryDate` to to `+7`. Unless you pass a different value using this environment variable.
+
 ### OPENSHIFT_BASE_DOMAIN
 Default: No default.
 The base domain for the cluster.
