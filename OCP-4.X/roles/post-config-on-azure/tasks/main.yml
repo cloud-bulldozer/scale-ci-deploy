@@ -57,7 +57,7 @@
 
 - name: Append a tag to the resource group to extend the lifetime of the cluster to 40 days
   shell: |
-    az group update -n {{rhcos_cluster_name.stdout}}-rg --set tags.'openshift_expiryDate'=$(date -d "+40 days" +%F)
+    az group update -n {{rhcos_cluster_name.stdout}}-rg --set tags.'openshift_expiryDate'=$(date -d "+{{ azure_cluster_expiry | default(7,true) }} days" +%F)
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:

@@ -6,6 +6,7 @@ azure_service_principal_client_id: "{{ lookup('env', 'AZURE_SERVICE_PRINCIPAL_CL
 azure_service_principal_client_secret: "{{ lookup('env', 'AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET') }}"
 azure_base_domain_resource_group_name: "{{ lookup('env', 'AZURE_BASE_DOMAIN_RESOURCE_GROUP_NAME') }}"
 azure_region: "{{ lookup('env', 'AZURE_REGION') }}"
+azure_cluster_expiry: "{{lookup('env', 'AZURE_CLUSTER_EXPIRY') |  default(7, true) }}"
 
 # Cluster Configuration
 openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN') }}"
