@@ -95,7 +95,7 @@
       cp oc /usr/local/bin/oc
       cp kubectl /usr/local/bin/kubectl
 
-  when: not openshift_install_installer_from_source|bool and openshift_install_binary_url == ""
+  when: not openshift_install_installer_from_source|bool and openshift_install_release_image_override != ""
 
 - name: Build installer from source
   block:
@@ -244,7 +244,7 @@
        ls *.tar.gz | xargs -I % sh -c 'tar -xvf %'
        chmod +x openshift-install
 
-  when: openshift_install_binary_url != ""
+  when: openshift_install_binary_url != "" and openshift_install_release_image_override == ""
 
 - name: Setup install-config.yaml
   template:
