@@ -6,7 +6,7 @@ items:
     generation: 1
     labels:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}} 
-    name: infra-a
+    name: infra-{{cluster_name.stdout}}-a
     namespace: openshift-machine-api
   spec:
     replicas: 1
@@ -15,7 +15,7 @@ items:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
         {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
         {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-a
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-a
     template:
       metadata:
         creationTimestamp: null
@@ -23,7 +23,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-a
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-a
       spec:
         metadata:
           creationTimestamp: null
@@ -69,7 +69,7 @@ items:
     generation: 1
     labels:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}} 
-    name: infra-b
+    name: infra-{{cluster_name.stdout}}-b
     namespace: openshift-machine-api
   spec:
     replicas: 1
@@ -78,7 +78,7 @@ items:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
         {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
         {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-b
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-a
     template:
       metadata:
         creationTimestamp: null
@@ -86,7 +86,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-b
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-a
       spec:
         metadata:
           creationTimestamp: null
@@ -132,7 +132,7 @@ items:
     generation: 1
     labels:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}} 
-    name: infra-c
+    name: infra-{{cluster_name.stdout}}-c
     namespace: openshift-machine-api
   spec:
     replicas: 1
@@ -141,7 +141,7 @@ items:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
         {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
         {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-c
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-c
     template:
       metadata:
         creationTimestamp: null
@@ -149,7 +149,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-c
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-c
       spec:
         metadata:
           creationTimestamp: null
