@@ -78,7 +78,7 @@ items:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
         {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
         {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-a
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-b
     template:
       metadata:
         creationTimestamp: null
@@ -86,7 +86,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-a
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{cluster_name.stdout}}-b
       spec:
         metadata:
           creationTimestamp: null
