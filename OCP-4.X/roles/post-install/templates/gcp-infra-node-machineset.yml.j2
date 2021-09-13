@@ -37,7 +37,7 @@ items:
               name: gcp-cloud-credentials
             deletionProtection: false
             disks:
-            - autoDelete: false
+            - autoDelete: true
               boot: true
               image: {{worker_machineset_image.stdout}}
               labels: null
@@ -100,7 +100,7 @@ items:
               name: gcp-cloud-credentials
             deletionProtection: false
             disks:
-            - autoDelete: false
+            - autoDelete: true
               boot: true
               image: {{worker_machineset_image.stdout}}
               labels: null
@@ -163,7 +163,7 @@ items:
               name: gcp-cloud-credentials
             deletionProtection: false
             disks:
-            - autoDelete: false
+            - autoDelete: true
               boot: true
               image: {{worker_machineset_image.stdout}}
               labels: null
