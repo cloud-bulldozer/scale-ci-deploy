@@ -33,10 +33,15 @@
         groups: workload
   when: openshift_toggle_workload_node|bool
 
+- name: get openshift infra id
+  shell: |
+    oc get -o jsonpath='{.status.infrastructureName}{"\n"}' infrastructure cluster
+  register: ocp_infra_id
+
 - name: Get security groups for OCP 4 cluster
   shell: |
     . {{ ansible_user_dir }}/{{osp_project_name}}rc
-    openstack security group list --project ${OS_PROJECT_NAME} --format value -c ID -c Name | grep {{openshift_cluster_name}} | awk '{print $1}'
+    openstack security group list --project ${OS_PROJECT_NAME} --format value -c ID -c Name | grep {{ocp_infra_id}} | awk '{print $1}'
   register: security_groups
 
 - name: Allow traffic over tcp port (2022)
