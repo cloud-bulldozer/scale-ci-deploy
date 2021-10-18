@@ -33,12 +33,6 @@
     ES_SERVER: "{{ es_server }}"
     INSTALL_LOG: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/.openshift_install.log"
 
-- name: Get current ready node count
-  shell: oc get nodes | grep " Ready" -ic
-  register: current_node_count
-  environment:
-    KUBECONFIG: "{{ kubeconfig_path }}"
-
 - name: AWS Block of tasks
   block:
     - name: (AWS) Get AMI ID
@@ -203,7 +197,7 @@
 
 - name: Set expected node count
   set_fact:
-    expected_node_count: "{{current_node_count.stdout|int}}"
+    expected_node_count: "{{openshift_worker_count|int + openshift_master_count|int}}"
 
 - name: Increment expected node count with infra nodes
   set_fact:
