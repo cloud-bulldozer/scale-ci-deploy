@@ -6,9 +6,10 @@
 - set_fact:
     cluster_name: "perf-test"
 
-- name: Add rhacs chart repo
+- name: Add & update the rhacs chart repo
   shell: |
     helm repo add rhacs https://mirror.openshift.com/pub/rhacs/charts
+    helm repo update
 
 - set_fact:
     central_pass: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
@@ -26,7 +27,8 @@
       {{  (rhacs_image_main_tag == "" )             | ternary("", "--set central.image.tag=" + rhacs_image_main_tag) }} \
       --set central.exposure.route.enabled=true \
       --set central.adminPassword.value={{ central_pass }} \
-      --set central.exposeMonitoring=true
+      --set central.exposeMonitoring=true \
+      --set enableOpenShiftMonitoring=true
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
 
@@ -52,6 +54,12 @@
     dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/"
     mode: 0755
 
+- name: Enable OpenShift monitoring
+  shell: |
+    oc label namespace/stackrox openshift.io/cluster-monitoring="true"
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+
 - name: Cleanup previous run
   file:
     path: perf-bundle.yml
@@ -75,6 +83,7 @@
       {{  (rhacs_image_main_registry == "" )        | ternary("", "--set image.main.registry=" + rhacs_image_main_registry) }} \
       {{  (rhacs_image_main_tag == "" )             | ternary("", "--set image.main.tag=" + rhacs_image_main_tag) }} \
       --set clusterName={{ cluster_name }} \
-      --set exposeMonitoring=true
+      --set exposeMonitoring=true \
+      --set enableOpenShiftMonitoring=true
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
