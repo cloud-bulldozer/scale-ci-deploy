@@ -167,21 +167,23 @@
   
   - name: Wait for OVNK new master images to roll out
     command: oc rollout status -n {{ ovn_namespace }} ds/ovnkube-master
-  
-  - name: OVN SBDB block
-    block:
-    - name: Deploy ovnkube-sbdb-relay
-      script: sbdb-relay.sh deploy
-    
-    - name: Wait for OVNK sbdb-relay images to roll out
-      command: oc rollout status -n {{ ovn_namespace }} deployment.apps/ovnkube-sbdb-relay
-    
-    - name: Verify ovnkube-sbdb-relay connectivity
-      script: sbdb-relay.sh verify
-    when: openshift_toggle_ovn_relay|bool
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_ovn_patch|bool
+
+- name: OVN SBDB block
+  block:
+  - name: Deploy ovnkube-sbdb-relay
+   script: sbdb-relay.sh deploy
+
+  - name: Wait for OVNK sbdb-relay images to roll out
+    command: oc rollout status -n {{ ovn_namespace }} deployment.apps/ovnkube-sbdb-relay
+
+  - name: Verify ovnkube-sbdb-relay connectivity
+    script: sbdb-relay.sh verify
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  when: openshift_toggle_ovn_relay|bool
 
 - name: Create machinesets
   shell: |
