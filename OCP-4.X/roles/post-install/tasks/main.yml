@@ -28,9 +28,12 @@
 
 - name: Index install Timings
   script: index-install-timings.py
+  args:
+    executable: python
   environment:
     ES_SERVER: "{{ es_server }}"
     INSTALL_LOG: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/.openshift_install.log"
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 - name: AWS Block of tasks
   block:
