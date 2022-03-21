@@ -15,7 +15,7 @@ CLUSTER_VERSION = os.popen(oc_command + " get clusterversion --no-headers -o cus
 PLATFORM = os.popen(oc_command + " get infrastructure cluster -o jsonpath='{.status.platformStatus.type}'").read()
 
 masters = int(os.popen(oc_command + " get nodes -l node-role.kubernetes.io/master --no-headers=true | wc -l").read())
-workers = int(os.popen(oc_command + " get nodes -l node-role.kubernetes.io/worker --no-headers=true | wc -l").read())
+workers = int(os.popen(oc_command + " get nodes -l node-role.kubernetes.io/worker,node-role.kubernetes.io/infra!=,node-role.kubernetes.io/workload!= | wc -l").read())
 workload = int(os.popen(oc_command + " get nodes -l node-role.kubernetes.io/workload --no-headers=true | wc -l").read())
 infra = int(os.popen(oc_command + " get nodes -l node-role.kubernetes.io/infra --no-headers=true | wc -l").read())
 all = int(os.popen(oc_command + " get nodes --no-headers=true | wc -l").read())
@@ -90,7 +90,7 @@ for action in output:
         "worker_count": workers,
         "infra_count": infra,
         "workload_count": workload,
-        "total_node_    count": all,
+        "total_node_count": all,
         "cluster_name": CLUSTER_NAME,
         "action": action,
         "duration": output[action],
