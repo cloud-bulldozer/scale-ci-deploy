@@ -13,6 +13,7 @@ timestamp = datetime.now().strftime("%Y-%m-%dT%T")
 CLUSTER_NAME = os.popen(oc_command + " get infrastructure cluster -o jsonpath='{.status.infrastructureName}'").read()
 CLUSTER_VERSION = os.popen(oc_command + " get clusterversion --no-headers -o custom-columns=name:{.status.desired.version}").read()
 PLATFORM = os.popen(oc_command + " get infrastructure cluster -o jsonpath='{.status.platformStatus.type}'").read()
+NETWORK_TYPE = os.popen(oc_command + " describe network.config/cluster | grep 'Network Type' |  awk '{print $3}' | head -n 1").read()
 
 masters = int(os.popen(oc_command + " get nodes -l node-role.kubernetes.io/master --no-headers=true | wc -l").read())
 workers = int(os.popen(oc_command + " get nodes -l node-role.kubernetes.io/worker,node-role.kubernetes.io/infra!=,node-role.kubernetes.io/workload!= | wc -l").read())
@@ -85,6 +86,7 @@ for action in output:
     data = {
         "uuid" : UUID,
         "platform": PLATFORM,
+        "network_type": NETWORK_TYPE,
         "cluster_version": CLUSTER_VERSION,
         "master_count": masters,
         "worker_count": workers,
