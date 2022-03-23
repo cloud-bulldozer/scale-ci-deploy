@@ -53,9 +53,7 @@ for i in lines[:-1]:
 output = {}
 for i in data:
     title = i[0]
-    time = i[1].lstrip().rstrip()
-    print(title)
-    print(time)
+    time = i[1].strip()
     temp = 0
     if 'm' in time:
         time = time.split('m')
@@ -81,7 +79,7 @@ headers = {
     'Cache-Control': 'no-cache'
 }
 
-print("Indexing data to Elasticsearch")
+print(f"Indexing data to Elasticsearch: {ES}/openshift-install-timings")
 for action in output:
     data = {
         "uuid" : UUID,
