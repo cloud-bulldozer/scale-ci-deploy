@@ -135,6 +135,43 @@
 
   when: platform == "gcp"
 
+- name: Alibaba Block of tasks
+  block:
+    - name: (Alibaba) Get cluster region
+      shell: |
+        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.regionId}}'{%endraw%}
+      register: alibaba_region
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: (Alibaba) Get machineset name of a worker node
+      shell: |
+        {%raw%}oc get machinesets --no-headers -n openshift-machine-api | awk {'print $1'} | awk 'NR==1{print $1}'{%endraw%}
+      register: worker_node_machineset
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: (Alibaba) Get machineset image from worker node
+      shell: |
+       oc get machineset {{ worker_node_machineset.stdout }} -n openshift-machine-api -o jsonpath='{.spec.template.spec.providerSpec.value.imageId}'
+      register: worker_machineset_image
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: (Alibaba) Template out machineset yamls
+      template:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+      when: item.toggle|bool
+      with_items:
+        - src: alibaba-infra-node-machineset.yml.j2
+          dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/infra-node-machineset.yml"
+          toggle: "{{openshift_toggle_infra_node}}"
+        - src: alibaba-workload-node-machineset.yml.j2
+          dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/workload-node-machineset.yml"
+          toggle: "{{openshift_toggle_workload_node}}"
+  when: platform == "alibaba"
+
 - name: (OSP) Template out machineset yamls
   template:
     src: "{{item.src}}"

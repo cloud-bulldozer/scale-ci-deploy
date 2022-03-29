@@ -216,6 +216,38 @@
 
   when: platform == "gcp"
 
+- name: Setting up Alibaba
+  block:
+
+  - name: Create .alibaba dir
+    file:
+      path: "{{ ansible_user_dir }}/.alibaba"
+      state: directory
+
+  - name: Download aliyun
+    get_url:
+      url: "{{ aliyun_binary }}"
+      dest: "{{ ansible_user_dir }}/.alibaba/aliyun_binary.tgz"
+
+  - name: Untar and install aliyun
+    shell: |
+      set -o pipefail
+      tar xvzf "{{ ansible_user_dir }}/.alibaba/aliyun_binary.tgz"
+      cp aliyun /usr/local/bin
+      aliyun version
+
+  - name: Aliyun config
+    shell: |
+      aliyun configure set \
+        --profile {{ aliyun_profile }} \
+        --mode AK \
+        --region {{ alibaba_region }} \
+        --access-key-id {{ aliyun_access_key_id }} \
+        --access-key-secret {{ aliyun_access_key_secret }}
+
+  when: platform == "alibaba"
+
+
 - block:
    - name: Check for install payload
      shell: |
