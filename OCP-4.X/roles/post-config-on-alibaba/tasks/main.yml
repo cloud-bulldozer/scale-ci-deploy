@@ -31,7 +31,7 @@
   when: openshift_toggle_workload_node|bool
 
 # TODO - Get Security Group ID - https://partners-intl.aliyun.com/help/en/doc-detail/151786.html - register as sg_id
-# aliyun ecs DescribeSecurityGroups --RegionId cn-hangzhou --SecurityGroupName namedemo --DryRun false --output cols=SecurityGroupId rows=SecurityGroups.SecurityGroup[]
+# aliyun ecs DescribeSecurityGroups --RegionId {{ alibaba_region }} --SecurityGroupName {{cluster_name.stdout}}-sg-worker --DryRun false --output cols=SecurityGroupId rows=SecurityGroups.SecurityGroup[]
 - name: Add inbound rule to allow traffic on 22
   shell: |
     aliyun ecs AuthorizeSecurityGroup \
