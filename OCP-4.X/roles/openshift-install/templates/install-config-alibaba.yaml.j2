@@ -2,14 +2,14 @@ apiVersion: {{ openshift_install_apiversion }}
 baseDomain: {{ openshift_base_domain }}
 compute:
 - name: worker
- architecture: amd64
- hyperthreading: Enabled
- platform:
-  alibabacloud:
-   instanceType: {{ openshift_worker_instance_type }}
-   systemDiskCategory: {{ openshift_worker_root_volume_type }}
-   systemDiskSize: {{ openshift_worker_root_volume_size }}
- replicas: {{ openshift_worker_count }}
+  architecture: amd64
+  hyperthreading: Enabled
+  platform:
+   alibabacloud:
+    instanceType: {{ openshift_worker_instance_type }}
+    systemDiskCategory: {{ openshift_worker_root_volume_type }}
+    systemDiskSize: {{ openshift_worker_root_volume_size }}
+  replicas: {{ openshift_worker_count }}
 ControlPlane:
  name: master
  architecture: amd64
@@ -26,12 +26,14 @@ metadata:
 networking:
  clusterNetwork:
  - cidr: {{ openshift_cidr }}
-  hostPrefix: {{ openshift_host_prefix }}
+   hostPrefix: {{ openshift_host_prefix }}
  machineNetwork:
  - cidr: {{ openshift_machine_cidr }}
  networkType: {{ openshift_network_type }}
  serviceNetwork:
  - {{ openshift_service_network }}
+fips: {{ fips }}
+credentialsMode: Manual
 platform:
  alibabacloud:
   region: {{ alibaba_region }}
@@ -40,5 +42,3 @@ pullSecret: |+
   {{ openshift_install_pull_secret | to_json }}
 sshKey: |+
   {{ install_ssh_pub_key.content| b64decode }}
-fips: {{ fips }}
-credentialsMode: Manual
