@@ -283,16 +283,16 @@
 
   - name: Create RAM users and configure ccoctl
     shell: |
-      RELEASE_IMAGE=$(./openshift-install version | awk '/release image/ {print $3}')
+      cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
+      RELEASE_IMAGE=$(bin/openshift-install version | awk '/release image/ {print $3}')
       CCO_IMAGE=$(oc adm release info --image-for='cloud-credential-operator' $RELEASE_IMAGE)
       oc image extract $CCO_IMAGE --file="/usr/bin/ccoctl"
       chmod 775 ccoctl
       cp ccoctl /usr/local/bin
-      cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
       bin/openshift-install create manifests --dir .
       oc adm release extract --credentials-requests --cloud=alibabacloud --to=./credrequests $RELEASE_IMAGE
       ccoctl alibabacloud create-ram-users --name {{ openshift_cluster_name }} --region={{ alibaba_region }} --credentials-requests-dir=./credrequests --output-dir=.
-      
+
   when: platform == "alibaba"
 
 - name: Setup install-config.yaml
