@@ -1,5 +1,6 @@
 apiVersion: {{ openshift_install_apiversion }}
 baseDomain: {{ openshift_base_domain }}
+credentialsMode: Manual
 compute:
 - name: worker
   architecture: amd64
