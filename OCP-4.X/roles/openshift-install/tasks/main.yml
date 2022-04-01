@@ -245,6 +245,11 @@
         --access-key-id {{ aliyun_access_key_id }} \
         --access-key-secret {{ aliyun_access_key_secret }}
 
+  - name: Alibaba credentials
+    template:
+       src: alibaba_credentials.j2
+       dest: "{{ ansible_user_dir }}/.alibaba/credentials"
+
   when: platform == "alibaba"
 
 
