@@ -289,9 +289,14 @@
       oc image extract $CCO_IMAGE --file="/usr/bin/ccoctl"
       chmod 775 ccoctl
       cp ccoctl /usr/local/bin
+      cco_dir1='cco-credrequests'
+      cco_dir2='cco-manifests'
+      rm -fr "${cco_dir1}/*" "${cco_dir2}/*"
       bin/openshift-install create manifests --dir .
-      oc adm release extract --credentials-requests --cloud=alibabacloud --to=./credrequests $RELEASE_IMAGE
-      ccoctl alibabacloud create-ram-users --name {{ openshift_cluster_name }} --region={{ alibaba_region }} --credentials-requests-dir=./credrequests --output-dir=.
+      oc adm release extract --credentials-requests --cloud=alibabacloud --to="${cco_dir1}" $RELEASE_IMAGE
+      ./ccoctl alibabacloud create-ram-users --region {{ alibaba_region }} --name $(awk '/infrastructureName:/{print $2}' "./manifests/cluster-infrastructure-02-config.yml") --credentials-requests-dir "${cco_dir1}" --output-dir "${cco_dir2}"
+      cp ${cco_dir2}/manifests/*.yaml ./manifests/
+
 
   when: platform == "alibaba"
 
