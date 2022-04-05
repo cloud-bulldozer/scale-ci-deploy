@@ -30,8 +30,14 @@
         groups: workload
   when: openshift_toggle_workload_node|bool
 
-# TODO - Get Security Group ID - https://partners-intl.aliyun.com/help/en/doc-detail/151786.html - register as sg_id
-# aliyun ecs DescribeSecurityGroups --RegionId {{ alibaba_region }} --SecurityGroupName {{cluster_name.stdout}}-sg-worker --DryRun false --output cols=SecurityGroupId rows=SecurityGroups.SecurityGroup[]
+- name: Get security groups
+  shell: |
+    aliyun ecs DescribeSecurityGroups \
+      --RegionId {{ alibaba_region }} \
+      --SecurityGroupName {{ rhcos_cluster_name.stdout }}-sg-worker \
+      | jq .SecurityGroups.SecurityGroup[].SecurityGroupId
+  register: security_groups
+
 - name: Add inbound rule to allow traffic on 22
   shell: |
     aliyun ecs AuthorizeSecurityGroup \
@@ -39,8 +45,7 @@
       --SecurityGroupId {{ item }} \
       --IpProtocol "tcp" \
       --PortRange "22/22" \
-      --SourceCidrIp "0.0.0.0/0" \
-      --endpoint {{ aliyun_ecs_endpoint }}
+      --SourceCidrIp "0.0.0.0/0"
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
@@ -52,8 +57,7 @@
       --SecurityGroupId {{ item }} \
       --IpProtocol "tcp" \
       --PortRange "2022/2022" \
-      --SourceCidrIp "0.0.0.0/0" \
-      --endpoint {{ aliyun_ecs_endpoint }}
+      --SourceCidrIp "0.0.0.0/0"
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
@@ -65,8 +69,7 @@
       --SecurityGroupId {{ item }} \
       --IpProtocol "tcp" \
       --PortRange "20000/30109" \
-      --SourceCidrIp "0.0.0.0/0" \
-      --endpoint {{ aliyun_ecs_endpoint }}
+      --SourceCidrIp "0.0.0.0/0"
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
@@ -78,8 +81,7 @@
       --SecurityGroupId {{ item }} \
       --IpProtocol "udp" \
       --PortRange "20000/30109" \
-      --SourceCidrIp "0.0.0.0/0" \
-      --endpoint {{ aliyun_ecs_endpoint }}
+      --SourceCidrIp "0.0.0.0/0"
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
@@ -94,8 +96,7 @@
       --SecurityGroupId {{ item }} \
       --IpProtocol "tcp" \
       --PortRange "32768/60999" \
-      --SourceCidrIp "0.0.0.0/0" \
-      --endpoint {{ aliyun_ecs_endpoint }}
+      --SourceCidrIp "0.0.0.0/0"
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
@@ -107,8 +108,7 @@
       --SecurityGroupId {{ item }} \
       --IpProtocol "udp" \
       --PortRange "32768/60999" \
-      --SourceCidrIp "0.0.0.0/0" \
-      --endpoint {{ aliyun_ecs_endpoint }}
+      --SourceCidrIp "0.0.0.0/0"
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
