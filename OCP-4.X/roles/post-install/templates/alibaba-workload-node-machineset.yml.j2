@@ -1,32 +1,35 @@
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:
+  creationTimestamp: null
   labels:
-    machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-    machine.openshift.io/cluster-api-machine-role: workload
-    machine.openshift.io/cluster-api-machine-type: workload
-  name: workload-{{alibaba_region.stdout}}-a
+    {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+    {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
+    {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
+  name: workload-{{alibaba_region.stdout}}a
   namespace: openshift-machine-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-      machine.openshift.io/cluster-api-machineset: workload-{{alibaba_region.stdout}}a
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{alibaba_region.stdout}}a
   template:
     metadata:
+      creationTimestamp: null
       labels:
-        machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-        machine.openshift.io/cluster-api-machine-role: workload
-        machine.openshift.io/cluster-api-machine-type: workload
-        machine.openshift.io/cluster-api-machineset: workload-{{alibaba_region.stdout}}a
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
+        {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{alibaba_region.stdout}}a
     spec:
       metadata:
+        creationTimestamp: null
         labels:
           node-role.kubernetes.io/workload: ""
       providerSpec:
         value:
-          apiVersion: machine.openshift.io/v1
+          apiVersion: machine.openshift.io/v1beta1
           credentialsSecret:
             name: alibabacloud-credentials
           imageId: {{worker_machineset_image.stdout}}
@@ -49,7 +52,7 @@ spec:
               Value: {{cluster_name.stdout}}-sg-worker
             type: Tags
           systemDisk:
-            category: cloud_essd
+            category: {{openshift_workload_node_volume_type}}
             size: {{openshift_workload_node_volume_size}}
           tag:
           - Key: kubernetes.io/cluster/{{cluster_name.stdout}}

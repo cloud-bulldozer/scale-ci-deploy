@@ -5,36 +5,39 @@ items:
 - apiVersion: machine.openshift.io/v1beta1
   kind: MachineSet
   metadata:
+    creationTimestamp: null
     labels:
-      machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-      machine.openshift.io/cluster-api-machine-role: infra
-      machine.openshift.io/cluster-api-machine-type: infra
-    name: infra-{{alibaba_region.stdout}}-a
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: infra-{{alibaba_region.stdout}}a
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
-        machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-        machine.openshift.io/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
     template:
       metadata:
+        creationTimestamp: null
         labels:
-          machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-          machine.openshift.io/cluster-api-machine-role: infra
-          machine.openshift.io/cluster-api-machine-type: infra
-          machine.openshift.io/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
+          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
       spec:
         metadata:
+          creationTimestamp: null
           labels:
             node-role.kubernetes.io/infra: ""
         providerSpec:
           value:
-            apiVersion: machine.openshift.io/v1
+            apiVersion: machine.openshift.io/v1beta1
             credentialsSecret:
               name: alibabacloud-credentials
             imageId: {{worker_machineset_image.stdout}}
-            instanceType: {{openshift_infra_node_machine_type}}
+            instanceType: {{ openshift_infra_node_machine_type }}
             kind: AlibabaCloudMachineProviderConfig
             ramRoleName: {{cluster_name.stdout}}-role-worker
             regionId: {{alibaba_region.stdout}}
@@ -83,27 +86,30 @@ items:
 - apiVersion: machine.openshift.io/v1beta1
   kind: MachineSet
   metadata:
+    creationTimestamp: null
     labels:
-      machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-      machine.openshift.io/cluster-api-machine-role: infra
-      machine.openshift.io/cluster-api-machine-type: infra
-    name: infra-{{alibaba_region.stdout}}-b
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: infra-{{alibaba_region.stdout}}b
     namespace: openshift-machine-api
   spec:
     replicas: 2
     selector:
       matchLabels:
-        machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-        machine.openshift.io/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
     template:
       metadata:
+        creationTimestamp: null
         labels:
-          machine.openshift.io/cluster-api-cluster: {{cluster_name.stdout}}
-          machine.openshift.io/cluster-api-machine-role: infra
-          machine.openshift.io/cluster-api-machine-type: infra
-          machine.openshift.io/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
+          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
       spec:
         metadata:
+          creationTimestamp: null
           labels:
             node-role.kubernetes.io/infra: ""
         providerSpec:
@@ -112,7 +118,7 @@ items:
             credentialsSecret:
               name: alibabacloud-credentials
             imageId: {{worker_machineset_image.stdout}}
-            instanceType: {{openshift_infra_node_machine_type}}
+            instanceType: {{ openshift_infra_node_machine_type }}
             kind: AlibabaCloudMachineProviderConfig
             ramRoleName: {{cluster_name.stdout}}-role-worker
             regionId: {{alibaba_region.stdout}}
