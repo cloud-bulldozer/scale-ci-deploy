@@ -37,7 +37,7 @@ items:
             credentialsSecret:
               name: alibabacloud-credentials
             imageId: {{worker_machineset_image.stdout}}
-            instanceType: {{ openshift_infra_node_machine_type }}
+            instanceType: {{ openshift_infra_node_instance_type }}
             kind: AlibabaCloudMachineProviderConfig
             ramRoleName: {{cluster_name.stdout}}-role-worker
             regionId: {{alibaba_region.stdout}}
@@ -118,7 +118,7 @@ items:
             credentialsSecret:
               name: alibabacloud-credentials
             imageId: {{worker_machineset_image.stdout}}
-            instanceType: {{ openshift_infra_node_machine_type }}
+            instanceType: {{ openshift_infra_node_instance_type }}
             kind: AlibabaCloudMachineProviderConfig
             ramRoleName: {{cluster_name.stdout}}-role-worker
             regionId: {{alibaba_region.stdout}}
