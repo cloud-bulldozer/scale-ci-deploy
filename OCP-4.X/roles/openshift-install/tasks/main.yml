@@ -247,6 +247,13 @@
 
   when: openshift_install_binary_url != "" and openshift_install_release_image_override == ""
 
+- name: Setup install-config.yaml
+  template:
+    src: install-config-{{ platform }}.yaml.j2
+    dest: "{{item}}"
+  with_items:
+    - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/install-config.yaml"
+
 - name: Setting up Alibaba
   block:
 
@@ -297,15 +304,7 @@
       ./ccoctl alibabacloud create-ram-users --region {{ alibaba_region }} --name $(awk '/infrastructureName:/{print $2}' "./manifests/cluster-infrastructure-02-config.yml") --credentials-requests-dir "${cco_dir1}" --output-dir "${cco_dir2}"
       cp ${cco_dir2}/manifests/*.yaml ./manifests/
 
-
   when: platform == "alibaba"
-
-- name: Setup install-config.yaml
-  template:
-    src: install-config-{{ platform }}.yaml.j2
-    dest: "{{item}}"
-  with_items:
-    - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/install-config.yaml"
 
 - name: Run openshift installer
   shell: |
