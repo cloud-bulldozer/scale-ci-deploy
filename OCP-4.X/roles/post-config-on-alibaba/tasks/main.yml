@@ -23,8 +23,8 @@
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
 
+# TODO - Check and Fix Public Ip allocation to the Alibaba workload machine instance.
 - block:
-    # TODO register as aliyun_ecs_endpoint
     - name: Get public ip of the workload node
       shell: oc get nodes -l node-role.kubernetes.io/workload= -o wide | awk 'NR>1 {print $7}'
       register: workload_public_ip

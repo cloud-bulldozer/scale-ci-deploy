@@ -4,12 +4,13 @@ The scale-ci-deploy repo is split into two major directories, playbooks for Open
 
 ## OpenShift 4 (OCP-4.X directory) scale-ci-deploy docs
 
-| Environment              | IPI Install | Scale-up | Upgrade | Cleanup / Destroy            |
-| ------------------------ | ----------- | -------- | ------- | ---------------------------- |
-| [AWS](ocp4_aws.md)       | Yes         | Yes      | Yes     | Variable `OPENSHIFT_CLEANUP` |
-| [Azure](ocp4_azure.md)   | Yes         | Yes      | Yes     | Variable `OPENSHIFT_CLEANUP` |
-| [GCP](ocp4_gcp.md)       | Yes         | Yes      | No      | Variable `OPENSHIFT_CLEANUP` |
-| [OpenStack](ocp4_osp.md) | Yes         | No       | Yes     | Separate Playbook            |
+| Environment                | IPI Install | Scale-up | Upgrade | Cleanup / Destroy            |
+| ------------------------   | ----------- | -------- | ------- | ---------------------------- |
+| [AWS](ocp4_aws.md)         | Yes         | Yes      | Yes     | Variable `OPENSHIFT_CLEANUP` |
+| [Azure](ocp4_azure.md)     | Yes         | Yes      | Yes     | Variable `OPENSHIFT_CLEANUP` |
+| [GCP](ocp4_gcp.md)         | Yes         | Yes      | No      | Variable `OPENSHIFT_CLEANUP` |
+| [Alibaba](ocp4_alibaba.md) | Yes         | Yes      | No      | Variable `OPENSHIFT_CLEANUP` |
+| [OpenStack](ocp4_osp.md)   | Yes         | No       | Yes     | Separate Playbook            |
 
 ### OpenShift 4 Scale playbook
 

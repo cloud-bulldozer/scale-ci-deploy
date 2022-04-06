@@ -1,6 +1,6 @@
 # scale-ci-deploy
 
-This repo contains playbooks to install, scale and upgrade OpenShift 4 clusters on Azure, AWS, GCP, and OpenStack for the Scale-CI environment and test framework. Included are the playbooks to install and scale an OpenShift 3 cluster on OpenStack as well.
+This repo contains playbooks to install, scale and upgrade OpenShift 4 clusters on Azure, AWS, GCP, Alibaba, and OpenStack for the Scale-CI environment and test framework. Included are the playbooks to install and scale an OpenShift 3 cluster on OpenStack as well.
 
 ## Documentation, Usage and Examples
 
@@ -22,7 +22,7 @@ $ # Edit deployment variables (Ex vi OCP-4.X/vars/install-on-aws.yml) or define 
 $ ansible-playbook -v -i inventory OCP-4.X/deploy-cluster.yml -e platform=aws
 ```
 
-Where platform can be either `aws`, `azure` or `gcp`.
+Where platform can be either `aws`, `azure`, `alibaba` or `gcp`.
 
 The orchestration host can be `localhost` or a remote machine already provisioned on the cloud in which the cluster will be deployed on.  If executing from Jenkins, `localhost` should be used.
 
