@@ -40,6 +40,7 @@ spec:
           resourceGroup:
             name: {{cluster_name.stdout}}-rg
             type: Name
+          publicIp: true
           securityGroups:
           - tags:
             - Key: kubernetes.io/cluster/{{cluster_name.stdout}}
