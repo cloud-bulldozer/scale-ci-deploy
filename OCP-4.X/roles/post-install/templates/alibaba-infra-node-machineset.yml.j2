@@ -1,0 +1,166 @@
+apiVersion: v1
+kind: List
+metadata: {}
+items:
+- apiVersion: machine.openshift.io/v1beta1
+  kind: MachineSet
+  metadata:
+    creationTimestamp: null
+    labels:
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: infra-{{alibaba_region.stdout}}a
+    namespace: openshift-machine-api
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
+      spec:
+        metadata:
+          creationTimestamp: null
+          labels:
+            node-role.kubernetes.io/infra: ""
+        providerSpec:
+          value:
+            apiVersion: machine.openshift.io/v1beta1
+            credentialsSecret:
+              name: alibabacloud-credentials
+            imageId: {{worker_machineset_image.stdout}}
+            instanceType: {{ openshift_infra_node_instance_type }}
+            kind: AlibabaCloudMachineProviderConfig
+            ramRoleName: {{cluster_name.stdout}}-role-worker
+            regionId: {{alibaba_region.stdout}}
+            resourceGroup:
+              name: {{cluster_name.stdout}}-rg
+              type: Name
+            securityGroups:
+            - tags:
+              - Key: kubernetes.io/cluster/{{cluster_name.stdout}}
+                Value: owned
+              - Key: GISV
+                Value: ocp
+              - Key: sigs.k8s.io/cloud-provider-alibaba/origin
+                Value: ocp
+              - Key: Name
+                Value: {{cluster_name.stdout}}-sg-worker
+              type: Tags
+            systemDisk:
+              category: cloud_essd
+              size: {{openshift_infra_node_volume_size}}
+            tag:
+            - Key: kubernetes.io/cluster/{{cluster_name.stdout}}
+              Value: owned
+            - Key: GISV
+              Value: ocp
+            - Key: sigs.k8s.io/cloud-provider-alibaba/origin
+              Value: ocp
+            userDataSecret:
+              name: worker-user-data
+            vSwitch:
+              tags:
+              - Key: kubernetes.io/cluster/{{cluster_name.stdout}}
+                Value: owned
+              - Key: GISV
+                Value: ocp
+              - Key: sigs.k8s.io/cloud-provider-alibaba/origin
+                Value: ocp
+              - Key: Name
+                Value: {{cluster_name.stdout}}-vswitch-{{alibaba_region.stdout}}a
+              type: Tags
+            vpcId: ""
+            zoneId: {{alibaba_region.stdout}}a
+          taints:
+          - key: node-role.kubernetes.io/infra
+            effect: NoSchedule
+- apiVersion: machine.openshift.io/v1beta1
+  kind: MachineSet
+  metadata:
+    creationTimestamp: null
+    labels:
+      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: infra-{{alibaba_region.stdout}}b
+    namespace: openshift-machine-api
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
+      spec:
+        metadata:
+          creationTimestamp: null
+          labels:
+            node-role.kubernetes.io/infra: ""
+        providerSpec:
+          value:
+            apiVersion: machine.openshift.io/v1
+            credentialsSecret:
+              name: alibabacloud-credentials
+            imageId: {{worker_machineset_image.stdout}}
+            instanceType: {{ openshift_infra_node_instance_type }}
+            kind: AlibabaCloudMachineProviderConfig
+            ramRoleName: {{cluster_name.stdout}}-role-worker
+            regionId: {{alibaba_region.stdout}}
+            resourceGroup:
+              name: {{cluster_name.stdout}}-rg
+              type: Name
+            securityGroups:
+            - tags:
+              - Key: kubernetes.io/cluster/{{cluster_name.stdout}}
+                Value: owned
+              - Key: GISV
+                Value: ocp
+              - Key: sigs.k8s.io/cloud-provider-alibaba/origin
+                Value: ocp
+              - Key: Name
+                Value: {{cluster_name.stdout}}-sg-worker
+              type: Tags
+            systemDisk:
+              category: cloud_essd
+              size: {{openshift_infra_node_volume_size}}
+            tag:
+            - Key: kubernetes.io/cluster/{{cluster_name.stdout}}
+              Value: owned
+            - Key: GISV
+              Value: ocp
+            - Key: sigs.k8s.io/cloud-provider-alibaba/origin
+              Value: ocp
+            userDataSecret:
+              name: worker-user-data
+            vSwitch:
+              tags:
+              - Key: kubernetes.io/cluster/{{cluster_name.stdout}}
+                Value: owned
+              - Key: GISV
+                Value: ocp
+              - Key: sigs.k8s.io/cloud-provider-alibaba/origin
+                Value: ocp
+              - Key: Name
+                Value: {{cluster_name.stdout}}-vswitch-{{alibaba_region.stdout}}b
+              type: Tags
+            vpcId: ""
+            zoneId: {{alibaba_region.stdout}}b
+          taints:
+          - key: node-role.kubernetes.io/infra
+            effect: NoSchedule

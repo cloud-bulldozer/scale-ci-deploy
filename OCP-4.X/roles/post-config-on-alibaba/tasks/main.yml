@@ -1,0 +1,129 @@
+---
+#
+# Post-Config for OCP on Alibaba
+#
+# Performs:
+# * Opens firewall rules for workload/worker nodes for ssh (as well as for debugging workload pod ssh)
+# * Opens firewall rules for Network Tests P2P HostNetwork Tests
+#   Ports 2022 (tcp), 20000-30109 (tcp, udp), 32768-60999 (tcp, udp)
+# * Ensures ssh is started and running on nodes
+#
+
+- name: Get cluster name
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{machineset_metadata_label_prefix}}/cluster-api-cluster" {%raw%})}}'{%endraw%}
+  register: rhcos_cluster_name
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+
+- name: (Alibaba) Get cluster region
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.regionId}}'{%endraw%}
+  register: alibaba_region
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+
+# TODO - Check and Fix Public Ip allocation to the Alibaba workload machine instance.
+- block:
+    - name: Get public ip of the workload node
+      shell: oc get nodes -l node-role.kubernetes.io/workload= -o wide | awk 'NR>1 {print $7}'
+      register: workload_public_ip
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
+    - name: Add workload node to group
+      add_host:
+        name: "{{ workload_public_ip.stdout }}"
+        groups: workload
+  when: openshift_toggle_workload_node|bool
+
+- name: Get security groups
+  shell: |
+    aliyun ecs DescribeSecurityGroups \
+      --RegionId {{ alibaba_region.stdout }} \
+      --SecurityGroupName {{ rhcos_cluster_name.stdout }}-sg-worker \
+      | jq .SecurityGroups.SecurityGroup[].SecurityGroupId
+  register: security_groups
+
+- name: Add inbound rule to allow traffic on 22
+  shell: |
+    aliyun ecs AuthorizeSecurityGroup \
+      --RegionId {{ alibaba_region.stdout }} \
+      --SecurityGroupId {{ item }} \
+      --IpProtocol "tcp" \
+      --PortRange "22/22" \
+      --SourceCidrIp "0.0.0.0/0"
+  with_items:
+    - "{{ security_groups.stdout_lines }}"
+  ignore_errors: yes
+
+- name: Add inbound rule to allow traffic on 2022
+  shell: |
+    aliyun ecs AuthorizeSecurityGroup \
+      --RegionId {{ alibaba_region.stdout }} \
+      --SecurityGroupId {{ item }} \
+      --IpProtocol "tcp" \
+      --PortRange "2022/2022" \
+      --SourceCidrIp "0.0.0.0/0"
+  with_items:
+    - "{{ security_groups.stdout_lines }}"
+  ignore_errors: yes
+
+- name: Add inbound rule to allow tcp traffic on port range 20000 to 30109
+  shell: |
+    aliyun ecs AuthorizeSecurityGroup \
+      --RegionId {{ alibaba_region.stdout }} \
+      --SecurityGroupId {{ item }} \
+      --IpProtocol "tcp" \
+      --PortRange "20000/30109" \
+      --SourceCidrIp "0.0.0.0/0"
+  with_items:
+    - "{{ security_groups.stdout_lines }}"
+  ignore_errors: yes
+
+- name: Add inbound rule to allow udp traffic on port range 20000 to 30109
+  shell: |
+    aliyun ecs AuthorizeSecurityGroup \
+      --RegionId {{ alibaba_region.stdout }} \
+      --SecurityGroupId {{ item }} \
+      --IpProtocol "udp" \
+      --PortRange "20000/30109" \
+      --SourceCidrIp "0.0.0.0/0"
+  with_items:
+    - "{{ security_groups.stdout_lines }}"
+  ignore_errors: yes
+
+# Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
+# Currently there is no method outside of sysctls to control those ports
+# See pbench issue #1238 - https://github.com/distributed-system-analysis/pbench/issues/1238
+- name: Add inbound rule to allow tcp traffic on port range 32768 to 60999
+  shell: |
+    aliyun ecs AuthorizeSecurityGroup \
+      --RegionId {{ alibaba_region.stdout }} \
+      --SecurityGroupId {{ item }} \
+      --IpProtocol "tcp" \
+      --PortRange "32768/60999" \
+      --SourceCidrIp "0.0.0.0/0"
+  with_items:
+    - "{{ security_groups.stdout_lines }}"
+  ignore_errors: yes
+
+- name: Add inbound rule to allow udp traffic on port range 32768 to 60999
+  shell: |
+    aliyun ecs AuthorizeSecurityGroup \
+      --RegionId {{ alibaba_region.stdout }} \
+      --SecurityGroupId {{ item }} \
+      --IpProtocol "udp" \
+      --PortRange "32768/60999" \
+      --SourceCidrIp "0.0.0.0/0"
+  with_items:
+    - "{{ security_groups.stdout_lines }}"
+  ignore_errors: yes
+
+- name: Get the kubeconfig off of the orchestration host
+  fetch:
+    src: "{{ kubeconfig_path }}"
+    dest: "{{playbook_dir}}/kubeconfig"
+    flat: true
+  when:
+    - kubeconfig_auth_dir_path == ""

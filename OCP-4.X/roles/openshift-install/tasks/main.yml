@@ -216,6 +216,7 @@
 
   when: platform == "gcp"
 
+
 - block:
    - name: Check for install payload
      shell: |
@@ -253,10 +254,62 @@
   with_items:
     - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/install-config.yaml"
 
+- name: Setting up Alibaba
+  block:
+
+  - name: Create .alibaba dir
+    file:
+      path: "{{ ansible_user_dir }}/.alibaba"
+      state: directory
+
+  - name: Download aliyun
+    get_url:
+      url: "{{ aliyun_binary }}"
+      dest: "{{ ansible_user_dir }}/.alibaba/aliyun_binary.tgz"
+
+  - name: Untar and install aliyun
+    shell: |
+      set -o pipefail
+      tar xvzf "{{ ansible_user_dir }}/.alibaba/aliyun_binary.tgz"
+      cp aliyun /usr/local/bin
+      aliyun version
+
+  - name: Aliyun config
+    shell: |
+      aliyun configure set \
+        --profile {{ aliyun_profile }} \
+        --mode AK \
+        --region {{ alibaba_region }} \
+        --access-key-id {{ aliyun_access_key_id }} \
+        --access-key-secret {{ aliyun_access_key_secret }}
+
+  - name: Alibaba credentials
+    template:
+       src: alibaba_credentials.j2
+       dest: "{{ ansible_user_dir }}/.alibaba/credentials"
+
+  - name: Create RAM users and configure ccoctl
+    shell: |
+      cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
+      RELEASE_IMAGE=$(bin/openshift-install version | awk '/release image/ {print $3}')
+      CCO_IMAGE=$(oc adm release info --image-for='cloud-credential-operator' $RELEASE_IMAGE)
+      oc image extract $CCO_IMAGE --file="/usr/bin/ccoctl"
+      chmod 775 ccoctl
+      cp ccoctl /usr/local/bin
+      cco_dir1='cco-credrequests'
+      cco_dir2='cco-manifests'
+      rm -fr "${cco_dir1}/*" "${cco_dir2}/*"
+      bin/openshift-install create manifests --dir .
+      oc adm release extract --credentials-requests --cloud=alibabacloud --to="${cco_dir1}" $RELEASE_IMAGE
+      ./ccoctl alibabacloud create-ram-users --region {{ alibaba_region }} --name $(awk '/infrastructureName:/{print $2}' "./manifests/cluster-infrastructure-02-config.yml") --credentials-requests-dir "${cco_dir1}" --output-dir "${cco_dir2}"
+      cp ${cco_dir2}/manifests/*.yaml ./manifests/
+
+  when: platform == "alibaba"
+
 - name: Run openshift installer
   shell: |
     set -o pipefail
-     cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
+    cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
     export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
     bin/openshift-install create cluster --log-level=debug

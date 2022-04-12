@@ -1,0 +1,45 @@
+---
+# Cloud environment and authentication
+alibaba_region: "{{ lookup('env', 'ALIBABA_REGION') }}"
+#alibaba_base_domain_resource_group_id: 
+aliyun_binary: "{{ lookup('env', 'ALIYUN_BINARY') | default('https://aliyuncli.alicdn.com/aliyun-cli-linux-3.0.32-amd64.tgz', true) }}"
+aliyun_access_key_id: "{{ lookup('env', 'ALIYUN_ACCESS_KEY_ID') }}"
+aliyun_access_key_secret: "{{ lookup('env', 'ALIYUN_ACCESS_KEY_SECRET') }}"
+aliyun_profile:  "{{ lookup('env', 'ALIYUN_PROFILE') | default('perfscale', true) }}"
+
+# Cluster configuration
+openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN') }}"
+openshift_cluster_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER_NAME') }}"
+
+openshift_master_count: "{{ lookup('env', 'OPENSHIFT_MASTER_COUNT')|default(3, true) }}"
+openshift_worker_count: "{{ lookup('env', 'OPENSHIFT_WORKER_COUNT')|default(5, true) }}"
+
+openshift_master_instance_type: "{{ lookup('env', 'OPENSHIFT_MASTER_INSTANCE_TYPE')|default('ecs.r5.4xlarge', true) }}"
+openshift_worker_instance_type: "{{ lookup('env', 'OPENSHIFT_WORKER_INSTANCE_TYPE')|default('ecs.g6.2xlarge', true) }}"
+
+openshift_master_root_volume_size: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_SIZE')|default(64, true) }}"
+openshift_master_root_volume_type: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_TYPE')|default('cloud_essd', true) }}"
+openshift_master_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_IOPS')|default(0, true) }}"
+
+openshift_worker_root_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_SIZE')|default(64, true) }}"
+openshift_worker_root_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_TYPE')|default('cloud_essd', true) }}"
+openshift_worker_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_IOPS')|default(0, true) }}"
+
+## Either machine.openshift.io or sigs.k8s.io
+machineset_metadata_label_prefix: "{{ lookup('env', 'MACHINESET_METADATA_LABEL_PREFIX')|default('machine.openshift.io', true) }}"
+openshift_infra_node_instance_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_INSTANCE_TYPE')|default('ecs.g6.8xlarge', true) }}"
+openshift_workload_node_instance_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_INSTANCE_TYPE')|default('ecs.g6.4xlarge', true) }}"
+
+openshift_infra_node_volume_size: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_SIZE')|default(64, true) }}"
+openshift_infra_node_volume_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_TYPE')|default('cloud_essd', true) }}"
+openshift_infra_node_volume_iops: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_IOPS')|default(0, true) }}"
+
+openshift_workload_node_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_SIZE')|default(64, true) }}"
+openshift_workload_node_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_TYPE')|default('cloud_essd', true) }}"
+openshift_workload_node_volume_iops: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_IOPS')|default(0, true) }}"
+
+openshift_prometheus_retention_period: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_RETENTION_PERIOD')|default('15d', true) }}"
+openshift_prometheus_storage_class: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_CLASS')|default('alicloud-disk', true) }}"
+openshift_prometheus_storage_size: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_SIZE')|default('10Gi', true) }}"
+openshift_alertmanager_storage_class: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_CLASS')|default('alicloud-disk', true) }}"
+openshift_alertmanager_storage_size: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_SIZE')|default('2Gi', true) }}"

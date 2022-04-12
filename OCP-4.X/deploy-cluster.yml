@@ -48,6 +48,8 @@
       when: openshift_post_config|bool and platform == "azure"
     - role: post-config-on-gcp
       when: openshift_post_config|bool and platform == "gcp"
+    - role: post-config-on-alibaba
+      when: openshift_post_config|bool and platform == "alibaba"
     - role: cerberus
       when: cerberus_enable|bool
     - role: data_server_install
