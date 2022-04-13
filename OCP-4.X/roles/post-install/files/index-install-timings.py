@@ -98,6 +98,6 @@ for action in output:
     }
     print(data)
     data = json.dumps(data)
-    response = requests.post(ES+'/openshift-install-timings/_doc/', headers=headers, data=data)
+    response = requests.post(ES+'/openshift-install-timings/_doc/', headers=headers, data=data, verify=False)
 print("Data Successfully indexed to ES on index - openshift-install-timings")
 print("UUID :- " + UUID)
