@@ -31,7 +31,7 @@ The number of times for the playbook to poll the OpenShift cluster to determine 
 
 ### RHCOS_NEW_VERSION_URL
 Default: No default.  
-The url portion of a new version to upgrade to. An example would be `quay.io/openshift-release-dev/ocp-release` or `registry.svc.ci.openshift.org/ocp/release`.
+The url portion of a new version to upgrade to. An example would be `quay.io/openshift-release-dev/ocp-release` or `registry.ci.openshift.org/ocp/release`.
 
 ### RHCOS_NEW_VERSION
 Default: No default.  
