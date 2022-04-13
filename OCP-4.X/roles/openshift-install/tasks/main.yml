@@ -257,21 +257,19 @@
 - name: Setting up Alibaba
   block:
 
-  - name: Create .alibaba dir
+  - name: Create .alibabacloud dir
     file:
-      path: "{{ ansible_user_dir }}/.alibaba"
+      path: "{{ ansible_user_dir }}/.alibabacloud"
       state: directory
 
   - name: Download aliyun
     get_url:
       url: "{{ aliyun_binary }}"
-      dest: "{{ ansible_user_dir }}/.alibaba/aliyun_binary.tgz"
+      dest: "/tmp/aliyun_binary.tgz"
 
   - name: Untar and install aliyun
     shell: |
-      set -o pipefail
-      tar xvzf "{{ ansible_user_dir }}/.alibaba/aliyun_binary.tgz"
-      cp aliyun /usr/local/bin
+      tar xzf /tmp/aliyun_binary.tgz -C /usr/local/bin/ aliyun
       aliyun version
 
   - name: Aliyun config
@@ -286,7 +284,7 @@
   - name: Alibaba credentials
     template:
        src: alibaba_credentials.j2
-       dest: "{{ ansible_user_dir }}/.alibaba/credentials"
+       dest: "{{ ansible_user_dir }}/.alibabacloud/credentials"
 
   - name: Create RAM users and configure ccoctl
     shell: |
