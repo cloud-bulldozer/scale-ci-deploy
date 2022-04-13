@@ -29,7 +29,7 @@ openshift_install_ssh_pub_key_file: "{{ lookup('env', 'OPENSHIFT_INSTALL_SSH_PUB
 # Secrets/Tokens for extract and installing
 openshift_install_pull_secret: "{{ lookup('env', 'OPENSHIFT_INSTALL_PULL_SECRET') }}"
 openshift_install_quay_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_QUAY_REGISTRY_TOKEN') }}"
-openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY')|default('registry.svc.ci.openshift.org', true) }}"
+openshift_install_image_registry: "{{ lookup('env', 'OPENSHIFT_INSTALL_IMAGE_REGISTRY')|default('registry.ci.openshift.org', true) }}"
 openshift_install_registry_token: "{{ lookup('env', 'OPENSHIFT_INSTALL_REGISTRY_TOKEN') }}"
 # Not recommended, however you can build the installer from source. (You run the risk of using a mismatched binary vs install payload)
 openshift_install_installer_from_source: "{{ lookup('env', 'OPENSHIFT_INSTALL_INSTALLER_FROM_SOURCE')|default(false, true) }}"

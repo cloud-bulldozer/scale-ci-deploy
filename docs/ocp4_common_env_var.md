@@ -78,7 +78,7 @@ Default: No default.
 The token used to download and extract the installer binary from quay.
 
 ### OPENSHIFT_INSTALL_IMAGE_REGISTRY
-Default: `registry.svc.ci.openshift.org`
+Default: `registry.ci.openshift.org`
 The registry which contains the install image.
 
 ### OPENSHIFT_INSTALL_REGISTRY_TOKEN
