@@ -139,13 +139,6 @@
 
 - name: Alibaba Block of tasks
   block:
-    - name: (Alibaba) Get cluster region
-      shell: |
-        {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.regionId}}'{%endraw%}
-      register: alibaba_region
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"
-
     - name: (Alibaba) Get machineset name of a worker node
       shell: |
         {%raw%}oc get machinesets --no-headers -n openshift-machine-api | awk {'print $1'} | awk 'NR==1{print $1}'{%endraw%}

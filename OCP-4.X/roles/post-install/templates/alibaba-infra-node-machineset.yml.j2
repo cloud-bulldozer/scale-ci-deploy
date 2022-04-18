@@ -10,14 +10,14 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: infra-{{alibaba_region.stdout}}a
+    name: infra-{{alibaba_region}}a
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region}}a
     template:
       metadata:
         creationTimestamp: null
@@ -25,7 +25,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}a
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region}}a
       spec:
         metadata:
           creationTimestamp: null
@@ -40,7 +40,7 @@ items:
             instanceType: {{ openshift_infra_node_instance_type }}
             kind: AlibabaCloudMachineProviderConfig
             ramRoleName: {{cluster_name.stdout}}-role-worker
-            regionId: {{alibaba_region.stdout}}
+            regionId: {{alibaba_region}}
             resourceGroup:
               name: {{cluster_name.stdout}}-rg
               type: Name
@@ -76,10 +76,10 @@ items:
               - Key: sigs.k8s.io/cloud-provider-alibaba/origin
                 Value: ocp
               - Key: Name
-                Value: {{cluster_name.stdout}}-vswitch-{{alibaba_region.stdout}}a
+                Value: {{cluster_name.stdout}}-vswitch-{{alibaba_region}}a
               type: Tags
             vpcId: ""
-            zoneId: {{alibaba_region.stdout}}a
+            zoneId: {{alibaba_region}}a
           taints:
           - key: node-role.kubernetes.io/infra
             effect: NoSchedule
@@ -91,14 +91,14 @@ items:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
       {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
       {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: infra-{{alibaba_region.stdout}}b
+    name: infra-{{alibaba_region}}b
     namespace: openshift-machine-api
   spec:
     replicas: 2
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region}}b
     template:
       metadata:
         creationTimestamp: null
@@ -106,7 +106,7 @@ items:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
           {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
           {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region.stdout}}b
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{alibaba_region}}b
       spec:
         metadata:
           creationTimestamp: null
@@ -121,7 +121,7 @@ items:
             instanceType: {{ openshift_infra_node_instance_type }}
             kind: AlibabaCloudMachineProviderConfig
             ramRoleName: {{cluster_name.stdout}}-role-worker
-            regionId: {{alibaba_region.stdout}}
+            regionId: {{alibaba_region}}
             resourceGroup:
               name: {{cluster_name.stdout}}-rg
               type: Name
@@ -157,10 +157,10 @@ items:
               - Key: sigs.k8s.io/cloud-provider-alibaba/origin
                 Value: ocp
               - Key: Name
-                Value: {{cluster_name.stdout}}-vswitch-{{alibaba_region.stdout}}b
+                Value: {{cluster_name.stdout}}-vswitch-{{alibaba_region}}b
               type: Tags
             vpcId: ""
-            zoneId: {{alibaba_region.stdout}}b
+            zoneId: {{alibaba_region}}b
           taints:
           - key: node-role.kubernetes.io/infra
             effect: NoSchedule
