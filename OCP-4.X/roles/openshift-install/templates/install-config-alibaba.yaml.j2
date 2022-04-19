@@ -37,6 +37,7 @@ fips: {{ fips }}
 platform:
  alibabacloud:
   region: {{ alibaba_region }}
+  resourceGroupID: {{ alibaba_resource_group_id }}
 publish: External
 pullSecret: |+
   {{ openshift_install_pull_secret | to_json }}
