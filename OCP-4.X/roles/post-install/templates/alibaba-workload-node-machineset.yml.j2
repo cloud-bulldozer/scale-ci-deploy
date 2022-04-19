@@ -38,8 +38,8 @@ spec:
           ramRoleName: {{cluster_name.stdout}}-role-worker
           regionId: {{alibaba_region}}
           resourceGroup:
-            name: {{cluster_name.stdout}}-rg
-            type: Name
+            id: {{alibaba_resource_group_id}}
+            type: ID
           publicIp: true
           securityGroups:
           - tags:

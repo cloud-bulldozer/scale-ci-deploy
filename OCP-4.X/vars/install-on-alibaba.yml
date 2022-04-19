@@ -1,7 +1,7 @@
 ---
 # Cloud environment and authentication
 alibaba_region: "{{ lookup('env', 'ALIBABA_REGION') }}"
-#alibaba_base_domain_resource_group_id: 
+alibaba_resource_group_id: "{{ lookup('env', 'ALIBABA_RESOURCE_GROUP_ID') }}"
 aliyun_binary: "{{ lookup('env', 'ALIYUN_BINARY') | default('https://aliyuncli.alicdn.com/aliyun-cli-linux-3.0.32-amd64.tgz', true) }}"
 aliyun_access_key_id: "{{ lookup('env', 'ALIYUN_ACCESS_KEY_ID') }}"
 aliyun_access_key_secret: "{{ lookup('env', 'ALIYUN_ACCESS_KEY_SECRET') }}"
