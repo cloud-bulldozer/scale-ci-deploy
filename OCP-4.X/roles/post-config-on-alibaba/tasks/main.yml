@@ -28,7 +28,9 @@
       add_host:
         name: "{{ workload_public_ip.stdout }}"
         groups: workload
-  when: openshift_toggle_workload_node|bool
+  when:
+    - openshift_toggle_workload_node|bool
+    - openshift_debug_config|bool
 
 - name: Get security groups
   shell: |
