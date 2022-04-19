@@ -27,7 +27,9 @@
       add_host:
         name: "{{ workload_public_ip.stdout }}"
         groups: workload
-  when: openshift_toggle_workload_node|bool
+  when:
+    - openshift_toggle_workload_node|bool
+    - openshift_debug_config|bool
 
 - name: Get VpcId
   shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName, VpcId]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | awk '{print $7}' | grep -v '^$' | sort -u

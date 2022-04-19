@@ -31,7 +31,9 @@
       add_host:
         name: "{{ public_workload_fip.stdout }}"
         groups: workload
-  when: openshift_toggle_workload_node|bool
+  when:
+    - openshift_toggle_workload_node|bool
+    - openshift_debug_config|bool
 
 - name: get openshift infra id
   shell: |
