@@ -43,7 +43,7 @@ spec:
             sizeGb: {{openshift_workload_node_volume_size}}
             type: {{openshift_workload_node_volume_type}}
           kind: GCPMachineProviderSpec
-          machineType: {{openshift_workload_node_machine_type}}
+          machineType: {{openshift_workload_node_instance_type}}
           metadata:
             creationTimestamp: null
           networkInterfaces:

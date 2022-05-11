@@ -13,8 +13,8 @@ openshift_cluster_name: "{{ lookup('env', 'OPENSHIFT_CLUSTER_NAME') }}"
 openshift_master_count: "{{ lookup('env', 'OPENSHIFT_MASTER_COUNT')|default(3, true) }}"
 openshift_worker_count: "{{ lookup('env', 'OPENSHIFT_WORKER_COUNT')|default(5, true) }}"
 
-openshift_master_machine_type: "{{ lookup('env', 'OPENSHIFT_MASTER_MACHINE_TYPE')|default('n1-standard-4', true) }}"
-openshift_worker_machine_type: "{{ lookup('env', 'OPENSHIFT_WORKER_MACHINE_TYPE')|default('n1-standard-4', true) }}"
+openshift_master_instance_type: "{{ lookup('env', 'OPENSHIFT_MASTER_INSTANCE_TYPE')|default('n1-standard-4', true) }}"
+openshift_worker_instance_type: "{{ lookup('env', 'OPENSHIFT_WORKER_INSTANCE_TYPE')|default('n1-standard-4', true) }}"
 
 openshift_master_root_volume_size: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_SIZE')|default(64, true) }}"
 
@@ -22,8 +22,8 @@ openshift_worker_root_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLU
 
 # Either machine.openshift.io or sigs.k8s.io
 machineset_metadata_label_prefix: "{{ lookup('env', 'MACHINESET_METADATA_LABEL_PREFIX')|default('machine.openshift.io', true) }}"
-openshift_infra_node_machine_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_MACHINE_TYPE')|default('n1-standard-4', true) }}"
-openshift_workload_node_machine_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_MACHINE_TYPE')|default('n1-standard-4', true) }}"
+openshift_infra_node_instance_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_INSTANCE_TYPE')|default('n1-standard-4', true) }}"
+openshift_workload_node_instance_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_INSTANCE_TYPE')|default('n1-standard-4', true) }}"
 
 openshift_infra_node_volume_size: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_SIZE')|default(64, true) }}"
 openshift_infra_node_volume_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_TYPE')|default('pd-ssd', true) }}"
