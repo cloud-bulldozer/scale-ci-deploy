@@ -188,7 +188,7 @@
     command: oc scale -n openshift-cluster-version deployment.apps/cluster-version-operator --replicas=0
   
   - name: Patch new OVNKubernetes Image
-    command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}}
+    command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}} RELEASE_VERSION="5.0.0"
   
   - name: Pause the rollout to begin
     pause:
