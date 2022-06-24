@@ -161,7 +161,7 @@
        src: credentials.j2
        dest: "{{ ansible_user_dir }}/.aws/credentials"
 
-  when: platform == "aws"
+  when: platform == "aws" or platform == "aws-arm"
 
 - name: Setting up Azure
   block:
@@ -249,7 +249,7 @@
 
 - name: Setup install-config.yaml
   template:
-    src: install-config-{{ platform }}.yaml.j2
+    src: install-config-{{ (platform == 'aws-arm') | ternary('aws', platform) }}.yaml.j2
     dest: "{{item}}"
   with_items:
     - "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/install-config.yaml"

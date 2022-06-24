@@ -63,7 +63,7 @@
         - src: aws-workload-node-machineset.yml.j2
           dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
-  when: platform == "aws"
+  when: platform == "aws" or platform == "aws-arm"
 
 - name: Azure Block of tasks
   block:
