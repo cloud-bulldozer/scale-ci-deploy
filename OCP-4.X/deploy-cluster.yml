@@ -14,7 +14,7 @@
 
     - name: Include platform variables
       include_vars:
-        file: "vars/install-on-{{ platform }}.yml"
+        file: "vars/install-on-{{ (platform == 'aws-arm') | ternary('aws', platform) }}.yml"
 
     - name: Set dynamic scale-ci-deploy path
       set_fact:
@@ -43,7 +43,7 @@
     - role: cerberus_install
       when: cerberus_enable|bool
     - role: post-config-on-aws
-      when: openshift_post_config|bool and platform == "aws"
+      when: openshift_post_config|bool and (platform == "aws" or platform == "aws-arm")
     - role: post-config-on-azure
       when: openshift_post_config|bool and platform == "azure"
     - role: post-config-on-gcp
@@ -65,7 +65,7 @@
   pre_tasks:
     - name: Include platform variables
       include_vars:
-        file: "vars/install-on-{{ platform }}.yml"
+        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
   roles:
     - role: node-debug-config
       when: openshift_debug_config|bool
@@ -125,7 +125,7 @@
   pre_tasks:
     - name: Include platform variables
       include_vars:
-        file: "vars/install-on-{{ platform }}.yml"
+        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
   roles:
     - role: node-debug-config
       when: openshift_debug_config|bool

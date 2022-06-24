@@ -1,7 +1,8 @@
 apiVersion: {{ openshift_install_apiversion }}
 baseDomain: {{ openshift_base_domain }}
 compute:
-- name: worker
+- architecture: {{ aws_install_architecture }}
+  name: worker
   platform:
    aws:
      type: {{ openshift_worker_instance_type }}
@@ -11,6 +12,7 @@ compute:
        type: {{ openshift_worker_root_volume_type }}
   replicas: {{ openshift_worker_count }}
 ControlPlane:
+  architecture: {{ aws_install_architecture }}
   name: master
   platform:
    aws:

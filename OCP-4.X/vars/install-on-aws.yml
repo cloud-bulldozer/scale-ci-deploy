@@ -4,6 +4,7 @@ aws_profile: "{{ lookup('env', 'AWS_PROFILE')|default('default', true) }}"
 aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
 aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 aws_region: "{{ lookup('env', 'AWS_REGION') }}"
+aws_install_architecture: "{{ lookup('env', 'AWS_INSTALL_ARCHITECTURE') | default('amd64', true) }}"
 workload_aws_az_suffix: "{{ lookup('env', 'WORKLOAD_AWS_AZ_SUFFIX') | default('d', true) }}"
 
 # Cluster configuration
