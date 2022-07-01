@@ -12,7 +12,7 @@
 - debug:
     msg: "{{ central_pass }}"
 
-- name: Cleanup previous run
+- name: Cleanup any previous run for retries
   file:
     path: "{{ workspace }}"
     state: absent
@@ -28,33 +28,35 @@
     repo: 'https://github.com/stackrox/stackrox.git'
     dest: "{{ workspace }}/stackrox"
 
-- name: Get latest nightly build version
+- name: Get the second most recent nightly tag
   shell: |
-    cd "{{ workspace }}/stackrox" && git tag -l | grep nightly | sort | tail -n 1
+    cd "{{ workspace }}/stackrox" && git tag -l | grep nightly | sort | tail -n 2 | head -n 1
   register: nightly_tag_cmd
+  when: rhacs_image_main_tag == ""
 - set_fact:
-    nightly_tag: "{{ nightly_tag_cmd.stdout }}"
+    rhacs_image_main_tag: "{{ nightly_tag_cmd.stdout }}"
+  when: rhacs_image_main_tag == ""
 - debug:
-    msg: "{{ nightly_tag }}"
+    msg: "{{ rhacs_image_main_tag }}"
 
-- name: Get matching roxctl
+- name: Get roxctl
   shell: |
-    podman run --rm --entrypoint /bin/cat quay.io/stackrox-io/main:{{ nightly_tag }} \
+    podman run --rm --entrypoint /bin/cat quay.io/stackrox-io/main:{{ rhacs_image_main_tag }} \
       /assets/downloads/cli/roxctl-linux > {{ workspace }}/roxctl
 
-- name: Chmod
+- name: Make executable
   file:
     path: "{{ workspace }}/roxctl"
     state: file
     mode: "0755"
 
-- name: Generate matching helm charts for central
+- name: Generate helm charts for central
   shell: |
     {{ workspace }}/roxctl helm output central-services \
       --image-defaults opensource \
       --output-dir {{ workspace }}/stackrox-central-services-chart
 
-- name: Generate matching helm charts for secure-cluster
+- name: Generate helm charts for secured-cluster
   shell: |
     {{ workspace }}/roxctl helm output secured-cluster-services \
       --image-defaults opensource \
@@ -68,7 +70,7 @@
       {{ (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
       {{ (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
       {{ (rhacs_image_main_registry == "" )        | ternary("", "--set central.image.registry=" + rhacs_image_main_registry) }} \
-      --set central.image.tag={{ nightly_tag }} \
+      --set central.image.tag={{ rhacs_image_main_tag }} \
       --set central.exposure.route.enabled=true \
       --set central.adminPassword.value={{ central_pass }} \
       --set central.exposeMonitoring=true \
@@ -98,7 +100,7 @@
 
 - name: Enable OpenShift monitoring
   shell: |
-    oc label namespace/stackrox openshift.io/cluster-monitoring="true"
+    oc label namespace/stackrox openshift.io/cluster-monitoring="true" --overwrite
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
 
@@ -117,7 +119,7 @@
       {{ (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
       {{ (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
       {{ (rhacs_image_main_registry == "" )        | ternary("", "--set image.main.registry=" + rhacs_image_main_registry) }} \
-      --set image.main.tag={{ nightly_tag }} \
+      --set image.main.tag={{ rhacs_image_main_tag }} \
       --set clusterName={{ cluster_name }} \
       --set exposeMonitoring=true \
       --set enableOpenShiftMonitoring=true
