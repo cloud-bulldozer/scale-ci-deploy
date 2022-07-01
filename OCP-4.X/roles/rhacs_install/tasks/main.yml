@@ -5,26 +5,70 @@
 
 - set_fact:
     cluster_name: "perf-test"
-
-- name: Add & update the rhacs chart repo
-  shell: |
-    helm repo add rhacs https://mirror.openshift.com/pub/rhacs/charts
-    helm repo update
+    workspace: "/tmp/rhacs-workspace"
 
 - set_fact:
     central_pass: "{{ lookup('password', '/dev/null length=15 chars=ascii_letters') }}"
 - debug:
     msg: "{{ central_pass }}"
 
+- name: Cleanup previous run
+  file:
+    path: "{{ workspace }}"
+    state: absent
+
+- name: Create workspace
+  file:
+    path: "{{ workspace }}"
+    state: directory
+    mode: "0755"
+
+- name: Checkout Stackrox
+  ansible.builtin.git:
+    repo: 'https://github.com/stackrox/stackrox.git'
+    dest: "{{ workspace }}/stackrox"
+
+- name: Get latest nightly build version
+  shell: |
+    cd "{{ workspace }}/stackrox" && git tag -l | grep nightly | sort | tail -n 1
+  register: nightly_tag_cmd
+- set_fact:
+    nightly_tag: "{{ nightly_tag_cmd.stdout }}"
+- debug:
+    msg: "{{ nightly_tag }}"
+
+- name: Get matching roxctl
+  shell: |
+    docker run --rm --entrypoint /bin/cat quay.io/stackrox-io/main:{{ nightly_tag }} \
+      /assets/downloads/cli/roxctl-linux > {{ workspace }}/roxctl
+
+- name: Chmod
+  file:
+    path: "{{ workspace }}/roxctl"
+    state: file
+    mode: "0755"
+
+- name: Generate matching helm charts for central
+  shell: |
+    {{ workspace }}/roxctl helm output central-services \
+      --image-defaults opensource \
+      --output-dir {{ workspace }}/stackrox-central-services-chart
+
+- name: Generate matching helm charts for secure-cluster
+  shell: |
+    {{ workspace }}/roxctl helm output secured-cluster-services \
+      --image-defaults opensource \
+      --output-dir {{ workspace }}/stackrox-secured-cluster-services-chart
+
 - name: Install central services
   shell: |
-    helm install -n stackrox \
-      --create-namespace stackrox-central-services rhacs/central-services \
+    helm install -n stackrox --create-namespace \
+      stackrox-central-services {{ workspace }}/stackrox-central-services-chart \
       --set imagePullSecrets.allowNone={{ (rhacs_image_pull_secret_username == "") }} \
-      {{  (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
-      {{  (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
-      {{  (rhacs_image_main_registry == "" )        | ternary("", "--set central.image.registry=" + rhacs_image_main_registry) }} \
-      {{  (rhacs_image_main_tag == "" )             | ternary("", "--set central.image.tag=" + rhacs_image_main_tag) }} \
+      {{ (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
+      {{ (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
+      {{ (rhacs_image_main_registry == "" )        | ternary("", "--set central.image.registry=" + rhacs_image_main_registry) }} \
+      --set central.image.tag={{ nightly_tag }} \
       --set central.exposure.route.enabled=true \
       --set central.adminPassword.value={{ central_pass }} \
       --set central.exposeMonitoring=true \
@@ -35,24 +79,22 @@
 - name: Get route to central
   shell: |
     oc -n stackrox get routes central -o json | jq -r '.spec.host'
-  register: central_route
+  register: central_route_cmd
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
+- set_fact:
+    central_route: "{{ central_route_cmd.stdout }}"
+- debug:
+    msg: "{{ central_route }}"
 
 - name: Pause play until central is reachable
   uri:
-    url: "https://{{ central_route.stdout }}/v1/metadata"
+    url: "https://{{ central_route }}/v1/metadata"
     validate_certs: no
   register: _result
   until: _result.status == 200
   retries: 60
   delay: 5
-
-- name: Fetch the latest roxctl
-  get_url:
-    url: "https://mirror.openshift.com/pub/rhacs/assets/latest/bin/linux/roxctl"
-    dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin/"
-    mode: 0755
 
 - name: Enable OpenShift monitoring
   shell: |
@@ -60,28 +102,22 @@
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
 
-- name: Cleanup previous run
-  file:
-    path: perf-bundle.yml
-    state: absent
-
 - name: Get secure cluster bundle
   shell: |
-    roxctl -e https://{{ central_route.stdout }}:443 -p "{{ central_pass }}" central init-bundles generate {{ cluster_name }} \
-      --output perf-bundle.yml
-  environment:
-    PATH: "{{ lookup('env', 'PATH') }}:{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/bin"
+    {{ workspace }}/roxctl -e https://{{ central_route }}:443 -p "{{ central_pass }}" \
+      central init-bundles generate {{ cluster_name }} \
+      --output {{ workspace }}/perf-bundle.yml
 
 - name: Install secured cluster services
   shell: |
-    helm install -n stackrox \
-      --create-namespace stackrox-secured-cluster-services rhacs/secured-cluster-services \
-      -f perf-bundle.yml \
+    helm install -n stackrox --create-namespace \
+      stackrox-secured-cluster-services {{ workspace }}/stackrox-secured-cluster-services-chart \
+      -f {{ workspace }}/perf-bundle.yml \
       --set imagePullSecrets.allowNone={{ (rhacs_image_pull_secret_username == "") }} \
-      {{  (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
-      {{  (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
-      {{  (rhacs_image_main_registry == "" )        | ternary("", "--set image.main.registry=" + rhacs_image_main_registry) }} \
-      {{  (rhacs_image_main_tag == "" )             | ternary("", "--set image.main.tag=" + rhacs_image_main_tag) }} \
+      {{ (rhacs_image_pull_secret_username == "" ) | ternary("", "--set imagePullSecrets.username=" + rhacs_image_pull_secret_username) }} \
+      {{ (rhacs_image_pull_secret_password == "" ) | ternary("", "--set imagePullSecrets.password=" + rhacs_image_pull_secret_password) }} \
+      {{ (rhacs_image_main_registry == "" )        | ternary("", "--set image.main.registry=" + rhacs_image_main_registry) }} \
+      --set image.main.tag={{ nightly_tag }} \
       --set clusterName={{ cluster_name }} \
       --set exposeMonitoring=true \
       --set enableOpenShiftMonitoring=true
