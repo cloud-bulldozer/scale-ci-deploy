@@ -39,7 +39,7 @@
 
 - name: Get matching roxctl
   shell: |
-    docker run --rm --entrypoint /bin/cat quay.io/stackrox-io/main:{{ nightly_tag }} \
+    podman run --rm --entrypoint /bin/cat quay.io/stackrox-io/main:{{ nightly_tag }} \
       /assets/downloads/cli/roxctl-linux > {{ workspace }}/roxctl
 
 - name: Chmod
