@@ -39,7 +39,7 @@
     - role: post-install
       when: openshift_post_install|bool
     - role: winc-install
-      when: openshift_winc_install|bool
+      when: not openshift_cleanup|bool and openshift_winc_install|bool
     - role: rhacs_install
       when: rhacs_enable|bool
     - role: cerberus_install
