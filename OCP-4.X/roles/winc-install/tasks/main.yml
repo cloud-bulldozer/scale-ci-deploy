@@ -1,5 +1,11 @@
-# Applies Windows Worker nodes configuration to a cluster post installation
 ---
+#
+# Applies Windows Worker nodes configuration to a cluster post installation
+#
+# Performs:
+#  * Creates infra node machineset
+#  * Creates workload node machineset
+#  * Moves infra node pods/workload to infra nodes
 #  These registers be set from post-install tasks, but if you skip those tasks, you can enable them here to run this role one-off.
 # - name: Get cluster name
 #   shell: |
@@ -64,7 +70,6 @@
 
 - name: winC - Create SSH key secret for WMCO to reach nodes
   kubernetes.core.k8s:
-    kubeconfig: "{{ kubeconfig_path }}"
     api_version: v1
     kind: Secret
     name: cloud-private-key
@@ -81,8 +86,7 @@
     template: subscription.yaml
 
 - name: winC - Wait for WMCO Deployment to be ready
-  kubernetes.core.k8s_info:
-    kubeconfig: "{{ kubeconfig_path }}"
+  kubernetes.core.k8s:
     api_version: apps/v1
     kind: Deployment
     name: windows-machine-config-operator
@@ -92,8 +96,6 @@
       type: Available
       status: True
       reason: MinimumReplicasAvailable
-  retries: 3
-  delay: 10
 
 - name: winC AWS - Template out machineset yamls
   kubernetes.core.k8s:
