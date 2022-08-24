@@ -304,7 +304,23 @@
 
   when: platform == "alibaba"
 
-- name: Run openshift installer
+- name: Create installer dir
+  shell: |
+    set -o pipefail
+    cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
+    export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
+    export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
+    bin/openshift-install create manifests --log-level=debug
+  when: openshfit_network_ovn_hybrid is defined and openshfit_network_ovn_hybrid
+
+# There is a CIDR hard-coded in this Network object that does not conflict with openshift_cidr for the DAG. If you run into issues, check that the subnets do not overlap.
+- name: Template file dir
+  copy:
+    src: cluster-network-03-config.yml
+    dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/manifests/"
+  when: openshfit_network_ovn_hybrid is defined and openshfit_network_ovn_hybrid
+
+- name: Install cluster
   shell: |
     set -o pipefail
     cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}

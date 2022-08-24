@@ -1,0 +1,110 @@
+---
+#
+# Applies Windows Worker nodes configuration to a cluster post installation
+#
+# Performs:
+#  * Creates infra node machineset
+#  * Creates workload node machineset
+#  * Moves infra node pods/workload to infra nodes
+#  These registers be set from post-install tasks, but if you skip those tasks, you can enable them here to run this role one-off.
+# - name: Get cluster name
+#   shell: |
+#     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ machineset_metadata_label_prefix }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
+#   register: cluster_name
+#   environment:
+#     KUBECONFIG: "{{ kubeconfig_path }}"
+
+# - name: (AWS) set cluster region
+#   shell: |
+#     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.placement.region}}'{%endraw%}
+#   register: aws_region
+#   environment:
+#     KUBECONFIG: "{{ kubeconfig_path }}"
+
+- name: winC AWS - Get Windows AMI ID
+  shell: |
+    aws ec2 describe-images --filters Name=name,Values={{ primary_windows_image }}* --region {{ aws_region.stdout }} --query {%raw%}'sort_by(Images, &CreationDate)[-1].[ImageId]'{%endraw%} --output text
+  register: windows_ami_id
+  when: platform == "aws"
+
+- name: winC - Create WMCO catalog source
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    name: openshift-windows-machine-config-operator
+    template: catalogsource.yaml.j2
+  retries: 3
+
+- name: winC - Wait for catalog source
+  shell: oc get catalogsource wmco -o=jsonpath={.status.connectionState.lastObservedState} -n openshift-marketplace
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  register: result
+  until: result.stdout == "READY"
+  retries: 3
+  delay: 10
+
+- name: winC - Create WMCO namespace
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: openshift-windows-machine-config-operator
+
+- name: winC - Add monitoring label to wmco namespace
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: patched
+    kind: Namespace
+    name: openshift-windows-machine-config-operator
+    definition:
+      metadata:
+        labels:
+          openshift.io/cluster-monitoring: "true"
+
+- name: winC - Create WMCO operatorgroup
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    template: operatorgroup.yaml
+
+- name: winC - Create SSH key secret for WMCO to reach nodes
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    api_version: v1
+    kind: Secret
+    name: cloud-private-key
+    namespace: openshift-windows-machine-config-operator
+    definition:
+      type: Opaque
+      data:
+        private-key.pem: "{{ lookup('file', lookup( 'env', 'PRIVATE_KEY' ) ) | b64encode }}"
+
+- name: winC - Create WMCO subscription
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    template: subscription.yaml
+
+- name: winC - Wait for WMCO Deployment to be ready
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig_path }}"
+    api_version: apps/v1
+    kind: Deployment
+    name: windows-machine-config-operator
+    namespace: openshift-windows-machine-config-operator
+    wait: yes
+    wait_condition:
+      type: Available
+      status: True
+      reason: MinimumReplicasAvailable
+  retries: 3
+  delay: 10
+
+- name: winC AWS - Template out machineset yamls
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    template: aws-windows-node-machineset.yml.j2
+  when: platform == "aws"
+
