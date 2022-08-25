@@ -87,7 +87,7 @@
     template: subscription.yaml
 
 - name: winC - Wait for WMCO Deployment to be ready
-  kubernetes.core.k8s:
+  kubernetes.core.k8s_info:
     kubeconfig: "{{ kubeconfig_path }}"
     api_version: apps/v1
     kind: Deployment
@@ -98,6 +98,8 @@
       type: Available
       status: True
       reason: MinimumReplicasAvailable
+  retries: 3
+  delay: 10
 
 - name: winC AWS - Template out machineset yamls
   kubernetes.core.k8s:
