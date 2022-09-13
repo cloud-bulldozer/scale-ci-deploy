@@ -190,10 +190,6 @@
   - name: Patch new OVNKubernetes Image
     command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}} RELEASE_VERSION="5.0.0"
  
-  - name: Set expected new ovn image
-    set_fact:
-      new_ovn_image: "{{openshift_ovn_image}}"
-
   - name: Get ovnkube-node pod
     shell: oc get pods -n {{ ovn_namespace }} | tail -n1 | awk '{print $1}'
     register: ovnkube_node_pod
@@ -201,7 +197,7 @@
   - name: Check one ovnkube-node pod to see if ovn image has been updated
     shell: oc get pod -n {{ ovn_namespace }} {{ovnkube_node_pod.stdout}} -o json| jq '.spec.containers[] | select(.name=="ovnkube-node").image'
     register: ovnkube_node_image
-    until: (ovnkube_node_image.stdout) == (new_ovn_image) or (ovnkube_node_image.stdout) == ""
+    until: (ovnkube_node_image.stdout) == (openshift_ovn_image) or (ovnkube_node_image.stdout) == ""
     delay: 1
     retries: 600
   
