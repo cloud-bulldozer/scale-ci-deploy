@@ -1,11 +1,5 @@
----
-#
 # Applies Windows Worker nodes configuration to a cluster post installation
-#
-# Performs:
-#  * Creates infra node machineset
-#  * Creates workload node machineset
-#  * Moves infra node pods/workload to infra nodes
+---
 #  These registers be set from post-install tasks, but if you skip those tasks, you can enable them here to run this role one-off.
 # - name: Get cluster name
 #   shell: |
