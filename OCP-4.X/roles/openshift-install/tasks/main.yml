@@ -304,6 +304,16 @@
 
   when: platform == "alibaba"
 
+- name: Create openshift manifests
+  shell: |
+    set -o pipefail
+    cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
+    export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
+    export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
+    bin/openshift-install create manifests --dir .
+    sed -i -e '/ami:/i\          \spotMarketOptions: {}' {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/openshift/99_openshift-cluster-api_worker*
+  when: platform == "aws" and spot_instance_zone
+
 - name: Run openshift installer
   shell: |
     set -o pipefail

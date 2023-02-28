@@ -6,55 +6,53 @@ items:
     creationTimestamp: null
     labels:
       {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
-      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-    name: workload-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+    name: infra-{{spot_instance_zone}}
     namespace: openshift-machine-api
   spec:
     replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
+        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{spot_instance_zone}}
     template:
       metadata:
         creationTimestamp: null
         labels:
           {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: workload
-          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: workload
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: workload-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
+          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{spot_instance_zone}}
       spec:
         metadata:
           creationTimestamp: null
           labels:
-            node-role.kubernetes.io/workload: ""
+            node-role.kubernetes.io/infra: ""
         providerSpec:
           value:
-            {% if spot_instance_zone -%}
             spotMarketOptions: {}
-            {%+ endif -%}
             ami:
               id: {{ami_id.stdout}}
             apiVersion: awsproviderconfig.openshift.io/v1beta1
             blockDevices:
             - ebs:
-                iops: {{openshift_workload_node_volume_iops}}
-                volumeSize: {{openshift_workload_node_volume_size}}
-                volumeType: {{openshift_workload_node_volume_type}}
+                iops: {{openshift_infra_node_volume_iops}}
+                volumeSize: {{openshift_infra_node_volume_size}}
+                volumeType: {{openshift_infra_node_volume_type}}
             credentialsSecret:
               name: aws-cloud-credentials
             deviceIndex: 0
             iamInstanceProfile:
               id: {{cluster_name.stdout}}-worker-profile
-            instanceType: {{openshift_workload_node_instance_type}}
+            instanceType: {{openshift_infra_node_instance_type}}
             kind: AWSMachineProviderConfig
             metadata:
               creationTimestamp: null
             placement:
-              availabilityZone: {{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
+              availabilityZone: {{spot_instance_zone}}
               region: {{aws_region.stdout}}
-            publicIp: true
+            publicIp: false
             securityGroups:
             - filters:
               - name: tag:Name
@@ -64,7 +62,7 @@ items:
               filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-public-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
+                - {{cluster_name.stdout}}-private-{{spot_instance_zone}}
             tags:
             - name: kubernetes.io/cluster/{{cluster_name.stdout}}
               value: owned

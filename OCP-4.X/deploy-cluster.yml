@@ -65,7 +65,7 @@
   pre_tasks:
     - name: Include platform variables
       include_vars:
-        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
+        file: "vars/install-on-{{ (platform == 'aws-arm') | ternary('aws', platform) }}.yml"
   roles:
     - role: node-debug-config
       when: openshift_debug_config|bool
@@ -125,7 +125,7 @@
   pre_tasks:
     - name: Include platform variables
       include_vars:
-        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
+        file: "vars/install-on-{{ (platform == 'aws-arm') | ternary('aws', platform) }}.yml"
   roles:
     - role: node-debug-config
       when: openshift_debug_config|bool
