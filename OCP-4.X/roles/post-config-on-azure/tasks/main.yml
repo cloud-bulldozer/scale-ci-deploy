@@ -5,7 +5,7 @@
 # Performs:
 # * Opens firewall rules for workload/worker nodes for ssh (as well as for debugging workload pod ssh)
 # * Opens firewall rules for Network Tests P2P HostNetwork Tests
-#   Ports 2022 (tcp), 20000-30109 (tcp, udp), 32768-60999 (tcp, udp)
+#   Ports 2022 (tcp), 0-30109 (tcp, udp), 32768-60999 (tcp, udp)
 #
 
 - name: Get cluster name
@@ -46,9 +46,9 @@
   shell: |
     az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-pbench-agent --nsg-name {{azure_sg.stdout}} --priority 102 --access Allow --description "scale-ci allow pbench-agent" --protocol Tcp --destination-port-ranges "2022"
 
-- name: Create network security group rule for tcp,udp network tests (20000-30109)
+- name: Create network security group rule for tcp,udp network tests (0-30109)
   shell: |
-    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-net --nsg-name {{azure_sg.stdout}} --priority 104 --access Allow --description "scale-ci allow tcp,udp network tests" --protocol "*" --destination-port-ranges "20000-30109"
+    az network nsg rule create -g {{rhcos_cluster_name.stdout}}-rg --name scale-ci-net --nsg-name {{azure_sg.stdout}} --priority 104 --access Allow --description "scale-ci allow tcp,udp network tests" --protocol "*" --destination-port-ranges "0-30109"
 
 # Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
 # Currently there is no method outside of sysctls to control those ports

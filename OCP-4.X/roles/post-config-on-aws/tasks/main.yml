@@ -5,7 +5,7 @@
 # Performs:
 # * Opens firewall rules for workload/worker nodes for ssh (as well as for debugging workload pod ssh)
 # * Opens firewall rules for Network Tests P2P HostNetwork Tests
-#   Ports 2022 (tcp), 20000-30109 (tcp, udp), 32768-60999 (tcp, udp)
+#   Ports 2022 (tcp), 0-30109 (tcp, udp), 32768-60999 (tcp, udp)
 # * Ensures ssh is started and running on nodes
 #
 
@@ -51,14 +51,14 @@
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: Add inbound rule to allow tcp traffic on port range 20000 to 30109
-  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 20000-30109 --cidr 0.0.0.0/0
+- name: Add inbound rule to allow tcp traffic on port range 0 to 30109
+  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 0-30109 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
 
-- name: Add inbound rule to allow udp traffic on port range 20000 to 30109
-  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 20000-30109 --cidr 0.0.0.0/0
+- name: Add inbound rule to allow udp traffic on port range 0 to 30109
+  shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 0-30109 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
