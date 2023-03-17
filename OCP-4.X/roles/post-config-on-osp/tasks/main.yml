@@ -6,7 +6,7 @@
 # * Add public ip to workload node
 # * Opens firewall rules for workload/worker nodes for ssh (as well as for debugging workload pod ssh)
 # * Opens firewall rules for Network Tests P2P HostNetwork Tests
-#   Ports 2022 (tcp), 20000-30109 (tcp, udp), 32768-60999 (tcp, udp)
+#   Ports 2022 (tcp), 0-30109 (tcp, udp), 32768-60999 (tcp, udp)
 #
 
 - block:
@@ -55,11 +55,11 @@
 # Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
 # Currently there is no method outside of sysctls to control those ports
 # See pbench issue #1238 - https://github.com/distributed-system-analysis/pbench/issues/1238
-- name: Allow traffic over tcp/udp ports (20000-30109, 32768-60999) for HostNetwork Network Tests
+- name: Allow traffic over tcp/udp ports (0-30109, 32768-60999) for HostNetwork Network Tests
   shell: |
     . {{ ansible_user_dir }}/{{osp_project_name}}rc
-    openstack security group rule create --ingress --protocol tcp --dst-port 20000:30109 {{item}}
-    openstack security group rule create --ingress --protocol udp --dst-port 20000:30109 {{item}}
+    openstack security group rule create --ingress --protocol tcp --dst-port 0:30109 {{item}}
+    openstack security group rule create --ingress --protocol udp --dst-port 0:30109 {{item}}
     openstack security group rule create --ingress --protocol tcp --dst-port 32768:60999 {{item}}
     openstack security group rule create --ingress --protocol udp --dst-port 32768:60999 {{item}}
   with_items: "{{security_groups.stdout_lines}}"
