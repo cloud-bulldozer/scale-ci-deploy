@@ -5,6 +5,10 @@ compute:
   name: worker
   platform:
    aws:
+     {% if spot_instance_zone -%}
+     zones:
+     - {{spot_instance_zone}}
+     {%+ endif -%}
      type: {{ openshift_worker_instance_type }}
      rootVolume:
        iops: {{ openshift_worker_root_volume_iops }}
@@ -16,6 +20,10 @@ ControlPlane:
   name: master
   platform:
    aws:
+     {% if spot_instance_zone -%}
+     zones:
+     - {{spot_instance_zone}}
+     {%+ endif -%}
      type: {{ openshift_master_instance_type }}
      rootVolume:
        iops: {{ openshift_master_root_volume_iops }}

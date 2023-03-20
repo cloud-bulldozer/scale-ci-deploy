@@ -59,10 +59,13 @@
       with_items:
         - src: aws-infra-node-machineset.yml.j2
           dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/infra-node-machineset.yml"
-          toggle: "{{openshift_toggle_infra_node}}"
+          toggle: "{{openshift_toggle_infra_node and (spot_instance_zone==false or spot_instance_zone=='')}}"
         - src: aws-workload-node-machineset.yml.j2
           dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/workload-node-machineset.yml"
           toggle: "{{openshift_toggle_workload_node}}"
+        - src: aws-spot-infra-node-machineset.yml.j2
+          dest: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/infra-node-machineset.yml"
+          toggle: "{{openshift_toggle_infra_node and spot_instance_zone!=false and spot_instance_zone!=''}}"
   when: platform == "aws" or platform == "aws-arm"
 
 - name: Azure Block of tasks
@@ -241,7 +244,12 @@
 - name: Increment expected node count with infra nodes
   set_fact:
     expected_node_count: "{{expected_node_count|int + 3}}"
-  when: openshift_toggle_infra_node|bool
+  when: openshift_toggle_infra_node and (spot_instance_zone==false or spot_instance_zone=='')
+
+- name: Increment expected node count with spot infra nodes
+  set_fact:
+    expected_node_count: "{{expected_node_count|int + 1}}"
+  when: openshift_toggle_infra_node and spot_instance_zone!=false and spot_instance_zone!=''
 
 - name: Increment expected node count with workload node
   set_fact:

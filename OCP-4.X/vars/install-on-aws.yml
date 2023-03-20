@@ -6,7 +6,8 @@ aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 aws_region: "{{ lookup('env', 'AWS_REGION') }}"
 aws_install_architecture: "{{ lookup('env', 'AWS_INSTALL_ARCHITECTURE') | default('amd64', true) }}"
 cluster_owner: "{{ lookup('env', 'CLUSTER_OWNER') | default('ci', true) }}"
-workload_aws_az_suffix: "{{ lookup('env', 'WORKLOAD_AWS_AZ_SUFFIX') | default('d', true) }}"
+spot_instance_zone : "{{ lookup('env', 'SPOT_INSTANCE_ZONE')|default('', true) }}"
+workload_aws_az_suffix: "{{ spot_instance_zone[-1]|default(lookup('env', 'WORKLOAD_AWS_AZ_SUFFIX'),true)| default('d', true) }}"
 
 # Cluster configuration
 openshift_base_domain: "{{ lookup('env', 'OPENSHIFT_BASE_DOMAIN') }}"
