@@ -1,4 +1,5 @@
 apiVersion: v1
+kind: List
 items:
 - apiVersion: machine.openshift.io/v1beta1
   kind: MachineSet
@@ -69,8 +70,6 @@ items:
               name: {{ user_data_secret }}
         versions:
           kubelet: ""
-  status:
-    replicas: 0
 - apiVersion: machine.openshift.io/v1beta1
   kind: MachineSet
   metadata:
@@ -140,78 +139,3 @@ items:
               name: {{ user_data_secret }}
         versions:
           kubelet: ""
-  status:
-    replicas: 0
-- apiVersion: machine.openshift.io/v1beta1
-  kind: MachineSet
-  metadata:
-    creationTimestamp: null
-    labels:
-      {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-      {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
-      {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-    name: infra-{{aws_region.stdout}}c
-    namespace: openshift-machine-api
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
-        {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-        {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}c
-    template:
-      metadata:
-        creationTimestamp: null
-        labels:
-          {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
-          {{machineset_metadata_label_prefix}}/cluster-api-machine-role: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machine-type: infra
-          {{machineset_metadata_label_prefix}}/cluster-api-machineset: infra-{{aws_region.stdout}}c
-      spec:
-        metadata:
-          creationTimestamp: null
-          labels:
-            node-role.kubernetes.io/infra: ""
-        providerSpec:
-          value:
-            ami:
-              id: {{ami_id.stdout}}
-            apiVersion: awsproviderconfig.openshift.io/v1beta1
-            blockDevices:
-            - ebs:
-                iops: {{openshift_infra_node_volume_iops}}
-                volumeSize: {{openshift_infra_node_volume_size}}
-                volumeType: {{openshift_infra_node_volume_type}}
-            credentialsSecret:
-              name: aws-cloud-credentials
-            deviceIndex: 0
-            iamInstanceProfile:
-              id: {{cluster_name.stdout}}-worker-profile
-            instanceType: {{openshift_infra_node_instance_type}}
-            kind: AWSMachineProviderConfig
-            metadata:
-              creationTimestamp: null
-            placement:
-              availabilityZone: {{aws_region.stdout}}c
-              region: {{aws_region.stdout}}
-            publicIp: false
-            securityGroups:
-            - filters:
-              - name: tag:Name
-                values:
-                - {{cluster_name.stdout}}-worker-sg
-            subnet:
-              filters:
-              - name: tag:Name
-                values:
-                - {{cluster_name.stdout}}-private-{{aws_region.stdout}}c
-            tags:
-            - name: kubernetes.io/cluster/{{cluster_name.stdout}}
-              value: owned
-            userDataSecret:
-              name: {{ user_data_secret }}
-        versions:
-          kubelet: ""
-  status:
-    replicas: 0
-kind: List
-metadata: {}

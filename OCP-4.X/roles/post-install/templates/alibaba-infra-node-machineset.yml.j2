@@ -94,7 +94,7 @@ items:
     name: infra-{{alibaba_region}}b
     namespace: openshift-machine-api
   spec:
-    replicas: 2
+    replicas: 1
     selector:
       matchLabels:
         {{machineset_metadata_label_prefix}}/cluster-api-cluster: {{cluster_name.stdout}}
