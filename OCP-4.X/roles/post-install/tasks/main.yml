@@ -240,7 +240,7 @@
 
 - name: Increment expected node count with infra nodes
   set_fact:
-    expected_node_count: "{{expected_node_count|int + 3}}"
+    expected_node_count: "{{expected_node_count|int + 2}}"
   when: openshift_toggle_infra_node|bool
 
 - name: Increment expected node count with workload node
