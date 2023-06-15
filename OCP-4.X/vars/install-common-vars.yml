@@ -90,11 +90,6 @@ cores_usage_percentage: "{{ lookup('env', 'CORES_USAGE_PERCENTAGE')|default(0.5,
 database_path: "{{ lookup('env', 'DATABASE_PATH')|default('/tmp/cerberus.db', true) }}"
 reuse_database: "{{ lookup('env', 'REUSE_DATABASE')|default(false, true) }}"
 
-## Remote write details
-sincgars_enable: "{{ lookup('env', 'ENABLE_REMOTE_WRITE')|default(false, true) }}"
-sincgars_cluster_name: "{{ lookup('env', 'SINCGARS_CLUSTER_NAME') }}"
-sincgars_remote_write_url: "{{ lookup('env', 'SINCGARS_REMOTE_WRITE_URL') }}"
-
 ## To specify an alternate auth dir containing kubeconfig, e.g. from AWS cluster installed by Flexy,
 ## use only when NOT using the default auth dir located in "${GOPATH}/src/github.com/openshift/installer"
 kubeconfig_auth_dir_path: "{{ lookup('env', 'KUBECONFIG_AUTH_DIR_PATH') }}"
