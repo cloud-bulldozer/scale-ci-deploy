@@ -186,26 +186,55 @@
   block:
   - name: Scale CVO Down for OVNKubernetes image patching
     command: oc scale -n openshift-cluster-version deployment.apps/cluster-version-operator --replicas=0
-  
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
+
   - name: Patch new OVNKubernetes Image
     command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}} RELEASE_VERSION="5.0.0"
- 
-  - name: Get ovnkube-node pod
-    shell: oc get pods -n {{ ovn_namespace }} | tail -n1 | awk '{print $1}'
-    register: ovnkube_node_pod
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
+    when: openshift_ovn_image != ''
 
-  - name: Check one ovnkube-node pod to see if ovn image has been updated
-    shell: oc get pod -n {{ ovn_namespace }} {{ovnkube_node_pod.stdout}} -o json| jq '.spec.containers[] | select(.name=="ovnkube-node").image'
-    register: ovnkube_node_image
-    until: (ovnkube_node_image.stdout) == (openshift_ovn_image) or (ovnkube_node_image.stdout) == ""
+  - name: Patch new CNO Image
+    command: oc -n openshift-network-operator set image deployment/network-operator network-operator={{openshift_cno_image}}
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
+    when: openshift_cno_image != ''
+
+  - name: wait for 1 minute before checking for rollout
+    pause:
+      minutes: 1
+
+  - name: Wait till we get ovnkube DS
+    vars:
+      ovnkube_ds_name: "daemonset.apps/ovnkube-node"
+    shell: oc -n {{ ovn_namespace }} get ds ovnkube-node -o NAME --no-headers=true --ignore-not-found=true
+    register: ovnkube_ds
+    until: ovnkube_ds.stdout == ovnkube_ds_name
     delay: 1
     retries: 600
-  
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
+
   - name: Wait for OVNK new node images to roll out
-    command: oc rollout status -n {{ ovn_namespace }} ds/ovnkube-node
-  
+    command: oc -n {{ ovn_namespace }} rollout status ds/ovnkube-node
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
+
   - name: Wait for OVNK new master images to roll out
-    command: oc rollout status -n {{ ovn_namespace }} ds/ovnkube-master
+    command: oc -n {{ ovn_namespace }} rollout status ds/ovnkube-master
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
+
+  - name: check if the ds has the new OVN image
+    shell: oc -n {{ ovn_namespace }} get ds ovnkube-node -o json | jq -r '.spec.template.spec.containers[] | select(.name=="ovnkube-node").image'
+    register: ovnkube_node_image
+    until: (ovnkube_node_image.stdout|regex_replace('\"', '') == openshift_ovn_image) or (ovnkube_node_image.stdout == "")
+    delay: 1
+    retries: 10
+    environment:
+      KUBECONFIG: "{{ kubeconfig_path }}"
+    when: openshift_ovn_image != ''
   
   - name: OVN SBDB block
     block:
@@ -214,13 +243,13 @@
     
     - name: Wait for OVNK sbdb-relay images to roll out
       command: oc rollout status -n {{ ovn_namespace }} deployment.apps/ovnkube-sbdb-relay
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
     
     - name: Verify ovnkube-sbdb-relay connectivity
       script: sbdb-relay.sh verify
     when: openshift_toggle_ovn_relay|bool
-  environment:
-    KUBECONFIG: "{{ kubeconfig_path }}"
-  when: openshift_toggle_ovn_patch|bool
+  when: openshift_ovn_image != '' or openshift_cno_image != ''
 
 - name: Create machinesets
   shell: |

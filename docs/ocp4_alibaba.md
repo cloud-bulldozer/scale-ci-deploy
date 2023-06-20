@@ -141,10 +141,14 @@ Default: `2Gi`
 Default: `false`
 Toggle the deployment of the OVN SBSB relay.
 
-### OVN_PATCH
+### OVN_IC
 Default: `false`
-Toggle to patch and replace the default OVN deployment image.
+OVN is using differnt naming convention for pods when OVN Interconnect is enabled. This flag helps in verifying if OVN_IMAGE is properly applied on relevant pods or not.
 
 ### OVN_IMAGE
 Default: `nil`
-The OVN image that we will use to replace the default, requires `OVN_PATCH` to be `true`.
+The OVN image that we will use to replace the default.
+
+### CNO_IMAGE
+Default: `nil`
+The CNO image that we will use to replace the default.

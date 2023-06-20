@@ -118,8 +118,9 @@ fips: "{{ lookup('env', 'FIPS')|default(false, true) }}"
 es_server: "{{ lookup('env', 'ES_SERVER')|default('https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443', true) }}"
 
 # OVNKubernetes image patch
-openshift_toggle_ovn_patch: "{{ lookup('env', 'OVN_PATCH')|default(false, true) }}"
-openshift_ovn_image: "{{ lookup('env', 'OVN_IMAGE')|default('', true) }}"
+openshift_ovn_ic: "{{ lookup('env', 'OPENSHIFT_OVN_IC')|default(false, true) }}"
+openshift_ovn_image: "{{ lookup('env', 'OPENSHIFT_OVN_IMAGE')|default('', true) }}"
+openshift_cno_image: "{{ lookup('env', 'OPENSHIFT_CNO_IMAGE')|default('', true) }}"
 
 # RHACS
 rhacs_enable: "{{ lookup('env', 'RHACS_ENABLE')|default(false, true) }}"
