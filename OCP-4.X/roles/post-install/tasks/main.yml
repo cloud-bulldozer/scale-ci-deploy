@@ -187,6 +187,15 @@
   - name: Scale CVO Down for OVNKubernetes image patching
     command: oc scale -n openshift-cluster-version deployment.apps/cluster-version-operator --replicas=0
   
+  - name: Patch new Cluster Network Operator Image
+    block:
+    - name: Patch new CNO Image
+      command: oc -n openshift-network-operator set image deployment.apps/network-operator network-operator={{openshift_cno_image}}
+
+    - name: Wait for CNO image to roll out
+      command: oc rollout status -n openshift-network-operator deployment.apps/network-operator
+    when: openshift_toggle_cno_patch|bool
+
   - name: Patch new OVNKubernetes Image
     command: oc -n openshift-network-operator set env deployment.apps/network-operator OVN_IMAGE={{openshift_ovn_image}} RELEASE_VERSION="5.0.0"
  
