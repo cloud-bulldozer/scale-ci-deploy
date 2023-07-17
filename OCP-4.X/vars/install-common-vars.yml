@@ -121,6 +121,10 @@ es_server: "{{ lookup('env', 'ES_SERVER')|default('https://search-perfscale-dev-
 openshift_toggle_ovn_patch: "{{ lookup('env', 'OVN_PATCH')|default(false, true) }}"
 openshift_ovn_image: "{{ lookup('env', 'OVN_IMAGE')|default('', true) }}"
 
+# Cluster Network Operator image patch
+openshift_toggle_cno_patch: "{{ lookup('env', 'CNO_PATCH')|default(false, true) }}"
+openshift_cno_image: "{{ lookup('env', 'CNO_IMAGE')|default('', true) }}"
+
 # RHACS
 rhacs_enable: "{{ lookup('env', 'RHACS_ENABLE')|default(false, true) }}"
 rhacs_image_pull_secret_username: "{{ lookup('env', 'RHACS_IMAGE_PULL_SECRET_USERNAME')|default('', true) }}"
