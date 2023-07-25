@@ -361,6 +361,11 @@
       patch: |
         '{"spec": {"nodePlacement": {"nodeSelector": {"matchLabels": {"node-role.kubernetes.io/infra": ""}}}}}'
       type: "--type merge"
+    - namespace: openshift-image-registry
+      object: configs.imageregistry.operator.openshift.io/cluster
+      patch: |
+        '{"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}'
+      type: "--type merge"
     # Monitoring (Relocate cluster-monitoring-operator from worker nodes) - Requires CVO overriding
     #- namespace: openshift-monitoring
     #  object: deployment.apps/cluster-monitoring-operator
@@ -371,11 +376,6 @@
       #   object: deployment.apps/cluster-image-registry-operator
       #   patch: |
       #     '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
-
-    - namespace: openshift-image-registry
-      object: deployment.apps/image-registry
-      patch: |
-         '{"spec": {"template": {"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}}}'
 
      ## Logging (If it is installed)
      # - namespace: openshift-logging
@@ -397,27 +397,6 @@
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   when: openshift_toggle_infra_node|bool
-
-- name: Use sincgars to enable remote write
-  block:
-    - name: clone sincgars
-      git:
-        repo: 'https://github.com/aakarshg/sincgars.git'
-        dest: "{{ ansible_user_dir }}/sincgars"
-        force: yes
-
-    - name: (sincgars_cluster_name not provided) run sincgars
-      command: python deploy.py -c {{ cluster_name.stdout }} -u {{ sincgars_remote_write_url }}
-      args:
-        chdir: "{{ ansible_user_dir }}/sincgars"
-      when: sincgars_cluster_name == ""
-
-    - name: (sincgars_cluster_name provided) run sincgars
-      command: python deploy.py -c {{ sincgars_cluster_name }} -u {{ sincgars_remote_write_url }}
-      args:
-        chdir: "{{ ansible_user_dir }}/sincgars"
-      when: sincgars_cluster_name != ""
-  when: sincgars_enable and sincgars_remote_write_url != ""
 
 - name: Deploy dittybopper
   block:

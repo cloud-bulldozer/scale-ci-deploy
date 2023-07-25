@@ -77,24 +77,24 @@ Default: `64`
 The root volume disk size for the masters.
 
 ### OPENSHIFT_MASTER_ROOT_VOLUME_TYPE
-Default: `gp2`
-The root volume type for the masters. Can be `gp2` or higher performing `io1` volume types.
+Default: `gp3`
+The root volume type for the masters.
 
 ### OPENSHIFT_MASTER_ROOT_VOLUME_IOPS
 Default: `0`
-When `OPENSHIFT_MASTER_ROOT_VOLUME_TYPE` is set to `io1`, the number of iops can be set here.
+Provisioned IOPS, when 0, it uses the default value of the volume
 
 ### OPENSHIFT_WORKER_ROOT_VOLUME_SIZE
 Default: `64`
 The root volume size for worker nodes.
 
 ### OPENSHIFT_WORKER_ROOT_VOLUME_TYPE
-Default: `gp2`
-The root volume type for worker nodes. Can be `gp2` or higher performing `io1` volume types.
+Default: `gp3`
+The root volume type for worker nodes.
 
 ### OPENSHIFT_WORKER_ROOT_VOLUME_IOPS
 Default: `0`
-When `OPENSHIFT_WORKER_ROOT_VOLUME_TYPE` is set to `io1`, the number of iops can be set here.
+Provisioned IOPS, when 0, it uses the default value of the volume
 
 ### MACHINESET_METADATA_LABEL_PREFIX
 Default: `machine.openshift.io`
@@ -113,31 +113,31 @@ Default: `64`
 The root volume size for the infra nodes.
 
 ### OPENSHIFT_INFRA_NODE_VOLUME_TYPE
-Default: `gp2`
-The root volume type for infra nodes. Can be `gp2` or higher performing `io1` volume types.
+Default: `gp3`
+The root volume type for infra nodes.
 
 ### OPENSHIFT_INFRA_NODE_VOLUME_IOPS
 Default: `0`
-When `OPENSHIFT_INFRA_NODE_VOLUME_TYPE` is set to `io1`, the number of iops can be set here.
+Provisioned IOPS, when 0, it uses the default value of the volume
 
 ### OPENSHIFT_WORKLOAD_NODE_VOLUME_SIZE
 Default: `64`
 The root volume size for the workload node.
 
 ### OPENSHIFT_WORKLOAD_NODE_VOLUME_TYPE
-Default: `gp2`
-The root volume type for workload node. Can be `gp2` or higher performing `io1` volume types.
+Default: `gp3`
+The root volume type for workload node.
 
 ### OPENSHIFT_WORKLOAD_NODE_VOLUME_IOPS
 Default: `0`
-When `OPENSHIFT_WORKLOAD_NODE_VOLUME_TYPE` is set to `io1`, the number of iops can be set here.
+Provisioned IOPS, when 0, it uses the default value of the volume
 
 ### OPENSHIFT_PROMETHEUS_RETENTION_PERIOD
 Default: `15d`
 The retention period for the Prometheus server.
 
 ### OPENSHIFT_PROMETHEUS_STORAGE_CLASS
-Default: `gp2`
+Default: `gp3-csi`
 The storage class for Prometheus server.
 
 ### OPENSHIFT_PROMETHEUS_STORAGE_SIZE
@@ -145,7 +145,7 @@ Default: `10Gi`
 The storage size for Prometheus server.
 
 ### OPENSHIFT_ALERTMANAGER_STORAGE_CLASS
-Default: `gp2`
+Default: `gp3-csi`
 The storage class for the alertmanager servers.
 
 ### OPENSHIFT_ALERTMANAGER_STORAGE_SIZE

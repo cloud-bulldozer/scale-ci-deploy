@@ -29,18 +29,6 @@ Controls if day 2 operations are ran against this cluster. Day 2 operations incl
 default: `true`
 Controls wheather a mutable Grafana instance is launched.
 
-### ENABLE_REMOTE_WRITE
-Default: `false`
-Controls whether remote write should be enabled or not, only applicable when OPENSHIFT_POST_INSTALL is set to true and also will need to set SINCGARS_REMOTE_WRITE_URL when this var is set to true.
-
-### SINCGARS_CLUSTER_NAME
-Default: value of label machine.openshift.io/cluster-api-cluster
-This is an identifier to associate system metrics
-
-### SINCGARS_REMOTE_WRITE_URL
-Default: no default
-This is the connection url that will be used for remote write, must set this when ENABLE_REMOTE_WRITE is set and OPENSHIFT_POST_INSTALL is set
-
 ### OPENSHIFT_POST_CONFIG
 Default: `true`
 Controls if "post-config" options are ran for this specific cluster. This opens the security groups for this cluster to permit more network tests to execute from the [openshift-scale/workloads](https://github.com/openshift-scale/workloads) repo.
@@ -310,4 +298,4 @@ Default: False
 Turn on remote_write to a thanos instance
 
 ### THANOS_RECEIVER_URL
-URL for the receiver to remote_write to. 
+URL for the receiver to remote_write to.

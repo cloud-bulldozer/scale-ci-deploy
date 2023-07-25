@@ -19,11 +19,11 @@ openshift_master_instance_type: "{{ lookup('env', 'OPENSHIFT_MASTER_INSTANCE_TYP
 openshift_worker_instance_type: "{{ lookup('env', 'OPENSHIFT_WORKER_INSTANCE_TYPE')|default('m5.large', true) }}"
 
 openshift_master_root_volume_size: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_SIZE')|default(64, true) }}"
-openshift_master_root_volume_type: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_TYPE')|default('gp2', true) }}"
+openshift_master_root_volume_type: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_TYPE')|default('gp3', true) }}"
 openshift_master_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_MASTER_ROOT_VOLUME_IOPS')|default(0, true) }}"
 
 openshift_worker_root_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_SIZE')|default(64, true) }}"
-openshift_worker_root_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_TYPE')|default('gp2', true) }}"
+openshift_worker_root_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_TYPE')|default('gp3', true) }}"
 openshift_worker_root_volume_iops: "{{ lookup('env', 'OPENSHIFT_WORKER_ROOT_VOLUME_IOPS')|default(0, true) }}"
 
 ## Either machine.openshift.io or sigs.k8s.io
@@ -32,15 +32,15 @@ openshift_infra_node_instance_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_INST
 openshift_workload_node_instance_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_INSTANCE_TYPE')|default('m5.large', true) }}"
 
 openshift_infra_node_volume_size: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_SIZE')|default(64, true) }}"
-openshift_infra_node_volume_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_TYPE')|default('gp2', true) }}"
+openshift_infra_node_volume_type: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_TYPE')|default('gp3', true) }}"
 openshift_infra_node_volume_iops: "{{ lookup('env', 'OPENSHIFT_INFRA_NODE_VOLUME_IOPS')|default(0, true) }}"
 
 openshift_workload_node_volume_size: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_SIZE')|default(64, true) }}"
-openshift_workload_node_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_TYPE')|default('gp2', true) }}"
+openshift_workload_node_volume_type: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_TYPE')|default('gp3', true) }}"
 openshift_workload_node_volume_iops: "{{ lookup('env', 'OPENSHIFT_WORKLOAD_NODE_VOLUME_IOPS')|default(0, true) }}"
 
 openshift_prometheus_retention_period: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_RETENTION_PERIOD')|default('15d', true) }}"
-openshift_prometheus_storage_class: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_CLASS')|default('gp2', true) }}"
+openshift_prometheus_storage_class: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_CLASS')|default('gp3-csi', true) }}"
 openshift_prometheus_storage_size: "{{ lookup('env', 'OPENSHIFT_PROMETHEUS_STORAGE_SIZE')|default('10Gi', true) }}"
-openshift_alertmanager_storage_class: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_CLASS')|default('gp2', true) }}"
+openshift_alertmanager_storage_class: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_CLASS')|default('gp3-csi', true) }}"
 openshift_alertmanager_storage_size: "{{ lookup('env', 'OPENSHIFT_ALERTMANAGER_STORAGE_SIZE')|default('2Gi', true) }}"
