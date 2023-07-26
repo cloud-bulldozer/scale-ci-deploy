@@ -187,6 +187,10 @@
   - name: Scale CVO Down for OVNKubernetes image patching
     command: oc scale -n openshift-cluster-version deployment.apps/cluster-version-operator --replicas=0
   
+  - name: Save name of an ovnkube-master pod
+    shell: oc get pods -n {{ ovn_namespace }} | grep ovnkube-master | tail -n1 | awk '{print $1}'
+    register: ovnkube_master_pod
+
   - name: Patch new Cluster Network Operator Image
     block:
     - name: Patch new CNO Image
@@ -213,8 +217,24 @@
   - name: Wait for OVNK new node images to roll out
     command: oc rollout status -n {{ ovn_namespace }} ds/ovnkube-node
   
+  - name: Wait for OVNK master pod to terminate
+    shell: oc get pods -n {{ ovn_namespace }} | grep {{ovnkube_master_pod.stdout}} || true
+    register: ovnkube_master_pod2
+    until: (ovnkube_master_pod2.stdout) == ""
+    delay: 1
+    retries: 600
+
+  - name: Determine if the cluster uses OVN-IC topology
+    shell: oc get pods -n {{ ovn_namespace }} | grep ovnkube-control-plane | tail -n1 | awk '{print $1}'
+    register: ovnkube_cp_pod
+
   - name: Wait for OVNK new master images to roll out
     command: oc rollout status -n {{ ovn_namespace }} ds/ovnkube-master
+    when: ovnkube_cp_pod == ""
+
+  - name: Wait for OVNK new IC controller images to roll out
+    command: oc rollout status -n {{ ovn_namespace }} deployment/ovnkube-control-plane
+    when: ovnkube_cp_pod != ""
   
   - name: OVN SBDB block
     block:
