@@ -8,6 +8,13 @@ data:
       configReloaderBaseImage: quay.io/coreos/configmap-reload
       nodeSelector:
         node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoExecute
     prometheusK8s:
 {% if thanos_enable %}
       externalLabels:
@@ -22,6 +29,13 @@ data:
       baseImage: openshift/prometheus
       nodeSelector:
         node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoExecute
       volumeClaimTemplate:
         spec:
           storageClassName: {{openshift_prometheus_storage_class}}
@@ -32,6 +46,13 @@ data:
       baseImage: openshift/prometheus-alertmanager
       nodeSelector:
         node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoExecute
       volumeClaimTemplate:
         spec:
           storageClassName: {{openshift_alertmanager_storage_class}}
@@ -46,15 +67,36 @@ data:
       baseImage: quay.io/coreos/kube-state-metrics
       nodeSelector:
         node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoExecute
     grafana:
       baseImage: grafana/grafana
       nodeSelector:
         node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoExecute
     auth:
       baseImage: openshift/oauth-proxy
     k8sPrometheusAdapter:
       nodeSelector:
         node-role.kubernetes.io/infra: ""
+      tolerations:
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        value: reserved
+        effect: NoExecute
 metadata:
   name: cluster-monitoring-config
   namespace: openshift-monitoring
