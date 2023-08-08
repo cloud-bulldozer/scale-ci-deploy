@@ -36,7 +36,7 @@ networking:
 platform:
   aws:
     userTags:
-      use: {{ cluster_owner | default('ci') }}
+      User: {{ cluster_owner | default('ci') }}
     region: {{ aws_region }}
 pullSecret: |+
   {{ openshift_install_pull_secret | to_json }}
