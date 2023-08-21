@@ -1,5 +1,6 @@
 ---
 # Cloud environment and authentication
+aws_shared_credentials_file: "{{ lookup('env', 'AWS_SHARED_CREDENTIALS_FILE')|default('', true) }}"
 aws_profile: "{{ lookup('env', 'AWS_PROFILE')|default('default', true) }}"
 aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
 aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"

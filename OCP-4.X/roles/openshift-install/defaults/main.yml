@@ -1,2 +1,3 @@
 ---
 aws_install_architecture: "amd64"
+aws_shared_credentials_file: ""

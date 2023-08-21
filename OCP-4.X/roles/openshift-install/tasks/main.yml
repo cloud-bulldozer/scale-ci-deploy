@@ -159,7 +159,8 @@
   - name: AWS credentials
     template:
        src: credentials.j2
-       dest: "{{ ansible_user_dir }}/.aws/credentials"
+       dest: "{% if aws_shared_credentials_file != '' %}{{ aws_shared_credentials_file }}{% else %}{{ ansible_user_dir }}/.aws/credentials{% endif %}"
+
 
   when: platform == "aws" or platform == "aws-arm"
 
@@ -310,6 +311,7 @@
     cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}
     export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ openshift_install_release_image_override }}
     export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
+    export AWS_SHARED_CREDENTIALS_FILE="{% if aws_shared_credentials_file != '' %}{{ aws_shared_credentials_file }}{% else %}{{ ansible_user_dir }}/.aws/credentials{% endif %}"
     bin/openshift-install create cluster --log-level=debug
 
 - name: Create dir to store artifacts
