@@ -14,6 +14,7 @@
         cd {{ ansible_user_dir }}/{{ dynamic_deploy_path }}/
         export GOOGLE_CREDENTIALS={{ gcp_auth_key_file|default() }}
         export cluster_name=$(oc get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
+        export AWS_SHARED_CREDENTIALS_FILE="{% if aws_shared_credentials_file != '' %}{{ aws_shared_credentials_file }}{% else %}{{ ansible_user_dir }}/.aws/credentials{% endif %}"
         bin/openshift-install destroy cluster --log-level=debug
         if [[ "{{ platform }}" == "alibaba" ]]
         then
