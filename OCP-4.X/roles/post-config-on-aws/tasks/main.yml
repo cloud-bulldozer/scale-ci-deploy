@@ -34,34 +34,46 @@
 - name: Get VpcId
   shell: aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,Tags[?Key==`Name`].Value|[0],State.Name,PrivateIpAddress,PublicIpAddress, PrivateDnsName, VpcId]' --output text | column -t | grep {{ rhcos_cluster_name.stdout }} | awk '{print $7}' | grep -v '^$' | sort -u
   register: vpc_id
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"
 
 - name: Get security groups
   shell: aws ec2 describe-security-groups --filters "Name=vpc-id,Values={{ vpc_id.stdout }}" --output json | jq .SecurityGroups[].GroupId
   register: security_groups
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"
 
 - name: Add inbound rule to allow traffic on 22
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 22 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"  
 
 - name: Add inbound rule to allow traffic on 2022
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 2022 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"
 
 - name: Add inbound rule to allow tcp traffic on port range 0 to 30109
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol tcp --port 0-30109 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"
 
 - name: Add inbound rule to allow udp traffic on port range 0 to 30109
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 0-30109 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"
 
 # Typically `net.ipv4.ip_local_port_range` is set to `32768 60999` in which uperf will pick a few random ports to send flags over.
 # Currently there is no method outside of sysctls to control those ports
@@ -71,12 +83,16 @@
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"
 
 - name: Add inbound rule to allow udp traffic on port range 32768 to 60999
   shell: aws ec2 authorize-security-group-ingress --group-id {{ item }} --protocol udp --port 32768-60999 --cidr 0.0.0.0/0
   with_items:
     - "{{ security_groups.stdout_lines }}"
   ignore_errors: yes
+  environment:
+    AWS_SHARED_CREDENTIALS_FILE: "{{ aws_shared_credentials_file }}"
 
 - name: Get the kubeconfig off of the orchestration host
   fetch:
