@@ -210,7 +210,7 @@
       register: ovnkube_node_pod
 
     - name: Check one ovnkube-node pod to see if ovn image has been updated
-      shell: oc get pod -n {{ ovn_namespace }} {{ovnkube_node_pod.stdout}} -o json| jq '.spec.containers[] | select(.name=="ovnkube-node").image'
+      shell: oc get pod -n {{ ovn_namespace }} {{ovnkube_node_pod.stdout}} -o json| jq '.spec.containers[] | select(.name=="ovnkube-controller").image'
       register: ovnkube_node_image
       until: (ovnkube_node_image.stdout) == (openshift_ovn_image) or (ovnkube_node_image.stdout) == ""
       delay: 1
