@@ -1,0 +1,8 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: windows-machine-config-operator
+  namespace: openshift-windows-machine-config-operator
+spec:
+  targetNamespaces:
+  - openshift-windows-machine-config-operator

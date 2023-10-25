@@ -1,0 +1,5 @@
+openshift_toggle_windows_node: false
+openshift_wmco_image: "quay.io/winc/wmco-index:6.0.0"
+openshift_wmco_channel: "stable"
+openshift_windows_node_instance_type: "{{ openshift_worker_instance_type }}"
+primary_windows_image: "Windows_Server-2019-English-Full-ContainersLatest"
