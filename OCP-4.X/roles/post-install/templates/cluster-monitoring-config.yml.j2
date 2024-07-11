@@ -42,6 +42,9 @@ data:
       baseImage: openshift/prometheus-node-exporter
     kubeRbacProxy:
       baseImage: quay.io/coreos/kube-rbac-proxy
+    metricsServer:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
     kubeStateMetrics:
       baseImage: quay.io/coreos/kube-state-metrics
       nodeSelector:
