@@ -56,12 +56,12 @@ items:
             - filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-worker-sg
+                - {{cluster_name.stdout}}-node
             subnet:
               filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-public-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
+                - {{cluster_name.stdout}}-subnet-public-{{aws_region.stdout}}{{ workload_aws_az_suffix | default('d') }}
             tags:
             - name: kubernetes.io/cluster/{{cluster_name.stdout}}
               value: owned
