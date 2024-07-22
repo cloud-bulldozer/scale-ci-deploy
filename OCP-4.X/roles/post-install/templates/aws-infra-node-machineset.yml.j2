@@ -57,12 +57,12 @@ items:
             - filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-worker-sg
+                - {{cluster_name.stdout}}-node
             subnet:
               filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-private-{{aws_region.stdout}}a
+                - {{cluster_name.stdout}}-subnet-private-{{aws_region.stdout}}a
             tags:
             - name: kubernetes.io/cluster/{{cluster_name.stdout}}
               value: owned
@@ -126,12 +126,12 @@ items:
             - filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-worker-sg
+                - {{cluster_name.stdout}}-node
             subnet:
               filters:
               - name: tag:Name
                 values:
-                - {{cluster_name.stdout}}-private-{{aws_region.stdout}}b
+                - {{cluster_name.stdout}}-subnet-private-{{aws_region.stdout}}b
             tags:
             - name: kubernetes.io/cluster/{{cluster_name.stdout}}
               value: owned
