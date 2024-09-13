@@ -7,19 +7,19 @@
 #  * Creates workload node machineset
 #  * Moves infra node pods/workload to infra nodes
 #  These registers be set from post-install tasks, but if you skip those tasks, you can enable them here to run this role one-off.
-# - name: Get cluster name
-#   shell: |
-#     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ machineset_metadata_label_prefix }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
-#   register: cluster_name
-#   environment:
-#     KUBECONFIG: "{{ kubeconfig_path }}"
+- name: Get cluster name
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index (index .items 0).metadata.labels {%endraw%} "{{ machineset_metadata_label_prefix }}/cluster-api-cluster" {%raw%})}}'{%endraw%}
+  register: cluster_name
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
-# - name: (AWS) set cluster region
-#   shell: |
-#     {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.placement.region}}'{%endraw%}
-#   register: aws_region
-#   environment:
-#     KUBECONFIG: "{{ kubeconfig_path }}"
+- name: (AWS) set cluster region
+  shell: |
+    {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{(index .items 0).spec.template.spec.providerSpec.value.placement.region}}'{%endraw%}
+  register: aws_region
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
 
 - name: winC AWS - Get Windows AMI ID
   shell: |

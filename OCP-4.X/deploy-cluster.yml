@@ -32,102 +32,102 @@
       set_fact:
         kubeconfig_path: "{{ ansible_user_dir }}/{{ dynamic_deploy_path }}/auth/kubeconfig"
   roles:
-    - role: openshift-cleanup
-      when: openshift_cleanup|bool
-    - role: openshift-install
-      when: openshift_install|bool
-    - role: post-install
-      when: openshift_post_install|bool
+#    - role: openshift-cleanup
+#      when: openshift_cleanup|bool
+#    - role: openshift-install
+#      when: openshift_install|bool
+#    - role: post-install
+#      when: openshift_post_install|bool
     - role: winc-install
       when: openshift_winc_install|bool
-    - role: rhacs_install
-      when: rhacs_enable|bool
-    - role: cerberus_install
-      when: cerberus_enable|bool
+#    - role: rhacs_install
+#      when: rhacs_enable|bool
+#    - role: cerberus_install
+#      when: cerberus_enable|bool
     - role: post-config-on-aws
       when: openshift_post_config|bool and (platform == "aws" or platform == "aws-arm")
-    - role: post-config-on-azure
-      when: openshift_post_config|bool and platform == "azure"
-    - role: post-config-on-gcp
-      when: openshift_post_config|bool and platform == "gcp"
-    - role: post-config-on-alibaba
-      when: openshift_post_config|bool and platform == "alibaba"
-    - role: cerberus
-      when: cerberus_enable|bool
-    - role: data_server_install
-      when: data_server_enable|bool
+#    - role: post-config-on-azure
+#      when: openshift_post_config|bool and platform == "azure"
+#    - role: post-config-on-gcp
+#      when: openshift_post_config|bool and platform == "gcp"
+#    - role: post-config-on-alibaba
+#      when: openshift_post_config|bool and platform == "alibaba"
+#    - role: cerberus
+#      when: cerberus_enable|bool
+#    - role: data_server_install
+#      when: data_server_enable|bool
 
-- name: (Optional) Debugging configuration of workload node
-  hosts: workload
-  gather_facts: true
-  become: true
-  remote_user: core
-  vars_files:
-    - vars/install-common-vars.yml
-  pre_tasks:
-    - name: Include platform variables
-      include_vars:
-        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
-  roles:
-    - role: node-debug-config
-      when: openshift_debug_config|bool
-  post_tasks:
-    - name: Add other nodes to in-memory inventory
-      when: openshift_debug_config|bool
-      block:
-        - name: Get master nodes
-          shell: |
-            oc get nodes -l 'node-role.kubernetes.io/master=' | awk 'NR>1 {print $1}'
-          register: ocp_master_nodes
-
-        - name: Get infra nodes
-          shell: |
-            oc get nodes -l 'node-role.kubernetes.io/infra=' | awk 'NR>1 {print $1}'
-          register: ocp_infra_nodes
-
-        - name: Get worker nodes
-          shell: |
-            oc get nodes -l 'node-role.kubernetes.io/worker=' | awk 'NR>1 {print $1}'
-          register: ocp_worker_nodes
-
-        - name: Add master nodes to in-memory inventory
-          add_host:
-            name: "{{ item }}"
-            groups: master
-            ansible_ssh_common_args: |-
-              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
-          with_items:
-            - "{{ ocp_master_nodes.stdout_lines }}"
-
-        - name: Add infra nodes to in-memory inventory
-          add_host:
-            name: "{{ item }}"
-            groups: infra
-            ansible_ssh_common_args: |-
-              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
-          with_items:
-            - "{{ ocp_infra_nodes.stdout_lines }}"
-
-        - name: Add worker nodes to in-memory inventory
-          add_host:
-            name: "{{ item }}"
-            groups: worker
-            ansible_ssh_common_args: |-
-              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
-          with_items:
-            - "{{ ocp_worker_nodes.stdout_lines }}"
-
-- name: (Optional) Debugging configuration of initially deployed nodes
-  hosts: master, infra, worker
-  gather_facts: true
-  become: true
-  remote_user: core
-  vars_files:
-    - vars/install-common-vars.yml
-  pre_tasks:
-    - name: Include platform variables
-      include_vars:
-        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
-  roles:
-    - role: node-debug-config
-      when: openshift_debug_config|bool
+#- name: (Optional) Debugging configuration of workload node
+#  hosts: workload
+#  gather_facts: true
+#  become: true
+#  remote_user: core
+#  vars_files:
+#    - vars/install-common-vars.yml
+#  pre_tasks:
+#    - name: Include platform variables
+#      include_vars:
+#        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
+#  roles:
+#    - role: node-debug-config
+#      when: openshift_debug_config|bool
+#  post_tasks:
+#    - name: Add other nodes to in-memory inventory
+#      when: openshift_debug_config|bool
+#      block:
+#        - name: Get master nodes
+#          shell: |
+#            oc get nodes -l 'node-role.kubernetes.io/master=' | awk 'NR>1 {print $1}'
+#          register: ocp_master_nodes
+#
+#        - name: Get infra nodes
+#          shell: |
+#            oc get nodes -l 'node-role.kubernetes.io/infra=' | awk 'NR>1 {print $1}'
+#          register: ocp_infra_nodes
+#
+#        - name: Get worker nodes
+#          shell: |
+#            oc get nodes -l 'node-role.kubernetes.io/worker=' | awk 'NR>1 {print $1}'
+#          register: ocp_worker_nodes
+#
+#        - name: Add master nodes to in-memory inventory
+#          add_host:
+#            name: "{{ item }}"
+#            groups: master
+#            ansible_ssh_common_args: |-
+#              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
+#          with_items:
+#            - "{{ ocp_master_nodes.stdout_lines }}"
+#
+#        - name: Add infra nodes to in-memory inventory
+#          add_host:
+#            name: "{{ item }}"
+#            groups: infra
+#            ansible_ssh_common_args: |-
+#              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
+#          with_items:
+#            - "{{ ocp_infra_nodes.stdout_lines }}"
+#
+#        - name: Add worker nodes to in-memory inventory
+#          add_host:
+#            name: "{{ item }}"
+#            groups: worker
+#            ansible_ssh_common_args: |-
+#              -o ProxyCommand='ssh -i {{ansible_private_key_file}} -W %h:%p core@{{inventory_hostname}}'
+#          with_items:
+#            - "{{ ocp_worker_nodes.stdout_lines }}"
+#
+#- name: (Optional) Debugging configuration of initially deployed nodes
+#  hosts: master, infra, worker
+#  gather_facts: true
+#  become: true
+#  remote_user: core
+#  vars_files:
+#    - vars/install-common-vars.yml
+#  pre_tasks:
+#    - name: Include platform variables
+#      include_vars:
+#        file: "vars/install-on-{{ {{ (platform == 'aws-arm') | ternary('aws', platform) }} }}.yml"
+#  roles:
+#    - role: node-debug-config
+#      when: openshift_debug_config|bool
