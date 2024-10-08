@@ -110,7 +110,7 @@ postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') }}"
 fips: "{{ lookup('env', 'FIPS')|default(false, true) }}"
 
 # Elasticsearch
-es_server: "{{ lookup('env', 'ES_SERVER')|default('https://search-perfscale-dev-chmf5l4sh66lvxbnadi4bznl3a.us-west-2.es.amazonaws.com:443', true) }}"
+es_server: "{{ lookup('env', 'ES_SERVER')|default('http://elastic:9200', true) }}"
 
 # OVNKubernetes image patch
 openshift_toggle_ovn_patch: "{{ lookup('env', 'OVN_PATCH')|default(false, true) }}"
