@@ -30,6 +30,13 @@ items:
           creationTimestamp: null
           labels:
             node-role.kubernetes.io/infra: ""
+        taints:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/infra
+          value: reserved
+        - effect: NoExecute
+          key: node-role.kubernetes.io/infra
+          value: reserved
         providerSpec:
           value:
             apiVersion: gcpprovider.openshift.io/v1beta1
@@ -91,6 +98,13 @@ items:
           creationTimestamp: null
           labels:
             node-role.kubernetes.io/infra: ""
+        taints:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/infra
+          value: reserved
+        - effect: NoExecute
+          key: node-role.kubernetes.io/infra
+          value: reserved
         providerSpec:
           value:
             apiVersion: gcpprovider.openshift.io/v1beta1
