@@ -81,8 +81,12 @@ items:
             vpcId: ""
             zoneId: {{alibaba_region}}a
           taints:
-          - key: node-role.kubernetes.io/infra
-            effect: NoSchedule
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/infra
+            value: reserved
+          - effect: NoExecute
+            key: node-role.kubernetes.io/infra
+            value: reserved
 - apiVersion: machine.openshift.io/v1beta1
   kind: MachineSet
   metadata:
@@ -162,5 +166,9 @@ items:
             vpcId: ""
             zoneId: {{alibaba_region}}b
           taints:
-          - key: node-role.kubernetes.io/infra
-            effect: NoSchedule
+          - effect: NoSchedule
+            key: node-role.kubernetes.io/infra
+            value: reserved
+          - effect: NoExecute
+            key: node-role.kubernetes.io/infra
+            value: reserved

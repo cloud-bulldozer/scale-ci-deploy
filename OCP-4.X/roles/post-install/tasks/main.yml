@@ -290,13 +290,6 @@
     KUBECONFIG: "{{ kubeconfig_path }}"
   when: (openshift_toggle_infra_node|bool == true or openshift_toggle_workload_node|bool == true)
 
-- name: Relabel the infra nodes
-  shell: |
-    oc label nodes --overwrite -l 'node-role.kubernetes.io/infra=' node-role.kubernetes.io/worker-
-  environment:
-    KUBECONFIG: "{{ kubeconfig_path }}"
-  when: openshift_toggle_infra_node|bool
-
 - name: Relabel the workload node
   shell: |
     oc label nodes --overwrite -l 'node-role.kubernetes.io/workload=' node-role.kubernetes.io/worker-
@@ -382,12 +375,12 @@
     - namespace: openshift-ingress-operator
       object: ingresscontrollers/default
       patch: |
-        '{"spec": {"nodePlacement": {"nodeSelector": {"matchLabels": {"node-role.kubernetes.io/infra": ""}}}}}'
+        '{"spec":{"nodePlacement": {"nodeSelector": {"matchLabels": {"node-role.kubernetes.io/infra": ""}},"tolerations": [{"effect":"NoSchedule","key": "node-role.kubernetes.io/infra","value": "reserved"},{"effect":"NoExecute","key": "node-role.kubernetes.io/infra","value": "reserved"}]}}}'
       type: "--type merge"
     - namespace: openshift-image-registry
       object: configs.imageregistry.operator.openshift.io/cluster
       patch: |
-        '{"spec": {"nodeSelector": {"node-role.kubernetes.io/infra": ""}}}'
+        '{"spec":{"nodeSelector": {"node-role.kubernetes.io/infra": ""},"tolerations": [{"effect":"NoSchedule","key": "node-role.kubernetes.io/infra","value": "reserved"},{"effect":"NoExecute","key": "node-role.kubernetes.io/infra","value": "reserved"}]}}'
       type: "--type merge"
     # Monitoring (Relocate cluster-monitoring-operator from worker nodes) - Requires CVO overriding
     #- namespace: openshift-monitoring
