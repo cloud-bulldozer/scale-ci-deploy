@@ -3,7 +3,6 @@ kind: ConfigMap
 data:
   config.yaml: |
     prometheusOperator:
-      baseImage: quay.io/coreos/prometheus-operator
       prometheusConfigReloaderBaseImage: quay.io/coreos/prometheus-config-reloader
       configReloaderBaseImage: quay.io/coreos/configmap-reload
       nodeSelector:
@@ -19,7 +18,6 @@ data:
         - url: {{ thanos_receiver_url }}
 {% endif %}
       retention: {{openshift_prometheus_retention_period}}
-      baseImage: openshift/prometheus
       nodeSelector:
         node-role.kubernetes.io/infra: ""
       volumeClaimTemplate:
@@ -29,7 +27,6 @@ data:
             requests:
               storage: {{openshift_prometheus_storage_size}}
     alertmanagerMain:
-      baseImage: openshift/prometheus-alertmanager
       nodeSelector:
         node-role.kubernetes.io/infra: ""
       volumeClaimTemplate:
@@ -38,23 +35,12 @@ data:
           resources:
             requests:
               storage: {{openshift_alertmanager_storage_size}}
-    nodeExporter:
-      baseImage: openshift/prometheus-node-exporter
-    kubeRbacProxy:
-      baseImage: quay.io/coreos/kube-rbac-proxy
     metricsServer:
       nodeSelector:
         node-role.kubernetes.io/infra: ""
     kubeStateMetrics:
-      baseImage: quay.io/coreos/kube-state-metrics
       nodeSelector:
         node-role.kubernetes.io/infra: ""
-    grafana:
-      baseImage: grafana/grafana
-      nodeSelector:
-        node-role.kubernetes.io/infra: ""
-    auth:
-      baseImage: openshift/oauth-proxy
     k8sPrometheusAdapter:
       nodeSelector:
         node-role.kubernetes.io/infra: ""
